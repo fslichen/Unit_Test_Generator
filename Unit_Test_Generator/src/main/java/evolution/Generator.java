@@ -1,12 +1,15 @@
 package evolution;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class Generator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
+	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
 	public boolean endsWithExtension(Path path, String extension) {
 		File file = path.toFile();
@@ -35,11 +39,11 @@ public class Generator {
 	}
 	
 	@FunctionalInterface
-	public interface UnitTestClassWriter {
+	public interface UnitTestMethodWriter {
 		public List<String> write(Method method);
 	}
 	
-	public void addIndent(int indentCount, StringBuilder code) {
+	public void writeIndent(int indentCount, StringBuilder code) {
 		for (int i = 0; i < indentCount; i++) {
 			for (int j = 0; j < 4; j++) {
 				code.append(" ");
@@ -47,7 +51,22 @@ public class Generator {
 		}
 	}
 	
-	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final UnitTestClassWriter writeUnitTest) throws IOException {
+	public int writeCode(String code, int indentCount, StringBuilder codes) {
+		String trimedCode = code.trim();
+		if (trimedCode.endsWith("{")) {
+			writeIndent(indentCount, codes);
+			indentCount++;
+		} else if (trimedCode.endsWith("}")) {
+			indentCount--;
+			writeIndent(indentCount, codes);
+		} else {
+			writeIndent(indentCount, codes);
+		}
+		codes.append(trimedCode).append("\n");
+		return indentCount;
+	}
+	
+	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final UnitTestMethodWriter writeUnitTest) throws IOException {
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.filter(new Predicate<Path>() {
 				@Override
@@ -63,10 +82,14 @@ public class Generator {
 					// Get the class.
 					Class<?> clazz = null;
 					String classPackageName = null;
+					String packageName = null;
+					String className = null;
 					try {
-						classPackageName = path.toString();
+						classPackageName = path.toString().replace("\\", "/");
 						classPackageName = classPackageName.substring(classPackageName.lastIndexOf(SRC_MAIN_JAVA) + SRC_MAIN_JAVA.length() + 1).replace("/", ".").replaceAll(".java", "");
 						clazz = Class.forName(classPackageName);
+						packageName = classPackageName.substring(0, classPackageName.lastIndexOf("."));
+						className = classPackageName.substring(classPackageName.lastIndexOf(".") + 1);
 					} catch (ClassNotFoundException e) {
 						System.out.println("Unable to determine the class.");
 						return;
@@ -90,27 +113,34 @@ public class Generator {
 						}
 					}
 					// Generate Unit Test Classes.
-					int indentCount = 0;
 					StringBuilder classCodes = new StringBuilder();
-					Method[] methods = clazz.getDeclaredMethods();
-					for (Method method : methods) {
-						List<String> methodCodes = writeUnitTest.write(method);
-						for (String methodCode : methodCodes) {
-							String trimedMethodCode = methodCode.trim();
-							if (trimedMethodCode.endsWith("{")) {
-								addIndent(indentCount, classCodes);
-								indentCount++;
-							} else if (trimedMethodCode.endsWith("}")) {
-								indentCount--;
-								addIndent(indentCount, classCodes);
-							} else {
-								addIndent(indentCount, classCodes);
-							}
-							classCodes.append(trimedMethodCode).append("\n");
+					List<String> metaCodes = Arrays.asList("package " + packageName + ";",
+							"import org.junit.Test;", 
+							"public class " + className + "Test {");
+					for (String metaCode : metaCodes) {
+						writeCode(metaCode, 0, classCodes);
+					}
+					int indentCount = 1;
+					for (Method method : clazz.getDeclaredMethods()) {
+						for (String methodCode : writeUnitTest.write(method)) {
+							indentCount = writeCode(methodCode, indentCount, classCodes);
 						}
 						classCodes.append("\n");
 					}
-					System.out.println(classCodes);
+					classCodes.append("}");
+					// Write unit test file.
+					String unitTestFilePath = path.toString().replace("\\", "/").replace("src/main/java", "src/test/java").replace(".java", "Test.java");
+					File unitTestFileDirectory = new File(unitTestFilePath.substring(0, unitTestFilePath.lastIndexOf("/")));
+					if (!unitTestFileDirectory.exists()) {
+						unitTestFileDirectory.mkdirs();
+					}
+					try (PrintWriter printWriter = new PrintWriter(new File(unitTestFilePath))) {
+						printWriter.write(classCodes.toString());
+						System.out.println("The unit test file is successfully generated.");
+					} catch (FileNotFoundException e) {
+						System.out.println("The file path is unavailable.");
+					}
+					System.out.println(classCodes);					
 				}
 			});
 		}
@@ -122,7 +152,7 @@ public class Generator {
 	
 	@Test
 	public void test() throws IOException {
-		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(new UnitTestClassWriter() {
+		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
 				List<String> codes = new LinkedList<>();
