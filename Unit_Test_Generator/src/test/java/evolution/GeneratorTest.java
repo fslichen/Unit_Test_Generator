@@ -20,14 +20,14 @@ public class GeneratorTest {
     @Test
     @DatabaseSetup4Ucase
     @ExpectedDatabase4Ucase
-    public void testEndsWithExtension() {
+    public void testCapitalizedFirstCharacter() {
         System.out.println("Hello World");
     }
 
     @Test
     @DatabaseSetup4Ucase
     @ExpectedDatabase4Ucase
-    public void testCapitalizedFirstCharacter() {
+    public void testEndsWithExtension() {
         System.out.println("Hello World");
     }
 
