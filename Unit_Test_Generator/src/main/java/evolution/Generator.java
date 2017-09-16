@@ -30,7 +30,7 @@ public class Generator {
 	public boolean endsWithExtension(Path path, String extension) {
 		File file = path.toFile();
 		if (file.isFile()) {
-			String fileName = file.getName();
+			String fileName = file.getName().replace("\\", "/");
 			if (extension.equals(fileName.substring(fileName.lastIndexOf(".") + 1))) {
 				return true;
 			}
@@ -41,6 +41,11 @@ public class Generator {
 	@FunctionalInterface
 	public interface UnitTestMethodWriter {
 		public List<String> write(Method method);
+	}
+	
+	@FunctionalInterface
+	public interface UnitTestImportsWriter {
+		public List<String> write();
 	}
 	
 	public void writeIndent(int indentCount, StringBuilder code) {
@@ -66,12 +71,12 @@ public class Generator {
 		return indentCount;
 	}
 	
-	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final UnitTestMethodWriter writeUnitTest) throws IOException {
+	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final UnitTestImportsWriter unitTestImportsWriter, final UnitTestMethodWriter unitTestMethodWriter) throws IOException {
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.filter(new Predicate<Path>() {
 				@Override
 				public boolean test(Path path) {
-					if (path.toString().contains(SRC_MAIN_JAVA) && endsWithExtension(path, "java")) {
+					if (path.toString().replace("\\", "/").contains(SRC_MAIN_JAVA) && endsWithExtension(path, "java")) {
 						return true;
 					}
 					return false;
@@ -114,15 +119,17 @@ public class Generator {
 					}
 					// Generate Unit Test Classes.
 					StringBuilder classCodes = new StringBuilder();
-					List<String> metaCodes = Arrays.asList("package " + packageName + ";",
-							"import org.junit.Test;", 
-							"public class " + className + "Test {");
+					List<String> metaCodes = new LinkedList<>();
+					metaCodes.add("package " + packageName + ";");
+					metaCodes.add("import org.junit.Test;");
+					metaCodes.addAll(unitTestImportsWriter.write());
+					metaCodes.add("public class " + className + "Test {");
 					for (String metaCode : metaCodes) {
 						writeCode(metaCode, 0, classCodes);
 					}
 					int indentCount = 1;
 					for (Method method : clazz.getDeclaredMethods()) {
-						for (String methodCode : writeUnitTest.write(method)) {
+						for (String methodCode : unitTestMethodWriter.write(method)) {
 							indentCount = writeCode(methodCode, indentCount, classCodes);
 						}
 						classCodes.append("\n");
@@ -152,7 +159,12 @@ public class Generator {
 	
 	@Test
 	public void test() throws IOException {
-		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(new UnitTestMethodWriter() {
+		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(new UnitTestImportsWriter() {
+			@Override
+			public List<String> write() {
+				return Arrays.asList("import evolution.annotation.DatabaseSetup4Ucase;",
+                "import evolution.annotation.ExpectedDatabase4Ucase;");
+			}}, new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
 				List<String> codes = new LinkedList<>();
