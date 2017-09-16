@@ -48,29 +48,6 @@ public class Generator {
 		public List<String> write();
 	}
 	
-	public void writeIndent(int indentCount, StringBuilder code) {
-		for (int i = 0; i < indentCount; i++) {
-			for (int j = 0; j < 4; j++) {
-				code.append(" ");
-			}
-		}
-	}
-	
-	public int writeCode(String code, int indentCount, StringBuilder codes) {
-		String trimedCode = code.trim();
-		if (trimedCode.endsWith("{")) {
-			writeIndent(indentCount, codes);
-			indentCount++;
-		} else if (trimedCode.endsWith("}")) {
-			indentCount--;
-			writeIndent(indentCount, codes);
-		} else {
-			writeIndent(indentCount, codes);
-		}
-		codes.append(trimedCode).append("\n");
-		return indentCount;
-	}
-	
 	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final UnitTestImportsWriter unitTestImportsWriter, final UnitTestMethodWriter unitTestMethodWriter) throws IOException {
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.filter(new Predicate<Path>() {
@@ -124,14 +101,10 @@ public class Generator {
 					metaCodes.add("import org.junit.Test;");
 					metaCodes.addAll(unitTestImportsWriter.write());
 					metaCodes.add("public class " + className + "Test {");
-					int indentCount = 0;
-					for (String metaCode : metaCodes) {
-						indentCount = writeCode(metaCode, 0, classCodes);
-					}
+					CodeWriter codeWriter = new CodeWriter();
+					codeWriter.writeCodes(metaCodes, classCodes);
 					for (Method method : clazz.getDeclaredMethods()) {
-						for (String methodCode : unitTestMethodWriter.write(method)) {
-							indentCount = writeCode(methodCode, indentCount, classCodes);
-						}
+						codeWriter.writeCodes(unitTestMethodWriter.write(method), classCodes);
 						classCodes.append("\n");
 					}
 					classCodes.append("}");
