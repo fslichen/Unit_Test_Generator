@@ -13,7 +13,7 @@ public class GeneratorTest {
     @Test
     @DatabaseSetup4Ucase
     @ExpectedDatabase4Ucase
-    public void testWriteIndent() {
+    public void testScanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() {
         System.out.println("Hello World");
     }
 
@@ -27,14 +27,7 @@ public class GeneratorTest {
     @Test
     @DatabaseSetup4Ucase
     @ExpectedDatabase4Ucase
-    public void testScanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @DatabaseSetup4Ucase
-    @ExpectedDatabase4Ucase
-    public void testCapitalizedFirstCharacter() {
+    public void testWriteIndent() {
         System.out.println("Hello World");
     }
 
@@ -42,6 +35,13 @@ public class GeneratorTest {
     @DatabaseSetup4Ucase
     @ExpectedDatabase4Ucase
     public void testEndsWithExtension() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @DatabaseSetup4Ucase
+    @ExpectedDatabase4Ucase
+    public void testCapitalizedFirstCharacter() {
         System.out.println("Hello World");
     }
 

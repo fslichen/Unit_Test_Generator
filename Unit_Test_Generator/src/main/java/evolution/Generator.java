@@ -124,10 +124,10 @@ public class Generator {
 					metaCodes.add("import org.junit.Test;");
 					metaCodes.addAll(unitTestImportsWriter.write());
 					metaCodes.add("public class " + className + "Test {");
+					int indentCount = 0;
 					for (String metaCode : metaCodes) {
-						writeCode(metaCode, 0, classCodes);
+						indentCount = writeCode(metaCode, 0, classCodes);
 					}
-					int indentCount = 1;
 					for (Method method : clazz.getDeclaredMethods()) {
 						for (String methodCode : unitTestMethodWriter.write(method)) {
 							indentCount = writeCode(methodCode, indentCount, classCodes);
