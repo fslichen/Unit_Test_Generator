@@ -15,14 +15,14 @@ public class CodeWriterTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWriteCodes() {
+    public void testWriteCode() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWriteCode() {
+    public void testWriteCodes() {
         System.out.println("Hello World");
     }
 

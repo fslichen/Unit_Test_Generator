@@ -15,14 +15,14 @@ public class GeneratorTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWithExtension() {
+    public void testClassAnnnotation() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testClassAnnnotation() {
+    public void testWithExtension() {
         System.out.println("Hello World");
     }
 

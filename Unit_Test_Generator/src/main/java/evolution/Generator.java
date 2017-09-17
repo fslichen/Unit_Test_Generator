@@ -78,12 +78,11 @@ public class Generator {
 						System.out.println("Unable to determine the class.");
 						return;
 					}
-					String packageName = className.substring(0, className.lastIndexOf("."));
 					String simpleClassName = clazz.getSimpleName();
-					// Generate unit test classes.
+					// Generate unit test class codes.
 					StringBuilder codes = new StringBuilder();
 					List<String> classCodes = new LinkedList<>();
-					classCodes.add("package " + packageName + ";");
+					classCodes.add("package " + className.substring(0, className.lastIndexOf(".")) + ";");
 					classCodes.add("import org.junit.Test;");
 					Class<?> classAnnotation = classAnnnotation(clazz);
 					UnitTestClassWriter unitTestClassWriter = unitTestClassWriters.get(classAnnotation);
@@ -98,6 +97,7 @@ public class Generator {
 					classCodes.add(importCount + 2, "public class " + simpleClassName + "Test {");
 					CodeWriter codeWriter = new CodeWriter();
 					codeWriter.writeCodes(classCodes, codes);
+					// Generate unit test method codes.
 					UnitTestMethodWriter unitTestMethodWriter = unitTestMethodWriters.get(classAnnotation);
 					for (Method method : clazz.getDeclaredMethods()) {
 						codeWriter.writeCodes(unitTestMethodWriter.write(method), codes);
@@ -121,7 +121,7 @@ public class Generator {
 					} catch (FileNotFoundException e) {
 						System.out.println("The file path is unavailable.");
 					}
-					System.out.println(codes);					
+					System.out.println(codes + "\n");					
 				}
 			});
 		}
