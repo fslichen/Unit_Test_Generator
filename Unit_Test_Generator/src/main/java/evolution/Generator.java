@@ -77,6 +77,18 @@ public class Generator {
 		return classAnnotation;
 	}
 	
+	public int keywordCount(List<String> codes, String... keywords) {
+		int keywordCount = 0;
+		for (String code : codes) {
+			for (String keyword : keywords) {
+				if (code.contains(keyword)) {
+					keywordCount++;
+				}
+			}
+		}
+		return keywordCount;
+	}
+	
 	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters, final boolean overwrite) throws IOException {
 		for (Entry<Path, Class<?>> entry : classesUnderSrcMainJava().entrySet()) {
 			// Generate unit test class related codes.
@@ -87,22 +99,22 @@ public class Generator {
 			classCodes.add("import org.junit.Test;");
 			Class<?> classAnnotation = classAnnnotation(clazz);
 			UnitTestClassWriter unitTestClassWriter = unitTestClassWriters.get(classAnnotation);
-			List<String> dynamicClassCodes = unitTestClassWriter.write();
-			classCodes.addAll(dynamicClassCodes);
-			int importCount = 0;
-			for (String dynamicClassCode : dynamicClassCodes) {
-				if (dynamicClassCode.contains("import")) {
-					importCount++;
-				}
-			}
-			classCodes.add(importCount + 2, "public class " + clazz.getSimpleName() + "Test {");// Put the class signature in the right place.
+			unitTestClassWriter = unitTestClassWriter == null ? unitTestClassWriters.get(null) : unitTestClassWriter;// If the specific unit test class writer is not found, use the default unit test class writer.
+			classCodes.addAll(unitTestClassWriter.write());
+			classCodes.add(keywordCount(classCodes, "package", "import"), "public class " + clazz.getSimpleName() + "Test {");// Put the class signature in the right place.
 			CodeWriter codeWriter = new CodeWriter();
 			StringBuilder completeCodes = new StringBuilder();
 			codeWriter.writeCodes(classCodes, completeCodes);
 			// Generate unit test method codes.
 			UnitTestMethodWriter unitTestMethodWriter = unitTestMethodWriters.get(classAnnotation);
+			unitTestMethodWriter = unitTestMethodWriter == null ? unitTestMethodWriters.get(null) : unitTestMethodWriter;// If the specific unit test method writer is not found, use the default unit test method writer.
 			for (Method method : clazz.getDeclaredMethods()) {
-				codeWriter.writeCodes(unitTestMethodWriter.write(method), completeCodes);
+				List<String> methodCodes = new LinkedList<>();
+				methodCodes.add("@Test");
+				methodCodes.addAll(unitTestMethodWriter.write(method));
+				methodCodes.add(keywordCount(methodCodes, "@"), "public void test" + capitalizedFirstCharacter(method.getName()) + "() {");
+				methodCodes.add("}");
+				codeWriter.writeCodes(methodCodes, completeCodes);
 				completeCodes.append("\n");
 			}
 			completeCodes.append("}");

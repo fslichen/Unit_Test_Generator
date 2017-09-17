@@ -16,21 +16,6 @@ import evolution.template.UnitTestMethodWriter;
 public class Run extends Generator {
 	@Test
 	public void test() throws IOException {
-		Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters = new LinkedHashMap<>();
-		UnitTestMethodWriter generalMethodWriter = new UnitTestMethodWriter() {
-			@Override
-			public List<String> write(Method method) {
-				List<String> codes = new LinkedList<>();
-				codes.add("@Test");
-				codes.add("@Database4UcaseSetup");
-				codes.add("@ExpectedDatabase4Ucase");
-				codes.add("public void test" + capitalizedFirstCharacter(method.getName()) + "() {");
-				codes.add("System.out.println(\"Hello World\");");
-				codes.add("}");
-				return codes;
-			}
-		};
-		Map<Class<?>, UnitTestClassWriter> unitTestClassWriters = new LinkedHashMap<>();
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
@@ -39,7 +24,19 @@ public class Run extends Generator {
 		                "private String name;", "");
 			}
 		};
+		Map<Class<?>, UnitTestClassWriter> unitTestClassWriters = new LinkedHashMap<>();
 		unitTestClassWriters.put(null, generalClassWriter);
+		UnitTestMethodWriter generalMethodWriter = new UnitTestMethodWriter() {
+			@Override
+			public List<String> write(Method method) {
+				List<String> codes = new LinkedList<>();
+				codes.add("@Database4UcaseSetup");
+				codes.add("@ExpectedDatabase4Ucase");
+				codes.add("System.out.println(\"Hello World\");");
+				return codes;
+			}
+		};
+		Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters = new LinkedHashMap<>();
 		unitTestMethodWriters.put(null, generalMethodWriter);
 		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(unitTestClassWriters, unitTestMethodWriters, true);
 	}

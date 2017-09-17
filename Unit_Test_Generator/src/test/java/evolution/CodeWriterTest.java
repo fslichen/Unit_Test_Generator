@@ -8,13 +8,6 @@ public class CodeWriterTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWriteCodes() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testWriteIndent() {
         System.out.println("Hello World");
     }
@@ -23,6 +16,13 @@ public class CodeWriterTest {
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testWriteCode() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testWriteCodes() {
         System.out.println("Hello World");
     }
 

@@ -36,6 +36,13 @@ public class GeneratorTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testKeywordCount() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testCapitalizedFirstCharacter() {
         System.out.println("Hello World");
     }
