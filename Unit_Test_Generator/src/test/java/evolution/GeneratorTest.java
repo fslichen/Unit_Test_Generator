@@ -15,7 +15,7 @@ public class GeneratorTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testClassAnnnotation() {
+    public void testClassesUnderSrcMainJava() {
         System.out.println("Hello World");
     }
 
@@ -23,6 +23,13 @@ public class GeneratorTest {
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testWithExtension() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testClassAnnnotation() {
         System.out.println("Hello World");
     }
 
