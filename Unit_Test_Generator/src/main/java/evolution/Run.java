@@ -41,6 +41,6 @@ public class Run extends Generator {
 		};
 		unitTestClassWriters.put(null, generalClassWriter);
 		unitTestMethodWriters.put(null, generalMethodWriter);
-		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(unitTestClassWriters, unitTestMethodWriters);
+		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(unitTestClassWriters, unitTestMethodWriters, true);
 	}
 }

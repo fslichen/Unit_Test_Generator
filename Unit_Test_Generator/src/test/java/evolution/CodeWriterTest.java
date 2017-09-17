@@ -8,14 +8,14 @@ public class CodeWriterTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWriteCodes() {
+    public void testWriteIndent() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWriteIndent() {
+    public void testWriteCodes() {
         System.out.println("Hello World");
     }
 

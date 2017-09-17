@@ -54,7 +54,7 @@ public class Generator {
 		return classAnnotation;
 	}
 	
-	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters) throws IOException {
+	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters, final boolean overwrite) throws IOException {
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.filter(new Predicate<Path>() {
 				@Override
@@ -110,7 +110,12 @@ public class Generator {
 					if (!unitTestFileDirectory.exists()) {
 						unitTestFileDirectory.mkdirs();
 					}
-					try (PrintWriter printWriter = new PrintWriter(new File(unitTestFilePath))) {
+					File unitTestFile = new File(unitTestFilePath);
+					if (unitTestFile.exists() && !overwrite) {
+						System.out.println("The file already exists.");
+						return;
+					}
+					try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
 						printWriter.write(codes.toString());
 						System.out.println("The unit test file is successfully generated.");
 					} catch (FileNotFoundException e) {
