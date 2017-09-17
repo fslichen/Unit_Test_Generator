@@ -8,41 +8,6 @@ public class ObjectMockerTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testMockPojo() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testSetters() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testMockMap() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testMockList() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testMockInt() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testCapitalizeFirstCharacter() {
         System.out.println("Hello World");
     }
@@ -64,6 +29,20 @@ public class ObjectMockerTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testMockInt() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testMockList() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testTypeArguments() {
         System.out.println("Hello World");
     }
@@ -78,7 +57,28 @@ public class ObjectMockerTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testMockMap() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testMockString() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testMockPojo() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testSetters() {
         System.out.println("Hello World");
     }
 

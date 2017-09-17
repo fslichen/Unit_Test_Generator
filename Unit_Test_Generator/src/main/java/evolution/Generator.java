@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
@@ -31,7 +32,11 @@ public class Generator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	public Map<Path, Class<?>> classesUnderSrcMainJava() throws IOException {
+	public void generateParameters() {
+		// TODO
+	}
+	
+	public Map<Path, Class<?>> classesUnderSrcMainJava(final Predicate<Class<?>> predicate) throws IOException {
 		final Map<Path, Class<?>> classes = new LinkedHashMap<>();
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.forEach(new Consumer<Path>() {
@@ -43,7 +48,10 @@ public class Generator {
 					try {
 						String className = path.toString().replace("\\", "/");
 						className = className.substring(className.lastIndexOf(SRC_MAIN_JAVA) + SRC_MAIN_JAVA.length() + 1).replace("/", ".").replace(".java", "");
-						classes.put(path, Class.forName(className));
+						Class<?> clazz = Class.forName(className);
+						if (predicate == null || predicate.test(clazz)) {
+							classes.put(path, clazz);
+						}
 					} catch (ClassNotFoundException e) {
 						System.out.println("Unable to determine the class.");
 					}
@@ -90,7 +98,7 @@ public class Generator {
 	}
 	
 	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters, final boolean overwrite) throws IOException {
-		for (Entry<Path, Class<?>> entry : classesUnderSrcMainJava().entrySet()) {
+		for (Entry<Path, Class<?>> entry : classesUnderSrcMainJava(null).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
 			String className = clazz.getName();
