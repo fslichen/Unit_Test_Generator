@@ -20,7 +20,7 @@ public class Run extends Generator {
 			@Override
 			public List<String> write() {
 				return Arrays.asList("import evolution.annotation.Database4UcaseSetup;",
-		                "import evolution.annotation.ExpectedDatabase4Ucase;",
+		                "import evolution.annotation.ExpectedDatabase4Ucase;", 
 		                "private String name;", "");
 			}
 		};
@@ -29,11 +29,8 @@ public class Run extends Generator {
 		UnitTestMethodWriter generalMethodWriter = new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
-				List<String> codes = new LinkedList<>();
-				codes.add("@Database4UcaseSetup");
-				codes.add("@ExpectedDatabase4Ucase");
-				codes.add("System.out.println(\"Hello World\");");
-				return codes;
+				return Arrays.asList("@Database4UcaseSetup", "@ExpectedDatabase4Ucase",
+						"System.out.println(\"Hello World\");");
 			}
 		};
 		Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters = new LinkedHashMap<>();
