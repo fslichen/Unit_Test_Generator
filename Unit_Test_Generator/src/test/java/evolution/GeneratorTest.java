@@ -1,33 +1,35 @@
 package evolution;
 import org.junit.Test;
-import evolution.annotation.DatabaseSetup4Ucase;
+import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
 public class GeneratorTest {
+    private String name;
+    
     @Test
-    @DatabaseSetup4Ucase
-    @ExpectedDatabase4Ucase
-    public void testTest() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @DatabaseSetup4Ucase
+    @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testScanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() {
         System.out.println("Hello World");
     }
 
     @Test
-    @DatabaseSetup4Ucase
+    @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testCapitalizedFirstCharacter() {
+    public void testWithExtension() {
         System.out.println("Hello World");
     }
 
     @Test
-    @DatabaseSetup4Ucase
+    @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testEndsWithExtension() {
+    public void testClassAnnnotation() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testCapitalizedFirstCharacter() {
         System.out.println("Hello World");
     }
 
