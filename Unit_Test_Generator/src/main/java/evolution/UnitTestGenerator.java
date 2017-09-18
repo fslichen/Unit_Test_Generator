@@ -21,7 +21,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
@@ -141,8 +140,14 @@ public class UnitTestGenerator {
 			List<String> classCodes = new LinkedList<>();
 			classCodes.add("package " + className.substring(0, className.lastIndexOf(".")) + ";");
 			classCodes.add("import org.junit.Test;");
+			classCodes.add("import org.springframework.beans.factory.annotation.Autowired;");
+			classCodes.add("import " + className + ";");
 			classCodes.addAll(unitTestClassWriter.write());
 			classCodes.add(keywordCount(classCodes, "package", "import"), "public class " + clazz.getSimpleName() + "Test {");// Put the class signature in the right place.
+			classCodes.add("@Autowired");
+			String simpleClassName = clazz.getSimpleName();
+			classCodes.add("private " + simpleClassName + " " + lowerFirstCharacter(simpleClassName) + ";");
+			classCodes.add(null);
 			CodeWriter codeWriter = new CodeWriter();
 			StringBuilder completeCodes = new StringBuilder();
 			codeWriter.writeCodes(classCodes, completeCodes);

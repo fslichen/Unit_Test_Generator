@@ -6,25 +6,12 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.WebApplicationContext;
 
-import evolution.example.Application;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = Application.class)
-@WebAppConfiguration
-public class Run {
-	@Autowired
-	private WebApplicationContext webApplicationContext;
-	
+public class Run extends BaseTest {
 	@Test
 	public void testInvokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues() throws Exception {
 		new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import evolution.example.controller.dto.AnyDto;
+import evolution.example.pojo.AnotherPojo;
+import evolution.example.pojo.AnyPojo;
 import evolution.example.service.AnyService;
 
 @RestController
@@ -23,6 +25,9 @@ public class AnyController {
 	public AnyDto post(@RequestBody AnyDto anyDto) {
 		anyDto.setName("Chen");
 		anyDto.setAge(27);
+		AnyPojo anyPojo = new AnyPojo();
+		AnotherPojo anotherPojo = new AnotherPojo();
+		anyService.anyMethod(anyPojo, anotherPojo);
 		return anyDto;
 	}
 }

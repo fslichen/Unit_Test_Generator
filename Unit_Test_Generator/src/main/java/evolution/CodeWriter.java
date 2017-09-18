@@ -29,7 +29,11 @@ public class CodeWriter {
 	
 	public void writeCodes(List<String> codesToBeWritten, StringBuilder codes) {
 		for (String codeToBeWritten : codesToBeWritten) {
-			writeCode(codeToBeWritten, codes);
+			if (codeToBeWritten == null) {
+				writeCode("\n", codes);
+			} else {
+				writeCode(codeToBeWritten, codes);
+			}
 		}
 	}
 }
