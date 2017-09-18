@@ -53,6 +53,10 @@ public class Run extends UnitTestGenerator {
 						"System.out.println(\"Hello World\");");
 			}
 		};
-		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", true, generalClassWriter, generalMethodWriter);
+		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", new Predicate<Class<?>>() {
+			@Override
+			public boolean test(Class<?> clazz) {
+				return clazz.getAnnotations().length > 0;
+			}}, true, generalClassWriter, generalMethodWriter);
 	}
 }

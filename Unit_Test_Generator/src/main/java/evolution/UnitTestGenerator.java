@@ -134,8 +134,8 @@ public class UnitTestGenerator {
 		return keywordCount;
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws IOException {
-		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, null).entrySet()) {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws IOException {
+		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
 			String className = clazz.getName();
