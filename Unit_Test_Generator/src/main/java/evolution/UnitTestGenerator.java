@@ -24,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,6 +38,10 @@ public class UnitTestGenerator {
 	
 	public String capitalizedFirstCharacter(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	}
+	
+	public String lowerFirstCharacter(String string) {
+		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
 	
 	public Class<?> classAnnnotation(Class<?> clazz) {
@@ -100,9 +105,10 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate) throws Exception {
-		Map<Path, Class<?>> map = classesUnderBasePackageOfSrcMainJava(basePackage, predicate);
-		for (Entry<Path, Class<?>> entry : map.entrySet()) {
+	public Map<Path, ParameterValuesAndReturnValue> invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
+		Map<Path, ParameterValuesAndReturnValue> parameterValuesAndReturnValueMap = new LinkedHashMap<>();
+		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
+			Path path = entry.getKey();
 			Class<?> clazz = entry.getValue();
 			for (Method method : clazz.getDeclaredMethods()) {
 				int i = 0;
@@ -116,10 +122,20 @@ public class UnitTestGenerator {
 				}
 				ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
 				result.setParameterValues(parameterValues);
-				result.setReturnValue(method.invoke(clazz.newInstance(), parameterValues4InvokingMethod));
-				System.out.println(result);
+				Object currentInstance = null;
+				if (webApplicationContext == null) {
+					currentInstance = clazz.newInstance();
+				} else {
+					currentInstance = webApplicationContext.getBean(lowerFirstCharacter(clazz.getSimpleName()));
+					if (currentInstance == null) {
+						currentInstance = clazz.newInstance();
+					}
+				}
+				result.setReturnValue(method.invoke(currentInstance, parameterValues4InvokingMethod));
+				parameterValuesAndReturnValueMap.put(path, result);
 			}
 		}
+		return parameterValuesAndReturnValueMap;
 	}
 	
 	public int keywordCount(List<String> codes, String... keywords) {

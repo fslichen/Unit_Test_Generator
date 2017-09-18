@@ -2,21 +2,34 @@ package evolution;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
+import evolution.example.Application;
 import evolution.example.controller.dto.AnyDto;
+import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = Application.class)
-//@WebAppConfiguration
-public class Run extends UnitTestGenerator {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = Application.class)
+@WebAppConfiguration
+public class Run {
+	@Autowired
+	private WebApplicationContext webApplicationContext;
+	
 //	@Test
 	public void testCopy() {
 		AnyDto anyDto = new AnyDto();
@@ -26,17 +39,18 @@ public class Run extends UnitTestGenerator {
 		System.out.println(anyDto0);
 	}
 	
-//	@Test
+	@Test
 	public void testInvokeMethodsUnderSrcMainJava() throws Exception {
-		new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
+		Map<Path, ParameterValuesAndReturnValue> map = new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return clazz.getAnnotation(RestController.class) != null;
 			}
-		});
+		}, webApplicationContext);
+		System.out.println(map);
 	}
 	
-	@Test
+//	@Test
 	public void test() throws IOException {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
