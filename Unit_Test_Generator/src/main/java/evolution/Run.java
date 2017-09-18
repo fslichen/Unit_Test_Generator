@@ -6,17 +6,13 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
-import evolution.example.Application;
-import evolution.example.controller.AnyController;
 import evolution.example.controller.dto.AnyDto;
-import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
@@ -33,14 +29,17 @@ public class Run extends UnitTestGenerator {
 		System.out.println(anyDto0);
 	}
 	
-//	@Test
+	@Test
 	public void testInvokeMethodsUnderSrcMainJava() throws Exception {
-		AnyController anyController = new AnyController();
-		ParameterValuesAndReturnValue result = new UnitTestGenerator().invokeMethodAndGetMockedParameterValuesAndReturnValue(AnyController.class.getMethod("post", AnyDto.class), anyController);
-		System.out.println(result);
+		new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
+			@Override
+			public boolean test(Class<?> clazz) {
+				return clazz.getAnnotation(RestController.class) != null;
+			}
+		});
 	}
 	
-	@Test
+//	@Test
 	public void test() throws IOException {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override

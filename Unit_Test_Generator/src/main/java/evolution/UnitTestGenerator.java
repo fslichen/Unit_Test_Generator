@@ -59,15 +59,6 @@ public class UnitTestGenerator {
 		return classAnnotation;
 	}
 	
-//	public void invokeMethodsUnderSrcMainJava() throws Exception {
-//		Map<Path, Class<?>> classes = classesUnderSrcMainJava(null);
-//		for (Entry<Path, Class<?>> entry : classes.entrySet()) {
-//			Class<?> clazz = entry.getValue();
-//			for (Method method : clazz.getDeclaredMethods()) {
-//			}
-//		}
-//	}
-	
 	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws IOException {
 		final Map<Path, Class<?>> classes = new LinkedHashMap<>();
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
@@ -109,20 +100,26 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public ParameterValuesAndReturnValue invokeMethodAndGetMockedParameterValuesAndReturnValue(Method method, Object currentInstance) throws Exception {
-		int i = 0;
-		ObjectMocker mocker = new ObjectMocker();
-		List<Object> parameterValues = new LinkedList<>();
-		Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
-		for (Class<?> parameterType : method.getParameterTypes()) {
-			Object parameterValue = mocker.mockObject(parameterType);
-			parameterValues.add(copyObject(parameterValue));
-			parameterValues4InvokingMethod[i++] = parameterValue;
+	public void invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate) throws Exception {
+		Map<Path, Class<?>> map = classesUnderBasePackageOfSrcMainJava(basePackage, predicate);
+		for (Entry<Path, Class<?>> entry : map.entrySet()) {
+			Class<?> clazz = entry.getValue();
+			for (Method method : clazz.getDeclaredMethods()) {
+				int i = 0;
+				ObjectMocker mocker = new ObjectMocker();
+				List<Object> parameterValues = new LinkedList<>();
+				Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
+				for (Class<?> parameterType : method.getParameterTypes()) {
+					Object parameterValue = mocker.mockObject(parameterType);
+					parameterValues.add(copyObject(parameterValue));
+					parameterValues4InvokingMethod[i++] = parameterValue;
+				}
+				ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
+				result.setParameterValues(parameterValues);
+				result.setReturnValue(method.invoke(clazz.newInstance(), parameterValues4InvokingMethod));
+				System.out.println(result);
+			}
 		}
-		ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
-		result.setParameterValues(parameterValues);
-		result.setReturnValue(method.invoke(currentInstance, parameterValues4InvokingMethod));
-		return result;
 	}
 	
 	public int keywordCount(List<String> codes, String... keywords) {
