@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +18,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +30,7 @@ public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	public String capitalizedFirstCharacter(String string) {
+	public String upperFirstCharacter(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}
 	
@@ -44,33 +38,17 @@ public class UnitTestGenerator {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
 	
-	public Class<?> classAnnnotation(Class<?> clazz) {
-		Class<?> classAnnotation = null;
-		for (Annotation annotation : clazz.getAnnotations()) {
-			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
-				classAnnotation = Controller.class;
-				break;
-			} else if (annotation.annotationType() == Service.class) {
-				classAnnotation = Service.class;
-				break;
-			} else if (annotation.annotationType() == Repository.class) {
-				classAnnotation = Repository.class;
-				break;
-			} else if (annotation.annotationType() == Component.class) {
-				classAnnotation = Component.class;
-				break;
-			}
-		}
-		return classAnnotation;
+	public String pathInString(Path path) {
+		return path.toString().replace("\\", "/");
 	}
 	
-	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws IOException {
+	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws Exception {
 		final Map<Path, Class<?>> classes = new LinkedHashMap<>();
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.filter(new Predicate<Path>() {
 				@Override
 				public boolean test(Path path) {
-					String pathInString = path.toString().replace("\\", "/");
+					String pathInString = pathInString(path);
 					if (!pathInString.contains(SRC_MAIN_JAVA) || (basePackage != null && !pathInString.contains(basePackage.replace(".", "/"))) || !withExtension(pathInString, "java")) {
 						return false;
 					}
@@ -78,15 +56,15 @@ public class UnitTestGenerator {
 				}}).forEach(new Consumer<Path>() {
 				@Override
 				public void accept(Path path) {
+					String pathInString = pathInString(path);
+					String className = pathInString.substring(pathInString.lastIndexOf(SRC_MAIN_JAVA) + SRC_MAIN_JAVA.length() + 1).replace("/", ".").replace(".java", "");
 					try {
-						String className = path.toString().replace("\\", "/");
-						className = className.substring(className.lastIndexOf(SRC_MAIN_JAVA) + SRC_MAIN_JAVA.length() + 1).replace("/", ".").replace(".java", "");
 						Class<?> clazz = Class.forName(className);
 						if (predicate == null || predicate.test(clazz)) {
 							classes.put(path, clazz);
 						}
 					} catch (ClassNotFoundException e) {
-						System.out.println("Unable to determine the class.");
+						System.out.println("Unable to determine the class " + className + ".");
 					}
 				}
 			});
@@ -105,10 +83,20 @@ public class UnitTestGenerator {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T> T newInstance(Class<T> clazz, WebApplicationContext webApplicationContext) throws InstantiationException, IllegalAccessException {
+		T currentInstance = null;
+		if (webApplicationContext == null) {
+			return clazz.newInstance();
+		} else {
+			currentInstance = (T) webApplicationContext.getBean(lowerFirstCharacter(clazz.getSimpleName()));
+			return currentInstance == null ? currentInstance = clazz.newInstance() : currentInstance; 
+		}
+	}
+	
 	public Map<Path, ParameterValuesAndReturnValue> invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
 		Map<Path, ParameterValuesAndReturnValue> parameterValuesAndReturnValueMap = new LinkedHashMap<>();
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
-			Path path = entry.getKey();
 			Class<?> clazz = entry.getValue();
 			for (Method method : clazz.getDeclaredMethods()) {
 				int i = 0;
@@ -122,17 +110,8 @@ public class UnitTestGenerator {
 				}
 				ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
 				result.setParameterValues(parameterValues);
-				Object currentInstance = null;
-				if (webApplicationContext == null) {
-					currentInstance = clazz.newInstance();
-				} else {
-					currentInstance = webApplicationContext.getBean(lowerFirstCharacter(clazz.getSimpleName()));
-					if (currentInstance == null) {
-						currentInstance = clazz.newInstance();
-					}
-				}
-				result.setReturnValue(method.invoke(currentInstance, parameterValues4InvokingMethod));
-				parameterValuesAndReturnValueMap.put(path, result);
+				result.setReturnValue(method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
+				parameterValuesAndReturnValueMap.put(entry.getKey(), result);
 			}
 		}
 		return parameterValuesAndReturnValueMap;
@@ -150,7 +129,7 @@ public class UnitTestGenerator {
 		return keywordCount;
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws IOException {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
@@ -168,7 +147,7 @@ public class UnitTestGenerator {
 				List<String> methodCodes = new LinkedList<>();
 				methodCodes.add("@Test");
 				methodCodes.addAll(unitTestMethodWriter.write(method));
-				methodCodes.add(keywordCount(methodCodes, "@"), "public void test" + capitalizedFirstCharacter(method.getName()) + "() {");
+				methodCodes.add(keywordCount(methodCodes, "@"), "public void test" + upperFirstCharacter(method.getName()) + "() {");
 				methodCodes.add("}");
 				codeWriter.writeCodes(methodCodes, completeCodes);
 				completeCodes.append("\n");

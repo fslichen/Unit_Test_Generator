@@ -41,7 +41,7 @@ public class Run {
 	}
 	
 	@Test
-	public void testScanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() throws IOException {
+	public void testScanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() throws Exception {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
