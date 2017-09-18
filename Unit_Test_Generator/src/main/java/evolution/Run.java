@@ -1,10 +1,8 @@
 package evolution;
 
 import java.lang.reflect.Method;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.Test;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import evolution.example.Application;
-import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
@@ -30,13 +27,12 @@ public class Run {
 	
 	@Test
 	public void testInvokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues() throws Exception {
-		Map<Path, ParameterValuesAndReturnValue> map = new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
+		new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return clazz.getAnnotation(RestController.class) != null;
 			}
 		}, webApplicationContext);
-		System.out.println(map);
 	}
 	
 	@Test

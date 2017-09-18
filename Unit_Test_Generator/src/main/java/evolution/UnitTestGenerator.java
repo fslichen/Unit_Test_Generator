@@ -97,10 +97,12 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public Map<Path, ParameterValuesAndReturnValue> invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
-		Map<Path, ParameterValuesAndReturnValue> parameterValuesAndReturnValueMap = new LinkedHashMap<>();
+	public void invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			Class<?> clazz = entry.getValue();
+			String jsonDirectoryPath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
+			int index = jsonDirectoryPath.lastIndexOf("/");
+			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
 			for (Method method : clazz.getDeclaredMethods()) {
 				int i = 0;
 				ObjectMocker mocker = new ObjectMocker();
@@ -111,13 +113,12 @@ public class UnitTestGenerator {
 					parameterValues.add(copyObject(parameterValue));
 					parameterValues4InvokingMethod[i++] = parameterValue;
 				}
-				ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
-				result.setParameterValues(parameterValues);
-				result.setReturnValue(method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
-				parameterValuesAndReturnValueMap.put(entry.getKey(), result);
+				ObjectMapper objectMapper = new ObjectMapper();
+				String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
+				objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request.json"), parameterValues);
+				objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response.json"), method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
 			}
 		}
-		return parameterValuesAndReturnValueMap;
 	}
 	
 	public int keywordCount(List<String> codes, String... keywords) {

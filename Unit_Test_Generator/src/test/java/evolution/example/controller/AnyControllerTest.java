@@ -8,6 +8,13 @@ public class AnyControllerTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testGet() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testPost() {
         System.out.println("Hello World");
     }

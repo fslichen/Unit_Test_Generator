@@ -1,6 +1,7 @@
 package evolution.example.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,11 @@ import evolution.example.service.AnyService;
 public class AnyController {
 	@Autowired
 	private AnyService anyService;
+	
+	@GetMapping("/get")
+	public void get() {
+		
+	}
 	
 	@PostMapping("/post")
 	public AnyDto post(@RequestBody AnyDto anyDto) {
