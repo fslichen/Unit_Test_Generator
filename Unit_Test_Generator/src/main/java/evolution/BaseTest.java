@@ -28,7 +28,7 @@ public abstract class BaseTest {
 		try {
 			return objectMapper.readValue(json, clazz);
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Failed to convert json to " + clazz.getName() + ".");
 			return null;
 		}
 	}
