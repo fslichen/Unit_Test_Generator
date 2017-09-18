@@ -35,31 +35,28 @@ public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	@SuppressWarnings("unchecked")
-	public <T> T copyObject(T t) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
-		} catch (Exception e) {
-			System.out.println("Unable to copy the object.");
-			return null;
-		}
+	public String capitalizedFirstCharacter(String string) {
+		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}
 	
-	public ParameterValuesAndReturnValue invokeMethodAndGetMockedParameterValuesAndReturnValue(Method method, Object currentInstance) throws Exception {
-		int i = 0;
-		ObjectMocker mocker = new ObjectMocker();
-		List<Object> parameterValues = new LinkedList<>();
-		Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
-		for (Class<?> parameterType : method.getParameterTypes()) {
-			Object parameterValue = mocker.mockObject(parameterType);
-			parameterValues.add(copyObject(parameterValue));
-			parameterValues4InvokingMethod[i++] = parameterValue;
+	public Class<?> classAnnnotation(Class<?> clazz) {
+		Class<?> classAnnotation = null;
+		for (Annotation annotation : clazz.getAnnotations()) {
+			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
+				classAnnotation = Controller.class;
+				break;
+			} else if (annotation.annotationType() == Service.class) {
+				classAnnotation = Service.class;
+				break;
+			} else if (annotation.annotationType() == Repository.class) {
+				classAnnotation = Repository.class;
+				break;
+			} else if (annotation.annotationType() == Component.class) {
+				classAnnotation = Component.class;
+				break;
+			}
 		}
-		ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
-		result.setParameterValues(parameterValues);
-		result.setReturnValue(method.invoke(currentInstance, parameterValues4InvokingMethod));
-		return result;
+		return classAnnotation;
 	}
 	
 //	public void invokeMethodsUnderSrcMainJava() throws Exception {
@@ -101,28 +98,31 @@ public class UnitTestGenerator {
 		return classes;
 	}
 	
-	public boolean withExtension(String path, String extension) {
-		return extension.equals(FilenameUtils.getExtension(path.toString().replace("\\", "/")));
+	@SuppressWarnings("unchecked")
+	public <T> T copyObject(T t) {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
+		} catch (Exception e) {
+			System.out.println("Unable to copy the object.");
+			return null;
+		}
 	}
 	
-	public Class<?> classAnnnotation(Class<?> clazz) {
-		Class<?> classAnnotation = null;
-		for (Annotation annotation : clazz.getAnnotations()) {
-			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
-				classAnnotation = Controller.class;
-				break;
-			} else if (annotation.annotationType() == Service.class) {
-				classAnnotation = Service.class;
-				break;
-			} else if (annotation.annotationType() == Repository.class) {
-				classAnnotation = Repository.class;
-				break;
-			} else if (annotation.annotationType() == Component.class) {
-				classAnnotation = Component.class;
-				break;
-			}
+	public ParameterValuesAndReturnValue invokeMethodAndGetMockedParameterValuesAndReturnValue(Method method, Object currentInstance) throws Exception {
+		int i = 0;
+		ObjectMocker mocker = new ObjectMocker();
+		List<Object> parameterValues = new LinkedList<>();
+		Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			Object parameterValue = mocker.mockObject(parameterType);
+			parameterValues.add(copyObject(parameterValue));
+			parameterValues4InvokingMethod[i++] = parameterValue;
 		}
-		return classAnnotation;
+		ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
+		result.setParameterValues(parameterValues);
+		result.setReturnValue(method.invoke(currentInstance, parameterValues4InvokingMethod));
+		return result;
 	}
 	
 	public int keywordCount(List<String> codes, String... keywords) {
@@ -187,7 +187,7 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public String capitalizedFirstCharacter(String string) {
-		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	public boolean withExtension(String path, String extension) {
+		return extension.equals(FilenameUtils.getExtension(path.toString().replace("\\", "/")));
 	}
 }
