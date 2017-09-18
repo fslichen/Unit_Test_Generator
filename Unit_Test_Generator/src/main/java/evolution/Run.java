@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import evolution.example.Application;
-import evolution.example.controller.dto.AnyDto;
 import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
@@ -30,17 +29,8 @@ public class Run {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 	
-//	@Test
-	public void testCopy() {
-		AnyDto anyDto = new AnyDto();
-		anyDto.setName("Chen");
-		anyDto.setAge(27);
-		AnyDto anyDto0 = new UnitTestGenerator().copyObject(anyDto);
-		System.out.println(anyDto0);
-	}
-	
 	@Test
-	public void testInvokeMethodsUnderSrcMainJava() throws Exception {
+	public void testInvokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues() throws Exception {
 		Map<Path, ParameterValuesAndReturnValue> map = new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
@@ -50,8 +40,8 @@ public class Run {
 		System.out.println(map);
 	}
 	
-//	@Test
-	public void test() throws IOException {
+	@Test
+	public void testScanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() throws IOException {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
