@@ -2,7 +2,6 @@ package evolution;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -39,7 +38,11 @@ public class UnitTestGenerator {
 	}
 	
 	public String pathInString(Path path) {
-		return path.toString().replace("\\", "/");
+		return pathInString(path.toString());
+	}
+	
+	public String pathInString(String path) {
+		return path.replace("\\", "/");
 	}
 	
 	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws Exception {
@@ -154,7 +157,7 @@ public class UnitTestGenerator {
 			}
 			completeCodes.append("}");
 			// Write unit test file.
-			String unitTestFilePath = entry.getKey().toString().replace("\\", "/").replace("src/main/java", "src/test/java").replace(".java", "Test.java");
+			String unitTestFilePath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java");
 			File unitTestFileDirectory = new File(unitTestFilePath.substring(0, unitTestFilePath.lastIndexOf("/")));
 			if (!unitTestFileDirectory.exists()) {
 				unitTestFileDirectory.mkdirs();
@@ -175,6 +178,10 @@ public class UnitTestGenerator {
 	}
 	
 	public boolean withExtension(String path, String extension) {
-		return extension.equals(FilenameUtils.getExtension(path.toString().replace("\\", "/")));
+		return extension.equals(FilenameUtils.getExtension(pathInString(path)));
+	}
+	
+	public boolean withExtension(Path path, String extension) {
+		return withExtension(path.toString(), extension);
 	}
 }
