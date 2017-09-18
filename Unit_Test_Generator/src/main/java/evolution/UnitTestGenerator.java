@@ -134,7 +134,7 @@ public class UnitTestGenerator {
 		return keywordCount;
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, final boolean overwrite, final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters) throws IOException {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws IOException {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, null).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
@@ -142,17 +142,12 @@ public class UnitTestGenerator {
 			List<String> classCodes = new LinkedList<>();
 			classCodes.add("package " + className.substring(0, className.lastIndexOf(".")) + ";");
 			classCodes.add("import org.junit.Test;");
-			Class<?> classAnnotation = classAnnnotation(clazz);
-			UnitTestClassWriter unitTestClassWriter = unitTestClassWriters.get(classAnnotation);
-			unitTestClassWriter = unitTestClassWriter == null ? unitTestClassWriters.get(null) : unitTestClassWriter;// If the specific unit test class writer is not found, use the default unit test class writer.
 			classCodes.addAll(unitTestClassWriter.write());
 			classCodes.add(keywordCount(classCodes, "package", "import"), "public class " + clazz.getSimpleName() + "Test {");// Put the class signature in the right place.
 			CodeWriter codeWriter = new CodeWriter();
 			StringBuilder completeCodes = new StringBuilder();
 			codeWriter.writeCodes(classCodes, completeCodes);
 			// Generate unit test method codes.
-			UnitTestMethodWriter unitTestMethodWriter = unitTestMethodWriters.get(classAnnotation);
-			unitTestMethodWriter = unitTestMethodWriter == null ? unitTestMethodWriters.get(null) : unitTestMethodWriter;// If the specific unit test method writer is not found, use the default unit test method writer.
 			for (Method method : clazz.getDeclaredMethods()) {
 				List<String> methodCodes = new LinkedList<>();
 				methodCodes.add("@Test");

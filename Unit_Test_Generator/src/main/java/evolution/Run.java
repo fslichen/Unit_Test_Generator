@@ -3,13 +3,10 @@ package evolution;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.Test;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import evolution.example.controller.dto.AnyDto;
@@ -29,7 +26,7 @@ public class Run extends UnitTestGenerator {
 		System.out.println(anyDto0);
 	}
 	
-	@Test
+//	@Test
 	public void testInvokeMethodsUnderSrcMainJava() throws Exception {
 		new UnitTestGenerator().invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.example.controller", new Predicate<Class<?>>() {
 			@Override
@@ -39,7 +36,7 @@ public class Run extends UnitTestGenerator {
 		});
 	}
 	
-//	@Test
+	@Test
 	public void test() throws IOException {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
@@ -49,8 +46,6 @@ public class Run extends UnitTestGenerator {
 		                "private String name;", "");
 			}
 		};
-		Map<Class<?>, UnitTestClassWriter> unitTestClassWriters = new LinkedHashMap<>();
-		unitTestClassWriters.put(null, generalClassWriter);
 		UnitTestMethodWriter generalMethodWriter = new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
@@ -58,8 +53,6 @@ public class Run extends UnitTestGenerator {
 						"System.out.println(\"Hello World\");");
 			}
 		};
-		Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters = new LinkedHashMap<>();
-		unitTestMethodWriters.put(null, generalMethodWriter);
-		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", true, unitTestClassWriters, unitTestMethodWriters);
+		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", true, generalClassWriter, generalMethodWriter);
 	}
 }
