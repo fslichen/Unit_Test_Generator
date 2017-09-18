@@ -32,8 +32,29 @@ public class Generator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	public void generateParameters() {
-		// TODO
+	public void invokeMethodsUnderSrcMainJava() throws Exception {
+		Map<Path, Class<?>> classes = classesUnderSrcMainJava(null);
+		ObjectMocker mocker = new ObjectMocker();
+		for (Entry<Path, Class<?>> entry : classes.entrySet()) {
+			Class<?> clazz = entry.getValue();
+			for (Method method : clazz.getDeclaredMethods()) {
+				try {
+					int i = 0;
+					Object[] methodParameterValues = new Object[method.getParameterCount()];
+					for (Class<?> methodParameterType : method.getParameterTypes()) {
+						methodParameterValues[i++] = mocker.mockObject(methodParameterType);
+					}
+					Object returnValue = method.invoke(clazz.newInstance(), methodParameterValues);
+					// Print out the result
+					for (Object methodParameterValue : methodParameterValues) {
+						System.out.println("method " + method.getName() + "parameter value = " + methodParameterValue);
+					}
+					System.out.println("method " + method.getName() + " return value = " + returnValue);
+				} catch (Exception e) {
+					System.out.println("Unable to invoke " + method.getName() + ".");
+				}
+			}
+		}
 	}
 	
 	public Map<Path, Class<?>> classesUnderSrcMainJava(final Predicate<Class<?>> predicate) throws IOException {

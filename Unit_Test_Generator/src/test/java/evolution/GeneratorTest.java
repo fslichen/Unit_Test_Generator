@@ -15,6 +15,13 @@ public class GeneratorTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testA() {
+        System.out.println("Hello World");
+    }
+
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testClassesUnderSrcMainJava() {
         System.out.println("Hello World");
     }

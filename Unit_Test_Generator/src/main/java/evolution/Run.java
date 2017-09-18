@@ -14,6 +14,11 @@ import evolution.template.UnitTestMethodWriter;
 
 public class Run extends Generator {
 	@Test
+	public void testInvokeMethodsUnderSrcMainJava() throws Exception {
+		new Generator().invokeMethodsUnderSrcMainJava();
+	}
+	
+	@Test
 	public void test() throws IOException {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
