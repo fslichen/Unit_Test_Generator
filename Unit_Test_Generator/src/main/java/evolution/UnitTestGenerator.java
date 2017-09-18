@@ -25,47 +25,66 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
-public class Generator {
+public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	public void invokeMethodsUnderSrcMainJava() throws Exception {
-		Map<Path, Class<?>> classes = classesUnderSrcMainJava(null);
-		ObjectMocker mocker = new ObjectMocker();
-		for (Entry<Path, Class<?>> entry : classes.entrySet()) {
-			Class<?> clazz = entry.getValue();
-			for (Method method : clazz.getDeclaredMethods()) {
-				try {
-					int i = 0;
-					Object[] methodParameterValues = new Object[method.getParameterCount()];
-					for (Class<?> methodParameterType : method.getParameterTypes()) {
-						methodParameterValues[i++] = mocker.mockObject(methodParameterType);
-					}
-					Object returnValue = method.invoke(clazz.newInstance(), methodParameterValues);
-					// Print out the result
-					for (Object methodParameterValue : methodParameterValues) {
-						System.out.println("method " + method.getName() + "parameter value = " + methodParameterValue);
-					}
-					System.out.println("method " + method.getName() + " return value = " + returnValue);
-				} catch (Exception e) {
-					System.out.println("Unable to invoke " + method.getName() + ".");
-				}
-			}
+	@SuppressWarnings("unchecked")
+	public <T> T copyObject(T t) {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
+		} catch (Exception e) {
+			System.out.println("Unable to copy the object.");
+			return null;
 		}
 	}
 	
-	public Map<Path, Class<?>> classesUnderSrcMainJava(final Predicate<Class<?>> predicate) throws IOException {
+	public ParameterValuesAndReturnValue invokeMethodAndGetMockedParameterValuesAndReturnValue(Method method, Object currentInstance) throws Exception {
+		int i = 0;
+		ObjectMocker mocker = new ObjectMocker();
+		List<Object> parameterValues = new LinkedList<>();
+		Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			Object parameterValue = mocker.mockObject(parameterType);
+			parameterValues.add(copyObject(parameterValue));
+			parameterValues4InvokingMethod[i++] = parameterValue;
+		}
+		ParameterValuesAndReturnValue result = new ParameterValuesAndReturnValue();
+		result.setParameterValues(parameterValues);
+		result.setReturnValue(method.invoke(currentInstance, parameterValues4InvokingMethod));
+		return result;
+	}
+	
+//	public void invokeMethodsUnderSrcMainJava() throws Exception {
+//		Map<Path, Class<?>> classes = classesUnderSrcMainJava(null);
+//		for (Entry<Path, Class<?>> entry : classes.entrySet()) {
+//			Class<?> clazz = entry.getValue();
+//			for (Method method : clazz.getDeclaredMethods()) {
+//			}
+//		}
+//	}
+	
+	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws IOException {
 		final Map<Path, Class<?>> classes = new LinkedHashMap<>();
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
-			paths.forEach(new Consumer<Path>() {
+			paths.filter(new Predicate<Path>() {
+				@Override
+				public boolean test(Path path) {
+					String pathInString = path.toString().replace("\\", "/");
+					if (!pathInString.contains(SRC_MAIN_JAVA) || (basePackage != null && !pathInString.contains(basePackage.replace(".", "/"))) || !withExtension(pathInString, "java")) {
+						return false;
+					}
+					return true;
+				}}).forEach(new Consumer<Path>() {
 				@Override
 				public void accept(Path path) {
-					if (!path.toString().replace("\\", "/").contains(SRC_MAIN_JAVA) || !withExtension(path, "java")) {
-						return;
-					}
 					try {
 						String className = path.toString().replace("\\", "/");
 						className = className.substring(className.lastIndexOf(SRC_MAIN_JAVA) + SRC_MAIN_JAVA.length() + 1).replace("/", ".").replace(".java", "");
@@ -82,7 +101,7 @@ public class Generator {
 		return classes;
 	}
 	
-	public boolean withExtension(Path path, String extension) {
+	public boolean withExtension(String path, String extension) {
 		return extension.equals(FilenameUtils.getExtension(path.toString().replace("\\", "/")));
 	}
 	
@@ -118,8 +137,8 @@ public class Generator {
 		return keywordCount;
 	}
 	
-	public void scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters, final boolean overwrite) throws IOException {
-		for (Entry<Path, Class<?>> entry : classesUnderSrcMainJava(null).entrySet()) {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, final boolean overwrite, final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters) throws IOException {
+		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, null).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
 			String className = clazz.getName();

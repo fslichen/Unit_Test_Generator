@@ -1,56 +1,42 @@
-package evolution;
+package evolution.example.controller.dto;
 import org.junit.Test;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
-public class GeneratorTest {
+public class AnyDtoTest {
     private String name;
     
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testScanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() {
+    public void testToString() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testA() {
+    public void testGetName() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testClassesUnderSrcMainJava() {
+    public void testSetName() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testWithExtension() {
+    public void testSetAge() {
         System.out.println("Hello World");
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testClassAnnnotation() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testKeywordCount() {
-        System.out.println("Hello World");
-    }
-
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testCapitalizedFirstCharacter() {
+    public void testGetAge() {
         System.out.println("Hello World");
     }
 

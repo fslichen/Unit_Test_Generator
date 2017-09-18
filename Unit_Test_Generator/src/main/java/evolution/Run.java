@@ -8,14 +8,36 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
+import evolution.example.Application;
+import evolution.example.controller.AnyController;
+import evolution.example.controller.dto.AnyDto;
+import evolution.pojo.ParameterValuesAndReturnValue;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
-public class Run extends Generator {
-	@Test
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(classes = Application.class)
+//@WebAppConfiguration
+public class Run extends UnitTestGenerator {
+//	@Test
+	public void testCopy() {
+		AnyDto anyDto = new AnyDto();
+		anyDto.setName("Chen");
+		anyDto.setAge(27);
+		AnyDto anyDto0 = new UnitTestGenerator().copyObject(anyDto);
+		System.out.println(anyDto0);
+	}
+	
+//	@Test
 	public void testInvokeMethodsUnderSrcMainJava() throws Exception {
-		new Generator().invokeMethodsUnderSrcMainJava();
+		AnyController anyController = new AnyController();
+		ParameterValuesAndReturnValue result = new UnitTestGenerator().invokeMethodAndGetMockedParameterValuesAndReturnValue(AnyController.class.getMethod("post", AnyDto.class), anyController);
+		System.out.println(result);
 	}
 	
 	@Test
@@ -39,6 +61,6 @@ public class Run extends Generator {
 		};
 		Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters = new LinkedHashMap<>();
 		unitTestMethodWriters.put(null, generalMethodWriter);
-		new Generator().scanClassesUnderSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(unitTestClassWriters, unitTestMethodWriters, true);
+		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", true, unitTestClassWriters, unitTestMethodWriters);
 	}
 }
