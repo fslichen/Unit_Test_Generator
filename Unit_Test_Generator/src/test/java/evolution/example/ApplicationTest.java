@@ -14,7 +14,10 @@ public class ApplicationTest {
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testMain() {
-        System.out.println("Hello World");
+        String requestData = null;
+        ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();
+        List<String> jsons = objectMapperPlus.splitJson(requestData);
+        application.main(objectMapperPlus.fromJson(jsons.get(0), String[].class));
     }
 
 }

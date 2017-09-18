@@ -36,7 +36,7 @@ public class Run extends BaseTest {
 			@Override
 			public List<String> write(Method method) {
 				return Arrays.asList("@Database4UcaseSetup", "@ExpectedDatabase4Ucase",
-						"System.out.println(\"Hello World\");");
+						"String requestData = null;");
 			}
 		};
 		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", new Predicate<Class<?>>() {

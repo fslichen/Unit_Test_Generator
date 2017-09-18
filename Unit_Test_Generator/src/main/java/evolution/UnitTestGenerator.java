@@ -146,7 +146,8 @@ public class UnitTestGenerator {
 			classCodes.add(keywordCount(classCodes, "package", "import"), "public class " + clazz.getSimpleName() + "Test {");// Put the class signature in the right place.
 			classCodes.add("@Autowired");
 			String simpleClassName = clazz.getSimpleName();
-			classCodes.add("private " + simpleClassName + " " + lowerFirstCharacter(simpleClassName) + ";");
+			String instanceName = lowerFirstCharacter(simpleClassName);
+			classCodes.add("private " + simpleClassName + " " + instanceName + ";");
 			classCodes.add(null);
 			CodeWriter codeWriter = new CodeWriter();
 			StringBuilder completeCodes = new StringBuilder();
@@ -157,6 +158,19 @@ public class UnitTestGenerator {
 				methodCodes.add("@Test");
 				methodCodes.addAll(unitTestMethodWriter.write(method));
 				methodCodes.add(keywordCount(methodCodes, "@"), "public void test" + upperFirstCharacter(method.getName()) + "() {");
+				methodCodes.add("ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();");
+				methodCodes.add("List<String> jsons = objectMapperPlus.splitJson(requestData);");
+				StringBuilder parameters = new StringBuilder();
+				int i = 0;
+				for (Class<?> parameterType : method.getParameterTypes()) {
+					parameters.append(String.format("objectMapperPlus.fromJson(jsons.get(%s), %s.class), ", i, parameterType.getSimpleName()));
+					i++;
+				}
+				String s = parameters.toString();
+				if (s.length() > 2) {
+					s = parameters.substring(0, parameters.length() - 2);
+				}
+				methodCodes.add(instanceName + "." + method.getName() + "(" + s +  ");");
 				methodCodes.add("}");
 				codeWriter.writeCodes(methodCodes, completeCodes);
 				completeCodes.append("\n");

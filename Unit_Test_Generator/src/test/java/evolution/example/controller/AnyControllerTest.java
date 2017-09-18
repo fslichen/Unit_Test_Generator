@@ -14,14 +14,20 @@ public class AnyControllerTest {
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testGet() {
-        System.out.println("Hello World");
+        String requestData = null;
+        ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();
+        List<String> jsons = objectMapperPlus.splitJson(requestData);
+        anyController.get();
     }
 
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testPost() {
-        System.out.println("Hello World");
+        String requestData = null;
+        ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();
+        List<String> jsons = objectMapperPlus.splitJson(requestData);
+        anyController.post(objectMapperPlus.fromJson(jsons.get(0), AnyDto.class));
     }
 
 }
