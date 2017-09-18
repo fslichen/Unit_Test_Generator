@@ -158,11 +158,7 @@ public class UnitTestGenerator {
 			completeCodes.append("}");
 			// Write unit test file.
 			String unitTestFilePath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java");
-			File unitTestFileDirectory = new File(unitTestFilePath.substring(0, unitTestFilePath.lastIndexOf("/")));
-			if (!unitTestFileDirectory.exists()) {
-				unitTestFileDirectory.mkdirs();
-			}
-			File unitTestFile = new File(unitTestFilePath);
+			File unitTestFile = createDirectoriesAndFile(unitTestFilePath);
 			if (unitTestFile.exists() && !overwrite) {
 				System.out.println("The file " + unitTestFilePath + " already exists.");
 				return;
@@ -175,6 +171,14 @@ public class UnitTestGenerator {
 			}
 			System.out.println(completeCodes + "\n");					
 		}
+	}
+	
+	public File createDirectoriesAndFile(String filePath) {
+		File fileDirectory = new File(filePath.substring(0, filePath.lastIndexOf("/")));
+		if (!fileDirectory.exists()) {
+			fileDirectory.mkdirs();
+		}
+		return new File(filePath);
 	}
 	
 	public boolean withExtension(String path, String extension) {
