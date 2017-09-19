@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
+import evolution.example.Application;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
@@ -48,7 +49,7 @@ public class Run extends BaseTest {
 		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
-				return clazz.getAnnotations().length > 0;
+				return clazz.getAnnotations().length > 0 && clazz != Application.class;
 			}}, true, generalClassWriter, generalMethodWriter);
 	}
 }
