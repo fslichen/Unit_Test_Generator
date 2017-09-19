@@ -7,13 +7,13 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Json {
-	protected ObjectMapper objectMapper;
+	private static ObjectMapper objectMapper;
 	
-	public Json() {
+	static {
 		objectMapper = new ObjectMapper();
 	}
 	
-	public List<String> splitJsonList(String jsonArray) {
+	public static List<String> splitJsonList(String jsonArray) {
 		int level = 0;
 		int leftBracketIndex = 0;
 		List<String> jsons = new LinkedList<>();
@@ -34,7 +34,7 @@ public class Json {
 		return jsons;
 	}
 	
-	public <T> List<T> fromJsonList(String json, Class<T> clazz) {
+	public static <T> List<T> fromJsonList(String json, Class<T> clazz) {
 		List<T> ts = new LinkedList<>();
 		for (String subJson : splitJsonList(json)) {
 			ts.add(fromJson(subJson, clazz));
@@ -42,7 +42,7 @@ public class Json {
 		return ts;
 	}
 	
-	public <T> T fromJson(String json, Class<T> clazz) {
+	public static <T> T fromJson(String json, Class<T> clazz) {
 		try {
 			return objectMapper.readValue(json, clazz);
 		} catch (IOException e) {

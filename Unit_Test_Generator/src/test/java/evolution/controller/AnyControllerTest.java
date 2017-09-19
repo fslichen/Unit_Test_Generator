@@ -19,8 +19,7 @@ public class AnyControllerTest {
     public void testGet0() {
         String requestData = null;
         String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
+        List<String> parameterValues = Json.splitJsonList(requestData);
         anyController.get();
     }
     
@@ -30,10 +29,9 @@ public class AnyControllerTest {
     public void testPost0() {
         String requestData = null;
         String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
-        AnyDto actualResult = anyController.post(json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
+        List<String> parameterValues = Json.splitJsonList(requestData);
+        AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
     }
     
     @Test
@@ -42,10 +40,9 @@ public class AnyControllerTest {
     public void testPost1() {
         String requestData = null;
         String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
-        AnyDto actualResult = anyController.post(json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
+        List<String> parameterValues = Json.splitJsonList(requestData);
+        AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
     }
     
     @Test
@@ -54,10 +51,9 @@ public class AnyControllerTest {
     public void testPost2() {
         String requestData = null;
         String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
-        AnyDto actualResult = anyController.post(json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
+        List<String> parameterValues = Json.splitJsonList(requestData);
+        AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
     }
     
     @Test
@@ -66,10 +62,9 @@ public class AnyControllerTest {
     public void testPost3() {
         String requestData = null;
         String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
-        AnyDto actualResult = anyController.post(json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
+        List<String> parameterValues = Json.splitJsonList(requestData);
+        AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
     }
     
     @Test
@@ -78,8 +73,7 @@ public class AnyControllerTest {
     public void testHttp0() {
         String requestData = null;
         String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
+        List<String> parameterValues = Json.splitJsonList(requestData);
         anyController.http();
     }
     

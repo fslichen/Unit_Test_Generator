@@ -228,21 +228,20 @@ public class UnitTestGenerator {
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));
 					codeWriter.writeMethod(method, "test", methodIndex);
 					codeWriter.writeImport(Json.class);
-					codeWriter.writeCode("Json json = new Json();");
 					codeWriter.writeImport(List.class);
-					codeWriter.writeCode("List<String> parameterValues = json.splitJsonList(requestData);");
+					codeWriter.writeCode("List<String> parameterValues = Json.splitJsonList(requestData);");
 					StringBuilder parameters = new StringBuilder();
 					int i = 0;
 					for (Class<?> parameterType : method.getParameterTypes()) {
 						codeWriter.writeImport(parameterType);
-						parameters.append(String.format("json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+						parameters.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 					}
 					Class<?> returnType = method.getReturnType();
 					if (returnType != void.class && returnType != Void.class) {
 						codeWriter.writeImport(returnType);
 						String returnTypeSimpleName = returnType.getSimpleName();
 						codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
-						codeWriter.writeCode(String.format("%s expectedResult = json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
+						codeWriter.writeCode(String.format("%s expectedResult = Json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
 					} else {
 						codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
 					}
