@@ -1,4 +1,5 @@
 package evolution.example;
+import [Ljava.lang.String;;
 import java.util.List;
 import evolution.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
@@ -17,6 +18,7 @@ public class ApplicationTest {
     @ExpectedDatabase4Ucase
     public void testMain() {
         String requestData = null;
+        String responseData = null;
         Json json = new Json();
         List<String> parameterValues = json.splitJsonList(requestData);
         application.main(json.fromJson(parameterValues.get(0), String[].class));

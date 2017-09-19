@@ -19,9 +19,11 @@ public class AnyServiceTest {
     @ExpectedDatabase4Ucase
     public void testAnyMethod() {
         String requestData = null;
+        String responseData = null;
         Json json = new Json();
         List<String> parameterValues = json.splitJsonList(requestData);
-        anyService.anyMethod(json.fromJson(parameterValues.get(0), AnyPojo.class), json.fromJson(parameterValues.get(1), AnotherPojo.class));
+        AnyPojo actualResult = anyService.anyMethod(json.fromJson(parameterValues.get(0), AnyPojo.class), json.fromJson(parameterValues.get(1), AnotherPojo.class));
+        AnyPojo expectedResult = json.fromJson(responseData, AnyPojo.class);
     }
     
 }

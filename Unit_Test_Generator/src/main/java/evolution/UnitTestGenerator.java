@@ -174,7 +174,15 @@ public class UnitTestGenerator {
 					codeWriter.writeImport(parameterType);
 					parameters.append(String.format("json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 				}
-				codeWriter.writeCode(instanceName(clazz) + "." + method.getName() + "(" + trimEndingComma(parameters.toString()) +  ");");
+				Class<?> returnType = method.getReturnType();
+				if (returnType != void.class && returnType != Void.class) {
+					codeWriter.writeImport(returnType);
+					String returnTypeSimpleName = returnType.getSimpleName();
+					codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+					codeWriter.writeCode(String.format("%s expectedResult = json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
+				} else {
+					codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+				}
 				codeWriter.writeRightCurlyBrace();
 				codeWriter.writeBlankLine();
 			}

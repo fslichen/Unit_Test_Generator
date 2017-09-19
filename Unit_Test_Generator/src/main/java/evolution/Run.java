@@ -41,6 +41,7 @@ public class Run extends BaseTest {
 				codeWriter.writeAnnotation(Database4UcaseSetup.class);
 				codeWriter.writeAnnotation(ExpectedDatabase4Ucase.class);
 				codeWriter.writeCode("String requestData = null;");
+				codeWriter.writeCode("String responseData = null;");
 				return codeWriter.getCodes();
 			}
 		};
