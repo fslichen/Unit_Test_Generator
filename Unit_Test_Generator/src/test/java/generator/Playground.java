@@ -51,4 +51,9 @@ public class Playground {
 		Json json = new Json();
 		System.out.println(json.splitJsonList(str));
 	}
+	
+	@Test
+	public void testJavaAssist() {
+		
+	}
 }

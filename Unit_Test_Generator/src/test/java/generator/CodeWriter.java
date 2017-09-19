@@ -68,8 +68,8 @@ public class CodeWriter {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
 	
-	public void writeMethod(Method method, String prefix) {
-		String methodSignature = String.format("public void test%s() {", upperFirstCharacter(method.getName()));
+	public void writeMethod(Method method, String prefix, Object suffix) {
+		String methodSignature = String.format("public void %s%s%s() {", prefix, upperFirstCharacter(method.getName()), suffix);
 		for (int i = codes.size() - 1; i >= 0; i--) {
 			String code = codes.get(i);
 			if (code.equals("\n")) {

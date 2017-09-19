@@ -2,6 +2,7 @@ package generator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -29,6 +31,24 @@ import generator.template.UnitTestMethodWriter;
 public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
+	
+	@SuppressWarnings("unchecked")
+	public <T> T property(String key, Class<T> clazz) {
+		Properties properties = new Properties();
+		try {
+			properties.load(UnitTestGenerator.class.getResourceAsStream("/unit-test.properties"));
+			String value = properties.get(key).toString();
+			if (clazz == int.class || clazz == Integer.class) {
+				return (T) new Integer(value);
+			} if (clazz == double.class || clazz == Double.class) {
+				return (T) new Double(value);
+			}
+			return (T) value;
+		} catch (IOException e) {
+			System.out.println("Please create unit-test.properties under src/test/resources");
+			return null;
+		}
+	}
 	
 	public String upperFirstCharacter(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
@@ -105,19 +125,21 @@ public class UnitTestGenerator {
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
 			for (Method method : clazz.getDeclaredMethods()) {
-				int i = 0;
-				ObjectMocker mocker = new ObjectMocker();
-				List<Object> parameterValues = new LinkedList<>();
-				Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
-				for (Class<?> parameterType : method.getParameterTypes()) {
-					Object parameterValue = mocker.mockObject(parameterType);
-					parameterValues.add(copyObject(parameterValue));
-					parameterValues4InvokingMethod[i++] = parameterValue;
+				for (int methodIndex = 0; methodIndex < property("test-case-count", Integer.class); methodIndex++) {
+					int i = 0;
+					ObjectMocker mocker = new ObjectMocker();
+					List<Object> parameterValues = new LinkedList<>();
+					Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
+					for (Class<?> parameterType : method.getParameterTypes()) {
+						Object parameterValue = mocker.mockObject(parameterType);
+						parameterValues.add(copyObject(parameterValue));
+						parameterValues4InvokingMethod[i++] = parameterValue;
+					}
+					ObjectMapper objectMapper = new ObjectMapper();
+					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
+					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), parameterValues);
+					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json"), method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
 				}
-				ObjectMapper objectMapper = new ObjectMapper();
-				String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
-				objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request.json"), parameterValues);
-				objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response.json"), method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
 			}
 		}
 	}
@@ -161,30 +183,32 @@ public class UnitTestGenerator {
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
 			for (Method method : clazz.getDeclaredMethods()) {
-				codeWriter.writeAnnotation(Test.class);
-				codeWriter.writeCodes(unitTestMethodWriter.write(method));
-				codeWriter.writeMethod(method, "test");
-				codeWriter.writeImport(Json.class);
-				codeWriter.writeCode("Json json = new Json();");
-				codeWriter.writeImport(List.class);
-				codeWriter.writeCode("List<String> parameterValues = json.splitJsonList(requestData);");
-				StringBuilder parameters = new StringBuilder();
-				int i = 0;
-				for (Class<?> parameterType : method.getParameterTypes()) {
-					codeWriter.writeImport(parameterType);
-					parameters.append(String.format("json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+				for (int methodIndex = 0; methodIndex < property("test-case-count", Integer.class); methodIndex++) {
+					codeWriter.writeAnnotation(Test.class);
+					codeWriter.writeCodes(unitTestMethodWriter.write(method));
+					codeWriter.writeMethod(method, "test", methodIndex);
+					codeWriter.writeImport(Json.class);
+					codeWriter.writeCode("Json json = new Json();");
+					codeWriter.writeImport(List.class);
+					codeWriter.writeCode("List<String> parameterValues = json.splitJsonList(requestData);");
+					StringBuilder parameters = new StringBuilder();
+					int i = 0;
+					for (Class<?> parameterType : method.getParameterTypes()) {
+						codeWriter.writeImport(parameterType);
+						parameters.append(String.format("json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+					}
+					Class<?> returnType = method.getReturnType();
+					if (returnType != void.class && returnType != Void.class) {
+						codeWriter.writeImport(returnType);
+						String returnTypeSimpleName = returnType.getSimpleName();
+						codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+						codeWriter.writeCode(String.format("%s expectedResult = json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
+					} else {
+						codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+					}
+					codeWriter.writeRightCurlyBrace();
+					codeWriter.writeBlankLine();
 				}
-				Class<?> returnType = method.getReturnType();
-				if (returnType != void.class && returnType != Void.class) {
-					codeWriter.writeImport(returnType);
-					String returnTypeSimpleName = returnType.getSimpleName();
-					codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
-					codeWriter.writeCode(String.format("%s expectedResult = json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
-				} else {
-					codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
-				}
-				codeWriter.writeRightCurlyBrace();
-				codeWriter.writeBlankLine();
 			}
 			codeWriter.writeRightCurlyBrace();
 			// Write unit test file.
