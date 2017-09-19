@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import evolution.controller.dto.AnyDto;
@@ -18,6 +20,11 @@ public class AnyController {
 	
 	@GetMapping("/get")
 	public void get() {
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.PATCH, value = "/http")
+	public void http() {
 		
 	}
 	

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -21,10 +22,17 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import generator.pojo.ControllerDto;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
@@ -118,13 +126,14 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void invokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
+	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			Class<?> clazz = entry.getValue();
 			String jsonDirectoryPath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
 			Map<String, Integer> useCaseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
+			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < useCaseCountByMethod.get(method.getName()); methodIndex++) {
 					int i = 0;
@@ -138,11 +147,40 @@ public class UnitTestGenerator {
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
-					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), parameterValues);
+					if (isController) {
+						objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), controllerDto(method, parameterValues));
+					} else {
+						objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), parameterValues);
+					}
 					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json"), method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
 				}
 			}
 		}
+	}
+	
+	public ControllerDto controllerDto(Method method, Object data) {
+		ControllerDto dto = new ControllerDto();
+		dto.setSession(UUID.randomUUID().toString());
+		dto.setData(data);
+		GetMapping getMapping = method.getAnnotation(GetMapping.class);
+		PostMapping postMapping = method.getAnnotation(PostMapping.class);
+		if (getMapping != null) {
+			dto.setRequestMethod("GET");
+			dto.setRequestPath(getMapping.value()[0]);
+		} else if (postMapping != null) {
+			dto.setRequestMethod("POST");
+			dto.setRequestPath(postMapping.value()[0]);
+		} else {
+			RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+			RequestMethod[] requestMethods = requestMapping.method();
+			if (requestMethods.length > 0) {
+				dto.setRequestMethod(requestMapping.method()[0].toString());
+			} else {
+				dto.setRequestMethod("ANY");
+			}
+			dto.setRequestPath(requestMapping.value()[0]);
+		}
+		return dto;
 	}
 	
 	public int keywordCount(List<String> codes, String... keywords) {

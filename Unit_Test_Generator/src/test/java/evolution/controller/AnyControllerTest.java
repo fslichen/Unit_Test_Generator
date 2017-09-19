@@ -72,4 +72,15 @@ public class AnyControllerTest {
         AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
     }
     
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testHttp0() {
+        String requestData = null;
+        String responseData = null;
+        Json json = new Json();
+        List<String> parameterValues = json.splitJsonList(requestData);
+        anyController.http();
+    }
+    
 }
