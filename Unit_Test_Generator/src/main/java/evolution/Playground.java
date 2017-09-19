@@ -44,4 +44,11 @@ public class Playground {
 		strs.add("World");
 		System.out.println(strs);
 	}
+	
+	@Test
+	public void testSplitJson() {
+		String str = "[{\"name\":\"Chen\"},{\"address\":\"FS\"}]";
+		Json json = new Json();
+		System.out.println(json.splitJsonList(str));
+	}
 }

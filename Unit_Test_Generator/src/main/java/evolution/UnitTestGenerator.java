@@ -134,42 +134,51 @@ public class UnitTestGenerator {
 		return keywordCount;
 	}
 	
+	public String instanceName(Class<?> clazz) {
+		return lowerFirstCharacter(clazz.getSimpleName());
+	}
+	
+	public String trimEndingComma(String string) {
+		if (string.endsWith(", ")) {
+			return string.substring(0, string.length() - 2);
+		} else if (string.endsWith(",")) {
+			return string.substring(0, string.length() - 1);
+		}
+		return string;
+	}
+	
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
 			CodeWriter codeWriter = new CodeWriter();
-			List<String> classCodes = new LinkedList<>();
-			codeWriter.writePackage(clazz, classCodes);
-			codeWriter.writeImport(Test.class, classCodes);
-			codeWriter.writeImport(clazz, classCodes);
-			classCodes.add(codeWriter.writeClass(clazz, "Test"));// Put the class signature in the right place.
-			codeWriter.writeAnnotation(Autowired.class, classCodes);
-			String instanceName = codeWriter.writeField(clazz, classCodes);
-			classCodes.add(null);
-			classCodes.addAll(unitTestClassWriter.write());
-			// Generate unit test method codes.
+			codeWriter.writePackage(clazz);
+			codeWriter.writeImport(Test.class);
+			codeWriter.writeClass(clazz, "Test");
+			codeWriter.writeAnnotation(Autowired.class);
+			codeWriter.writeField(clazz);
+			codeWriter.writeBlankLine();
+			codeWriter.writeCodes(unitTestClassWriter.write());
+			// Generate unit test method related codes.
 			for (Method method : clazz.getDeclaredMethods()) {
-				codeWriter.writeAnnotation(Test.class, classCodes);
-				classCodes.addAll(unitTestMethodWriter.write(method));
-				codeWriter.writeMethod(method, "test", classCodes);
-				classCodes.add("ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();");
-				classCodes.add("List<String> jsons = objectMapperPlus.splitJson(requestData);");
+				codeWriter.writeAnnotation(Test.class);
+				codeWriter.writeCodes(unitTestMethodWriter.write(method));
+				codeWriter.writeMethod(method, "test");
+				codeWriter.writeImport(Json.class);
+				codeWriter.writeCode("Json json = new Json();");
+				codeWriter.writeImport(List.class);
+				codeWriter.writeCode("List<String> parameterValues = json.splitJsonList(requestData);");
 				StringBuilder parameters = new StringBuilder();
 				int i = 0;
 				for (Class<?> parameterType : method.getParameterTypes()) {
-					parameters.append(String.format("objectMapperPlus.fromJson(jsons.get(%s), %s.class), ", i, parameterType.getSimpleName()));
-					i++;
+					codeWriter.writeImport(parameterType);
+					parameters.append(String.format("json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 				}
-				String s = parameters.toString();
-				if (s.length() > 2) {
-					s = parameters.substring(0, parameters.length() - 2);
-				}
-				classCodes.add(instanceName + "." + method.getName() + "(" + s +  ");");
-				classCodes.add("}");
-				codeWriter.writeBlankLine(classCodes);
+				codeWriter.writeCode(instanceName(clazz) + "." + method.getName() + "(" + trimEndingComma(parameters.toString()) +  ");");
+				codeWriter.writeRightCurlyBrace();
+				codeWriter.writeBlankLine();
 			}
-			classCodes.add("}");
+			codeWriter.writeRightCurlyBrace();
 			// Write unit test file.
 			String unitTestFilePath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java");
 			File unitTestFile = createDirectoriesAndFile(unitTestFilePath);
@@ -178,7 +187,7 @@ public class UnitTestGenerator {
 				return;
 			}
 			try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
-				printWriter.write(codeWriter.writeCodes(classCodes).toString());
+				printWriter.write(codeWriter.generateCodes().toString());
 				System.out.println("The unit test file " + unitTestFilePath + " is successfully generated.");
 			} catch (FileNotFoundException e) {
 				System.out.println("Failed to write the file " + unitTestFilePath + ".");

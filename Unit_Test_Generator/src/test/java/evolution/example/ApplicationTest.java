@@ -1,9 +1,11 @@
 package evolution.example;
-import org.springframework.beans.factory.annotation.Autowired;
-import evolution.example.Application;
-import org.junit.Test;
-import evolution.annotation.Database4UcaseSetup;
+import java.util.List;
+import evolution.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
+import evolution.annotation.Database4UcaseSetup;
+import evolution.example.Application;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.Test;
 public class ApplicationTest {
     @Autowired
     private Application application;
@@ -15,9 +17,9 @@ public class ApplicationTest {
     @ExpectedDatabase4Ucase
     public void testMain() {
         String requestData = null;
-        ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();
-        List<String> jsons = objectMapperPlus.splitJson(requestData);
-        application.main(objectMapperPlus.fromJson(jsons.get(0), String[].class));
+        Json json = new Json();
+        List<String> parameterValues = json.splitJsonList(requestData);
+        application.main(json.fromJson(parameterValues.get(0), String[].class));
     }
     
 }

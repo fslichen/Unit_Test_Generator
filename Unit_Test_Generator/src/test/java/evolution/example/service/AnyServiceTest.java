@@ -1,9 +1,13 @@
 package evolution.example.service;
-import org.springframework.beans.factory.annotation.Autowired;
-import evolution.example.service.AnyService;
-import org.junit.Test;
-import evolution.annotation.Database4UcaseSetup;
+import evolution.example.pojo.AnotherPojo;
+import evolution.example.pojo.AnyPojo;
+import java.util.List;
+import evolution.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
+import evolution.annotation.Database4UcaseSetup;
+import evolution.example.service.AnyService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.Test;
 public class AnyServiceTest {
     @Autowired
     private AnyService anyService;
@@ -15,9 +19,9 @@ public class AnyServiceTest {
     @ExpectedDatabase4Ucase
     public void testAnyMethod() {
         String requestData = null;
-        ObjectMapperPlus objectMapperPlus = new ObjectMapperPlus();
-        List<String> jsons = objectMapperPlus.splitJson(requestData);
-        anyService.anyMethod(objectMapperPlus.fromJson(jsons.get(0), AnyPojo.class), objectMapperPlus.fromJson(jsons.get(1), AnotherPojo.class));
+        Json json = new Json();
+        List<String> parameterValues = json.splitJsonList(requestData);
+        anyService.anyMethod(json.fromJson(parameterValues.get(0), AnyPojo.class), json.fromJson(parameterValues.get(1), AnotherPojo.class));
     }
     
 }

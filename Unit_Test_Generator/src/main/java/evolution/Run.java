@@ -1,13 +1,14 @@
 package evolution;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.Test;
 import org.springframework.web.bind.annotation.RestController;
 
+import evolution.annotation.Database4UcaseSetup;
+import evolution.annotation.ExpectedDatabase4Ucase;
 import evolution.template.UnitTestClassWriter;
 import evolution.template.UnitTestMethodWriter;
 
@@ -27,16 +28,20 @@ public class Run extends BaseTest {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
-				return Arrays.asList("import evolution.annotation.Database4UcaseSetup;",
-		                "import evolution.annotation.ExpectedDatabase4Ucase;", 
-		                "private String name;", "");
+				CodeWriter codeWriter = new CodeWriter();
+				codeWriter.writeCode("private String name;");
+				codeWriter.writeBlankLine();
+				return codeWriter.getCodes();
 			}
 		};
 		UnitTestMethodWriter generalMethodWriter = new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
-				return Arrays.asList("@Database4UcaseSetup", "@ExpectedDatabase4Ucase",
-						"String requestData = null;");
+				CodeWriter codeWriter = new CodeWriter();
+				codeWriter.writeAnnotation(Database4UcaseSetup.class);
+				codeWriter.writeAnnotation(ExpectedDatabase4Ucase.class);
+				codeWriter.writeCode("String requestData = null;");
+				return codeWriter.getCodes();
 			}
 		};
 		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", new Predicate<Class<?>>() {
