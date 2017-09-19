@@ -1,4 +1,4 @@
-package evolution;
+package generator;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -7,11 +7,11 @@ import java.util.function.Predicate;
 import org.junit.Test;
 import org.springframework.web.bind.annotation.RestController;
 
+import evolution.Application;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
-import evolution.example.Application;
-import evolution.template.UnitTestClassWriter;
-import evolution.template.UnitTestMethodWriter;
+import generator.template.UnitTestClassWriter;
+import generator.template.UnitTestMethodWriter;
 
 public class Run extends BaseTest {
 	@Test
@@ -46,7 +46,7 @@ public class Run extends BaseTest {
 				return codeWriter.getCodes();
 			}
 		};
-		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution.example", new Predicate<Class<?>>() {
+		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution", new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return clazz.getAnnotations().length > 0 && clazz != Application.class;

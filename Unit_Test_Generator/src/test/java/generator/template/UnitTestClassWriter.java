@@ -1,4 +1,4 @@
-package evolution.template;
+package generator.template;
 
 import java.util.List;
 

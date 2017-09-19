@@ -1,6 +1,6 @@
-package evolution.example.controller.dto;
+package evolution.pojo;
 
-public class AnyDto {
+public class AnyPojo {
 	private String name;
 	private Integer age;
 	public String getName() {
@@ -14,9 +14,5 @@ public class AnyDto {
 	}
 	public void setAge(Integer age) {
 		this.age = age;
-	}
-	@Override
-	public String toString() {
-		return "AnyDto [name=" + name + ", age=" + age + "]";
 	}
 }

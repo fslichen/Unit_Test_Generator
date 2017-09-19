@@ -1,4 +1,4 @@
-package evolution;
+package generator;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import evolution.example.controller.dto.AnyDto;
+import evolution.controller.dto.AnyDto;
 
 public class Playground {
 	@Test

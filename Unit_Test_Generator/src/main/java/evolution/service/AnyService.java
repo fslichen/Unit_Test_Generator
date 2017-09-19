@@ -1,9 +1,9 @@
-package evolution.example.service;
+package evolution.service;
 
 import org.springframework.stereotype.Service;
 
-import evolution.example.pojo.AnotherPojo;
-import evolution.example.pojo.AnyPojo;
+import evolution.pojo.AnotherPojo;
+import evolution.pojo.AnyPojo;
 
 @Service
 public class AnyService {

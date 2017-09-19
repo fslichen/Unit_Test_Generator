@@ -1,4 +1,4 @@
-package evolution.example.controller;
+package evolution.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import evolution.example.controller.dto.AnyDto;
-import evolution.example.pojo.AnotherPojo;
-import evolution.example.pojo.AnyPojo;
-import evolution.example.service.AnyService;
+import evolution.controller.dto.AnyDto;
+import evolution.pojo.AnotherPojo;
+import evolution.pojo.AnyPojo;
+import evolution.service.AnyService;
 
 @RestController
 public class AnyController {

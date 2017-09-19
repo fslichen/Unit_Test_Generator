@@ -1,4 +1,4 @@
-package evolution;
+package generator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,8 +23,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import evolution.template.UnitTestClassWriter;
-import evolution.template.UnitTestMethodWriter;
+import generator.template.UnitTestClassWriter;
+import generator.template.UnitTestMethodWriter;
 
 public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";

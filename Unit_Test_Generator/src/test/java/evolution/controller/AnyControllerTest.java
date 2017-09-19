@@ -1,10 +1,10 @@
-package evolution.example.controller;
-import evolution.example.controller.dto.AnyDto;
+package evolution.controller;
+import evolution.controller.dto.AnyDto;
 import java.util.List;
-import evolution.Json;
+import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import evolution.annotation.Database4UcaseSetup;
-import evolution.example.controller.AnyController;
+import evolution.controller.AnyController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Test;
 public class AnyControllerTest {

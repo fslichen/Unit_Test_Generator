@@ -1,4 +1,4 @@
-package evolution.example.pojo;
+package evolution.pojo;
 
 public class AnotherPojo {
 	private String address;

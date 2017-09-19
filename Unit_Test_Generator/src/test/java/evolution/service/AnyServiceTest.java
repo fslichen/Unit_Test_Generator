@@ -1,11 +1,11 @@
-package evolution.example.service;
-import evolution.example.pojo.AnotherPojo;
-import evolution.example.pojo.AnyPojo;
+package evolution.service;
+import evolution.pojo.AnotherPojo;
+import evolution.pojo.AnyPojo;
 import java.util.List;
-import evolution.Json;
+import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import evolution.annotation.Database4UcaseSetup;
-import evolution.example.service.AnyService;
+import evolution.service.AnyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Test;
 public class AnyServiceTest {
