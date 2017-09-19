@@ -124,8 +124,9 @@ public class UnitTestGenerator {
 			String jsonDirectoryPath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
+			Map<String, Integer> useCaseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < property("test-case-count", Integer.class); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < useCaseCountByMethod.get(method.getName()); methodIndex++) {
 					int i = 0;
 					ObjectMocker mocker = new ObjectMocker();
 					List<Object> parameterValues = new LinkedList<>();
