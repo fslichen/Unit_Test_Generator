@@ -54,6 +54,9 @@ public class Playground {
 	
 	@Test
 	public void testJavaAssist() {
-		
+		for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+			System.out.println(e.getLineNumber());
+			System.out.println(e);
+		}
 	}
 }

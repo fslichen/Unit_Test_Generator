@@ -27,17 +27,6 @@ public class AnyControllerTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testGet1() {
-        String requestData = null;
-        String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
-        anyController.get();
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testPost0() {
         String requestData = null;
         String responseData = null;
@@ -51,6 +40,30 @@ public class AnyControllerTest {
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
     public void testPost1() {
+        String requestData = null;
+        String responseData = null;
+        Json json = new Json();
+        List<String> parameterValues = json.splitJsonList(requestData);
+        AnyDto actualResult = anyController.post(json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testPost2() {
+        String requestData = null;
+        String responseData = null;
+        Json json = new Json();
+        List<String> parameterValues = json.splitJsonList(requestData);
+        AnyDto actualResult = anyController.post(json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = json.fromJson(responseData, AnyDto.class);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testPost3() {
         String requestData = null;
         String responseData = null;
         Json json = new Json();

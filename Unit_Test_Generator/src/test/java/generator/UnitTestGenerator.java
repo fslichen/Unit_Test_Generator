@@ -182,8 +182,9 @@ public class UnitTestGenerator {
 			codeWriter.writeBlankLine();
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
+			Map<String, Integer> caseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < property("test-case-count", Integer.class); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < caseCountByMethod.get(method.getName()); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));
 					codeWriter.writeMethod(method, "test", methodIndex);

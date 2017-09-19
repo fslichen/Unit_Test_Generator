@@ -26,16 +26,4 @@ public class AnyServiceTest {
         AnyPojo expectedResult = json.fromJson(responseData, AnyPojo.class);
     }
     
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testAnyMethod1() {
-        String requestData = null;
-        String responseData = null;
-        Json json = new Json();
-        List<String> parameterValues = json.splitJsonList(requestData);
-        AnyPojo actualResult = anyService.anyMethod(json.fromJson(parameterValues.get(0), AnyPojo.class), json.fromJson(parameterValues.get(1), AnotherPojo.class));
-        AnyPojo expectedResult = json.fromJson(responseData, AnyPojo.class);
-    }
-    
 }

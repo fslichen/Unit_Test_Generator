@@ -23,6 +23,13 @@ public class AnyController {
 	
 	@PostMapping("/post")
 	public AnyDto post(@RequestBody AnyDto anyDto) {
+		if (anyDto == null) {
+			anyDto = new AnyDto();
+		} else if (anyDto.getName() == null) {
+			anyDto.setName("Ling");
+		} else if (anyDto.getAge() == null) {
+			anyDto.setAge(26);
+		}
 		anyDto.setName("Chen");
 		anyDto.setAge(27);
 		AnyPojo anyPojo = new AnyPojo();
