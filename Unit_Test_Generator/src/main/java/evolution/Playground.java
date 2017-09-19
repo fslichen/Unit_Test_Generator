@@ -1,6 +1,7 @@
 package evolution;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
@@ -33,5 +34,14 @@ public class Playground {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void testAddNull2List() {
+		List<String> strs = new LinkedList<>();
+		strs.add("Hello");
+		strs.add(null);
+		strs.add("World");
+		System.out.println(strs);
 	}
 }

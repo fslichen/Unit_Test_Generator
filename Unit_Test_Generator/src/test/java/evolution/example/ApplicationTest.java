@@ -1,14 +1,14 @@
 package evolution.example;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import evolution.example.Application;
+import org.junit.Test;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
 public class ApplicationTest {
-    private String name;
-    
     @Autowired
     private Application application;
+    
+    private String name;
     
     @Test
     @Database4UcaseSetup
@@ -19,5 +19,5 @@ public class ApplicationTest {
         List<String> jsons = objectMapperPlus.splitJson(requestData);
         application.main(objectMapperPlus.fromJson(jsons.get(0), String[].class));
     }
-
+    
 }
