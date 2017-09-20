@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.Test;
-import org.springframework.web.bind.annotation.RestController;
 
 import evolution.Application;
 import evolution.annotation.Database4UcaseSetup;
@@ -13,17 +12,7 @@ import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
-public class Run extends BaseTest {
-	@Test
-	public void testInvokeMethodsUnderBasePackageUnderSrcMainJavaAndGetMockedParameterValuesAndReturnValues() throws Exception {
-		new UnitTestGenerator().invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution.controller", new Predicate<Class<?>>() {
-			@Override
-			public boolean test(Class<?> clazz) {
-				return clazz.getAnnotation(RestController.class) != null;
-			}
-		}, webApplicationContext);
-	}
-	
+public class UnitTestClassesGenerator extends BaseTest {
 	@Test
 	public void testScanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() throws Exception {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
