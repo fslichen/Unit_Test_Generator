@@ -15,9 +15,18 @@ import evolution.Application;
 @ContextConfiguration(classes = Application.class) 
 @WebAppConfiguration
 @TestPropertySource("classpath:application.properties")
-public abstract class BaseTest {
+public class BaseTest {
+	@Value("${max-test-case-count}")
+	protected Integer maxTestCaseCount;
+	
 	@Value("${max-use-case-count}")
 	protected Integer maxUseCaseCount;
+	
+	@Value("${overwrite-test-case}")
+	protected Boolean overwriteTestCase;
+	
+	@Value("${overwrite-use-case}")
+	protected Boolean overwriteUseCase;
 	
 	@Autowired
 	protected WebApplicationContext webApplicationContext;

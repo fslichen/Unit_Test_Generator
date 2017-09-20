@@ -9,12 +9,13 @@ import org.junit.Test;
 import evolution.Application;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
+import generator.pojo.TestCaseGeneratorConfiguration;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
-public class UnitTestClassesGenerator extends BaseTest {
+public class TestCaseGenerator extends BaseTest {
 	@Test
-	public void testScanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava() throws Exception {
+	public void run() throws Exception {
 		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
@@ -35,10 +36,13 @@ public class UnitTestClassesGenerator extends BaseTest {
 				return codeWriter.getCodes();
 			}
 		};
+		TestCaseGeneratorConfiguration configuration = new TestCaseGeneratorConfiguration();
+		configuration.setOverwrite(overwriteTestCase);
+		configuration.setMaxTestCaseCount(maxTestCaseCount);
 		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution", new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return clazz.getAnnotations().length > 0 && clazz != Application.class;
-			}}, true, generalClassWriter, generalMethodWriter);
+			}}, generalClassWriter, generalMethodWriter, configuration);
 	}
 }

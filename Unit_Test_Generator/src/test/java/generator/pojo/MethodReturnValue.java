@@ -1,12 +1,12 @@
 package generator.pojo;
 
-public class Response {
+public class MethodReturnValue {
 	private String status;
 	private String returnType;
-	public Response() {
+	public MethodReturnValue() {
 
 	}
-	public Response(String status, String returnType) {
+	public MethodReturnValue(String status, String returnType) {
 		this.status = status;
 		this.returnType = returnType;
 	}

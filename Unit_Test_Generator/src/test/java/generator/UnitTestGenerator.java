@@ -33,7 +33,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import generator.pojo.ControllerDto;
-import generator.pojo.Response;
+import generator.pojo.MethodReturnValue;
+import generator.pojo.TestCaseGeneratorConfiguration;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
@@ -156,12 +157,12 @@ public class UnitTestGenerator {
 					Object returnValue = null;
 					Class<?> returnType = method.getReturnType();
 					if (returnType == void.class || returnType == Void.class) {
-						returnValue = new Response("OK", "void");
+						returnValue = new MethodReturnValue("OK", "void");
 					} else {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);
 						} catch (Exception e) {
-							returnValue = new Response("Exception", returnType.getName());
+							returnValue = new MethodReturnValue("Exception", returnType.getName());
 						}
 					}
 					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json"), returnValue);
@@ -220,7 +221,7 @@ public class UnitTestGenerator {
 		return string;
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final boolean overwrite, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter, final TestCaseGeneratorConfiguration configuration) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
@@ -265,7 +266,7 @@ public class UnitTestGenerator {
 			// Write unit test file.
 			String unitTestFilePath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java");
 			File unitTestFile = createDirectoriesAndFile(unitTestFilePath);
-			if (unitTestFile.exists() && !overwrite) {
+			if (unitTestFile.exists() && !configuration.getOverwrite()) {
 				System.out.println("The file " + unitTestFilePath + " already exists.");
 				return;
 			}
