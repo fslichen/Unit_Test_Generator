@@ -19,8 +19,8 @@ public class AnyController {
 	private AnyService anyService;
 	
 	@GetMapping("/get")
-	public void get() {
-		
+	public int get() {
+		return 0;
 	}
 	
 	@RequestMapping(method = RequestMethod.PATCH, value = "/http")

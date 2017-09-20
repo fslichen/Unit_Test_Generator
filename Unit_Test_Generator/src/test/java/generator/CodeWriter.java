@@ -37,7 +37,9 @@ public class CodeWriter {
 	}
 	
 	public void writeImport(Class<?> clazz) {
-		writeImport(String.format("import %s;", clazz.getName()));
+		if (!clazz.getName().contains("lang") && clazz != byte.class && clazz != short.class && clazz != int.class && clazz != long.class && clazz != float.class && clazz != double.class&& clazz != char.class && clazz != boolean.class) {
+			writeImport(String.format("import %s;", clazz.getName()));
+		}
 	}
 	
 	public void writeClass(Class<?> clazz, String suffix) {

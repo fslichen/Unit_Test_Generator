@@ -20,7 +20,29 @@ public class AnyControllerTest {
         String requestData = null;
         String responseData = null;
         List<String> parameterValues = Json.splitJsonList(requestData, "data");
-        anyController.get();
+        int actualResult = anyController.get();
+        int expectedResult = Json.fromJson(responseData, int.class);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testException0() {
+        String requestData = null;
+        String responseData = null;
+        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testHttp0() {
+        String requestData = null;
+        String responseData = null;
+        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        anyController.http();
     }
     
     @Test
@@ -65,27 +87,6 @@ public class AnyControllerTest {
         List<String> parameterValues = Json.splitJsonList(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testException0() {
-        String requestData = null;
-        String responseData = null;
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
-        AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testHttp0() {
-        String requestData = null;
-        String responseData = null;
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
-        anyController.http();
     }
     
 }
