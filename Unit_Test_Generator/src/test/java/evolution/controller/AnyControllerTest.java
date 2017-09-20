@@ -70,22 +70,22 @@ public class AnyControllerTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testHttp0() {
+        String requestData = null;
+        String responseData = null;
+        List<String> parameterValues = Json.splitJsonList(requestData);
+        anyController.http();
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testException0() {
         String requestData = null;
         String responseData = null;
         List<String> parameterValues = Json.splitJsonList(requestData);
         AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testHttp0() {
-        String requestData = null;
-        String responseData = null;
-        List<String> parameterValues = Json.splitJsonList(requestData);
-        anyController.http();
     }
     
 }
