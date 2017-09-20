@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import generator.pojo.ControllerDto;
 import generator.pojo.MethodReturnValue;
-import generator.pojo.TestCaseGeneratorConfiguration;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
