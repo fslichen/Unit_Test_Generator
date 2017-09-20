@@ -44,4 +44,12 @@ public class AnyController {
 		anyService.anyMethod(anyPojo, anotherPojo);
 		return anyDto;
 	}
+	
+	@GetMapping("/exception")
+	public AnyDto exception(AnyDto anyDto) {
+		int i = 1 / 0;
+		anyDto.setName("Chen");
+		anyDto.setAge(27);
+		return anyDto;
+	}
 }

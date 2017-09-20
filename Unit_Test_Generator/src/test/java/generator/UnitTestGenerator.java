@@ -33,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import generator.pojo.ControllerDto;
+import generator.pojo.Response;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
@@ -152,7 +153,18 @@ public class UnitTestGenerator {
 					} else {
 						objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), parameterValues);
 					}
-					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json"), method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod));
+					Object returnValue = null;
+					Class<?> returnType = method.getReturnType();
+					if (returnType == void.class || returnType == Void.class) {
+						returnValue = new Response("OK", "void");
+					} else {
+						try {
+							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);
+						} catch (Exception e) {
+							returnValue = new Response("Exception", returnType.getName());
+						}
+					}
+					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json"), returnValue);
 				}
 			}
 		}
