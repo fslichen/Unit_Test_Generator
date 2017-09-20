@@ -9,14 +9,19 @@ import org.junit.Test;
 import evolution.Application;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
-import generator.pojo.TestCaseGeneratorConfiguration;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
 public class TestCaseGenerator extends BaseTest {
 	@Test
 	public void run() throws Exception {
-		UnitTestClassWriter generalClassWriter = new UnitTestClassWriter() {
+		Predicate<Class<?>> classFilter = new Predicate<Class<?>>() {
+			@Override
+			public boolean test(Class<?> clazz) {
+				return clazz.getAnnotations().length > 0 && clazz != Application.class;
+			}
+		};
+		UnitTestClassWriter classWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
 				CodeWriter codeWriter = new CodeWriter();
@@ -25,7 +30,7 @@ public class TestCaseGenerator extends BaseTest {
 				return codeWriter.getCodes();
 			}
 		};
-		UnitTestMethodWriter generalMethodWriter = new UnitTestMethodWriter() {
+		UnitTestMethodWriter methodWriter = new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
 				CodeWriter codeWriter = new CodeWriter();
@@ -36,13 +41,6 @@ public class TestCaseGenerator extends BaseTest {
 				return codeWriter.getCodes();
 			}
 		};
-		TestCaseGeneratorConfiguration configuration = new TestCaseGeneratorConfiguration();
-		configuration.setOverwrite(overwriteTestCase);
-		configuration.setMaxTestCaseCount(maxTestCaseCount);
-		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution", new Predicate<Class<?>>() {
-			@Override
-			public boolean test(Class<?> clazz) {
-				return clazz.getAnnotations().length > 0 && clazz != Application.class;
-			}}, generalClassWriter, generalMethodWriter, configuration);
+		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava("evolution", classFilter, classWriter, methodWriter);
 	}
 }

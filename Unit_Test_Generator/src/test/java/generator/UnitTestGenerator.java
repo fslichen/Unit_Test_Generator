@@ -52,6 +52,8 @@ public class UnitTestGenerator {
 				return (T) new Integer(value);
 			} if (clazz == double.class || clazz == Double.class) {
 				return (T) new Double(value);
+			} if (clazz == boolean.class || clazz == Boolean.class) {
+				return (T) new Boolean(value);
 			}
 			return (T) value;
 		} catch (IOException e) {
@@ -137,7 +139,7 @@ public class UnitTestGenerator {
 			Map<String, Integer> useCaseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < useCaseCountByMethod.get(method.getName()); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < Math.min(useCaseCountByMethod.get(method.getName()), property("max-use-case-count", Integer.class)); methodIndex++) {
 					int i = 0;
 					ObjectMocker mocker = new ObjectMocker();
 					List<Object> parameterValues = new LinkedList<>();
@@ -149,10 +151,15 @@ public class UnitTestGenerator {
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
-					if (isController) {
-						objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), controllerDto(method, parameterValues));
+					File requestJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json");
+					if (!requestJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
+						if (isController) {
+							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
+						} else {
+							objectMapper.writeValue(requestJsonFile, parameterValues);
+						}
 					} else {
-						objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json"), parameterValues);
+						System.out.println("The file " + requestJsonFile.getAbsolutePath() + " already exists.");
 					}
 					Object returnValue = null;
 					Class<?> returnType = method.getReturnType();
@@ -162,10 +169,15 @@ public class UnitTestGenerator {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);
 						} catch (Exception e) {
-							returnValue = new MethodReturnValue("Exception", returnType.getName());
+							returnValue = method.getReturnType().newInstance();
 						}
 					}
-					objectMapper.writeValue(createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json"), returnValue);
+					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json");
+					if (!responseJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
+						objectMapper.writeValue(responseJsonFile, returnValue);
+					} else {
+						System.out.println("The file " + responseJsonFile.getAbsolutePath() + " already exists.");
+					}
 				}
 			}
 		}
@@ -221,7 +233,7 @@ public class UnitTestGenerator {
 		return string;
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter, final TestCaseGeneratorConfiguration configuration) throws Exception {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
@@ -236,7 +248,7 @@ public class UnitTestGenerator {
 			// Generate unit test method related codes.
 			Map<String, Integer> caseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < caseCountByMethod.get(method.getName()); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < Math.min(caseCountByMethod.get(method.getName()), property("max-test-case-count", Integer.class)); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));
 					codeWriter.writeMethod(method, "test", methodIndex);
@@ -264,17 +276,16 @@ public class UnitTestGenerator {
 			}
 			codeWriter.writeRightCurlyBrace();
 			// Write unit test file.
-			String unitTestFilePath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java");
-			File unitTestFile = createDirectoriesAndFile(unitTestFilePath);
-			if (unitTestFile.exists() && !configuration.getOverwrite()) {
-				System.out.println("The file " + unitTestFilePath + " already exists.");
-				return;
-			}
-			try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
-				printWriter.write(codeWriter.generateCodes().toString());
-				System.out.println("The unit test file " + unitTestFilePath + " is successfully generated.");
-			} catch (FileNotFoundException e) {
-				System.out.println("Failed to write the file " + unitTestFilePath + ".");
+			File unitTestFile = createDirectoriesAndFile(pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java"));
+			if (!unitTestFile.exists() || property("overwrite-test-case", Boolean.class)) {
+				try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
+					printWriter.write(codeWriter.generateCodes().toString());
+					System.out.println("The unit test file " + unitTestFile.getAbsolutePath() + " is successfully generated.");
+				} catch (FileNotFoundException e) {
+					System.out.println("Failed to write the file " + unitTestFile.getAbsolutePath() + ".");
+				}
+			} else {
+				System.out.println("The file " + unitTestFile.getAbsolutePath() + " already exists.");
 			}
 		}
 	}
