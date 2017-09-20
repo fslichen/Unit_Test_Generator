@@ -32,6 +32,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import generator.pojo.CommonDto;
 import generator.pojo.ControllerDto;
 import generator.pojo.MethodReturnValue;
 import generator.template.UnitTestClassWriter;
@@ -155,7 +156,7 @@ public class UnitTestGenerator {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
 						} else {
-							objectMapper.writeValue(requestJsonFile, parameterValues);
+							objectMapper.writeValue(requestJsonFile, new CommonDto(parameterValues));
 						}
 					} else {
 						System.out.println("The file " + requestJsonFile.getAbsolutePath() + " already exists.");
@@ -253,7 +254,7 @@ public class UnitTestGenerator {
 					codeWriter.writeMethod(method, "test", methodIndex);
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(List.class);
-					codeWriter.writeCode("List<String> parameterValues = Json.splitJsonList(requestData);");
+					codeWriter.writeCode("List<String> parameterValues = Json.splitJsonList(requestData, \"data\");");
 					StringBuilder parameters = new StringBuilder();
 					int i = 0;
 					for (Class<?> parameterType : method.getParameterTypes()) {

@@ -42,6 +42,25 @@ public class Json {
 		return ts;
 	}
 	
+	public static List<String> splitJsonList(String json, String fieldName) {
+		int level = 0;
+		int leftBracketIndex = 0;
+		for (int i = json.indexOf(fieldName) + fieldName.length(); i < json.length(); i++) {
+			if (json.charAt(i) == '[') {
+				if (level == 0) {
+					leftBracketIndex = i;
+				}
+				level++;
+			} else if (json.charAt(i) == ']') {
+				level--;
+				if (level == 0) {
+					return splitJsonList(json.substring(leftBracketIndex, i + 1));
+				}
+			}
+		}
+		return null;
+	}
+	
 	public static <T> T fromJson(String json, Class<T> clazz) {
 		try {
 			return objectMapper.readValue(json, clazz);
