@@ -9,17 +9,21 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,40 +47,12 @@ public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	@SuppressWarnings("unchecked")
-	public <T> T property(String key, Class<T> clazz) {
-		Properties properties = new Properties();
-		try {
-			properties.load(UnitTestGenerator.class.getResourceAsStream("/unit-test.properties"));
-			String value = properties.get(key).toString();
-			if (clazz == int.class || clazz == Integer.class) {
-				return (T) new Integer(value);
-			} if (clazz == double.class || clazz == Double.class) {
-				return (T) new Double(value);
-			} if (clazz == boolean.class || clazz == Boolean.class) {
-				return (T) new Boolean(value);
-			}
-			return (T) value;
-		} catch (IOException e) {
-			System.out.println("Please create unit-test.properties under src/test/resources");
-			return null;
-		}
-	}
-	
-	public String upperFirstCharacter(String string) {
-		return string.substring(0, 1).toUpperCase() + string.substring(1);
-	}
-	
-	public String lowerFirstCharacter(String string) {
-		return string.substring(0, 1).toLowerCase() + string.substring(1);
-	}
-	
-	public String pathInString(Path path) {
-		return pathInString(path.toString());
-	}
-	
-	public String pathInString(String path) {
-		return path.replace("\\", "/");
+	public int caseCount(Method method, Map<String, Integer> caseCountByMethod, int maxCaseCount) {
+		Integer methodCaseCount = caseCountByMethod.get(method.getName());
+		if (methodCaseCount == null) {
+			return 1;
+		} 
+		return Math.min(methodCaseCount, maxCaseCount);
 	}
 	
 	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws Exception {
@@ -109,6 +85,31 @@ public class UnitTestGenerator {
 		return classes;
 	}
 	
+	public ControllerDto controllerDto(Method method, Object data) {
+		ControllerDto dto = new ControllerDto();
+		dto.setSession(UUID.randomUUID().toString());
+		dto.setData(data);
+		GetMapping getMapping = method.getAnnotation(GetMapping.class);
+		PostMapping postMapping = method.getAnnotation(PostMapping.class);
+		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+		if (getMapping != null) {
+			dto.setRequestMethod("GET");
+			dto.setRequestPath(getMapping.value()[0]);
+		} else if (postMapping != null) {
+			dto.setRequestMethod("POST");
+			dto.setRequestPath(postMapping.value()[0]);
+		} else if (requestMapping != null) {
+			RequestMethod[] requestMethods = requestMapping.method();
+			if (requestMethods.length > 0) {
+				dto.setRequestMethod(requestMapping.method()[0].toString());
+			} else {
+				dto.setRequestMethod("ANY");
+			}
+			dto.setRequestPath(requestMapping.value()[0]);
+		}
+		return dto;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T> T copyObject(T t) {
 		try {
@@ -120,23 +121,16 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T> T newInstance(Class<T> clazz, WebApplicationContext webApplicationContext) throws InstantiationException, IllegalAccessException {
-		T currentInstance = null;
-		if (webApplicationContext == null) {
-			return clazz.newInstance();
-		} else {
-			currentInstance = (T) webApplicationContext.getBean(lowerFirstCharacter(clazz.getSimpleName()));
-			return currentInstance == null ? currentInstance = clazz.newInstance() : currentInstance; 
+	public File createDirectoriesAndFile(String filePath) {
+		File fileDirectory = new File(filePath.substring(0, filePath.lastIndexOf("/")));
+		if (!fileDirectory.exists()) {
+			fileDirectory.mkdirs();
 		}
+		return new File(filePath);
 	}
 	
-	public int caseCount(Method method, Map<String, Integer> caseCountByMethod, int maxCaseCount) {
-		Integer methodCaseCount = caseCountByMethod.get(method.getName());
-		if (methodCaseCount == null) {
-			return 1;
-		} 
-		return Math.min(methodCaseCount, maxCaseCount);
+	public String instanceName(Class<?> clazz) {
+		return lowerFirstCharacter(clazz.getSimpleName());
 	}
 	
 	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
@@ -146,7 +140,7 @@ public class UnitTestGenerator {
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
 			int maxUseCaseCount = property("max-use-case-count", Integer.class);
-			Map<String, Integer> useCaseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
+			Map<String, Integer> useCaseCountByMethod = useCaseCountByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < caseCount(method, useCaseCountByMethod, maxUseCaseCount); methodIndex++) {
@@ -193,29 +187,9 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public ControllerDto controllerDto(Method method, Object data) {
-		ControllerDto dto = new ControllerDto();
-		dto.setSession(UUID.randomUUID().toString());
-		dto.setData(data);
-		GetMapping getMapping = method.getAnnotation(GetMapping.class);
-		PostMapping postMapping = method.getAnnotation(PostMapping.class);
-		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-		if (getMapping != null) {
-			dto.setRequestMethod("GET");
-			dto.setRequestPath(getMapping.value()[0]);
-		} else if (postMapping != null) {
-			dto.setRequestMethod("POST");
-			dto.setRequestPath(postMapping.value()[0]);
-		} else if (requestMapping != null) {
-			RequestMethod[] requestMethods = requestMapping.method();
-			if (requestMethods.length > 0) {
-				dto.setRequestMethod(requestMapping.method()[0].toString());
-			} else {
-				dto.setRequestMethod("ANY");
-			}
-			dto.setRequestPath(requestMapping.value()[0]);
-		}
-		return dto;
+	public boolean isMethodStartLine(String code) {
+		code = code.trim();
+		return !code.startsWith("public class") && (code.startsWith("public") || code.startsWith("protected") || code.startsWith("private"));// TODO Also consider the protect case without access modifier.
 	}
 	
 	public int keywordCount(List<String> codes, String... keywords) {
@@ -230,17 +204,47 @@ public class UnitTestGenerator {
 		return keywordCount;
 	}
 	
-	public String instanceName(Class<?> clazz) {
-		return lowerFirstCharacter(clazz.getSimpleName());
+	public String lowerFirstCharacter(String string) {
+		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
 	
-	public String trimEndingComma(String string) {
-		if (string.endsWith(", ")) {
-			return string.substring(0, string.length() - 2);
-		} else if (string.endsWith(",")) {
-			return string.substring(0, string.length() - 1);
+	@SuppressWarnings("unchecked")
+	public <T> T newInstance(Class<T> clazz, WebApplicationContext webApplicationContext) throws InstantiationException, IllegalAccessException {
+		T currentInstance = null;
+		if (webApplicationContext == null) {
+			return clazz.newInstance();
+		} else {
+			currentInstance = (T) webApplicationContext.getBean(lowerFirstCharacter(clazz.getSimpleName()));
+			return currentInstance == null ? currentInstance = clazz.newInstance() : currentInstance; 
 		}
-		return string;
+	}
+	
+	public String pathInString(Path path) {
+		return pathInString(path.toString());
+	}
+	
+	public String pathInString(String path) {
+		return path.replace("\\", "/");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T property(String key, Class<T> clazz) {
+		Properties properties = new Properties();
+		try {
+			properties.load(UnitTestGenerator.class.getResourceAsStream("/unit-test.properties"));
+			String value = properties.get(key).toString();
+			if (clazz == int.class || clazz == Integer.class) {
+				return (T) new Integer(value);
+			} if (clazz == double.class || clazz == Double.class) {
+				return (T) new Double(value);
+			} if (clazz == boolean.class || clazz == Boolean.class) {
+				return (T) new Boolean(value);
+			}
+			return (T) value;
+		} catch (IOException e) {
+			System.out.println("Please create unit-test.properties under src/test/resources");
+			return null;
+		}
 	}
 	
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
@@ -256,7 +260,7 @@ public class UnitTestGenerator {
 			codeWriter.writeBlankLine();
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
-			Map<String, Integer> caseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
+			Map<String, Integer> caseCountByMethod = useCaseCountByMethod(entry.getKey().toFile());
 			int maxTestCaseCount = property("max-test-case-count", Integer.class);
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < caseCount(method, caseCountByMethod, maxTestCaseCount); methodIndex++) {
@@ -272,36 +276,18 @@ public class UnitTestGenerator {
 						codeWriter.writeImport(parameterType);
 						parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 					}
-					String parameters = trimEndingComma(parametersBuilder.toString());
+					String parametersInString = trimEndingComma(parametersBuilder);
 					Class<?> returnType = method.getReturnType();
-					if (returnType != void.class && returnType != Void.class) {
-						codeWriter.writeImport(returnType);
-						String returnTypeSimpleName = returnType.getSimpleName();
-						String instanceName = instanceName(clazz);
-						if (method.getModifiers() == Modifier.PRIVATE) {
-							// TODO Encapsulate the logic within a block.
-							StringBuilder s = new StringBuilder();
-							for (Class<?> parameterType : method.getParameterTypes()) {
-								codeWriter.writeImport(parameterType);
-								s.append(parameterType.getSimpleName() + ".class" + ", ");
-							}
-							codeWriter.writeImport(Method.class);
-							codeWriter.writeCode("try {");
-							codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), trimEndingComma(s.toString())));
-							codeWriter.writeCode("method.setAccessible(true);");
-							codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", returnTypeSimpleName, returnTypeSimpleName, instanceName, parameters));
-							codeWriter.writeCode("} catch (Exception e){}");
-						} else {
-							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName, method.getName(), parameters));
-						}
-						codeWriter.writeCode(String.format("%s expectedResult = Json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
+					if (method.getModifiers() == Modifier.PRIVATE) {
+						a(clazz, method, parametersInString, codeWriter);
 					} else {
-						if (method.getModifiers() == Modifier.PRIVATE) {
-							// TODO Encapsulate the logic within a block.
-							codeWriter.writeCode("method.setAccessible(true)");
-							codeWriter.writeCode(String.format("method.invoke(%s, %s)", instanceName(clazz), parameters));
+						if (returnType != void.class && returnType != Void.class) {
+							codeWriter.writeImport(returnType);
+							String returnTypeSimpleName = returnType.getSimpleName();
+							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), parametersInString));
+							codeWriter.writeCode(String.format("%s expectedResult = Json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
 						} else {
-							codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+							codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), parametersInString));
 						}
 					}
 					codeWriter.writeRightCurlyBrace();
@@ -324,19 +310,77 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public File createDirectoriesAndFile(String filePath) {
-		File fileDirectory = new File(filePath.substring(0, filePath.lastIndexOf("/")));
-		if (!fileDirectory.exists()) {
-			fileDirectory.mkdirs();
+	public void a(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
+		StringBuilder s = new StringBuilder();
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			codeWriter.writeImport(parameterType);
+			s.append(parameterType.getSimpleName() + ".class" + ", ");
 		}
-		return new File(filePath);
+		codeWriter.writeImport(Method.class);
+		codeWriter.writeCode("try {");
+		codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), trimEndingComma(s.toString())));
+		codeWriter.writeCode("method.setAccessible(true);");
+		Class<?> returnType = method.getReturnType();
+		if (returnType == void.class && returnType == Void.class) {
+			codeWriter.writeCode(String.format("method.invoke(%s, %s);", instanceName(clazz), parametersInString));
+		} else {
+			String returnTypeSimpleName = returnType.getSimpleName();
+			codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", returnTypeSimpleName, returnTypeSimpleName, instanceName(clazz), parametersInString));
+		}
+		codeWriter.writeCode("} catch (Exception e){}");
 	}
 	
-	public boolean withExtension(String path, String extension) {
-		return extension.equals(FilenameUtils.getExtension(pathInString(path)));
+	public String trimEndingComma(StringBuilder stringBuilder) {
+		return trimEndingComma(stringBuilder.toString());
+	}
+	
+	public String trimEndingComma(String string) {
+		string = string.trim();
+		if (string.endsWith(",")) {
+			return string.substring(0, string.length() - 1);
+		}
+		return string;
+	}
+	
+	public String upperFirstCharacter(String string) {
+		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	}
+	
+	public Map<String, Integer> useCaseCountByMethod(File file) throws IOException {
+		int useCaseCount = 1;
+		String methodName = null;
+		Map<String, Integer> useCaseCountByMethod = new LinkedHashMap<>();
+		Set<String> conditionStatements = new HashSet<>(Arrays.asList("if (", "if(", "else if (", "else if(", "else {", "else{"));
+		for (String code : FileUtils.readLines(file, "UTF-8")) {
+			code = code.trim();
+			if (isMethodStartLine(code)) {// Method Begin
+				useCaseCount = 1;
+				int leftBracketIndex = code.indexOf("(");
+				for (int i = leftBracketIndex - 1; i >= 0; i--) {
+					if (code.charAt(i) == ' ') {
+						methodName = code.substring(i + 1, leftBracketIndex);
+						break;
+					}
+				}
+			} else if (code.endsWith("{")) {
+				for (String conditionStatement : conditionStatements) {
+					if (code.contains(conditionStatement)) {// Conditional Statement
+						useCaseCount++;
+						break;
+					}
+				}
+			} else if (code.endsWith("}")) {
+				useCaseCountByMethod.put(methodName, useCaseCount);
+			}
+		}
+		return useCaseCountByMethod;
 	}
 	
 	public boolean withExtension(Path path, String extension) {
 		return withExtension(path.toString(), extension);
+	}
+	
+	public boolean withExtension(String path, String extension) {
+		return extension.equals(FilenameUtils.getExtension(pathInString(path)));
 	}
 }
