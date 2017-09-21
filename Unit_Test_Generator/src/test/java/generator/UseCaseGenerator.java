@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
-public class UseCaseGenerator extends BaseTest {
+public class UseCaseGenerator {
 	@Test
 	public void testInvokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues() throws Exception {
 		Predicate<Class<?>> classFileter = new Predicate<Class<?>>() {
@@ -15,6 +15,6 @@ public class UseCaseGenerator extends BaseTest {
 				return clazz.getAnnotation(RestController.class) != null || clazz.getAnnotation(Service.class) != null;
 			}
 		};
-		new UnitTestGenerator().invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution", classFileter, webApplicationContext);
+		new UnitTestGenerator().invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution", classFileter, null);
 	}
 }

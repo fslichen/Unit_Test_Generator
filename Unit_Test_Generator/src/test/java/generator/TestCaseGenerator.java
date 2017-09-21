@@ -16,7 +16,7 @@ import generator.template.TestCase;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
-public class TestCaseGenerator extends BaseTest {
+public class TestCaseGenerator {
 	@Test
 	public void run() throws Exception {
 		Predicate<Class<?>> classFilter = new Predicate<Class<?>>() {
