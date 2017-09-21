@@ -47,12 +47,34 @@ public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	public int saftCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
-		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
-		if (methodCaseCount == null) {
-			return 1;
-		} 
-		return Math.min(methodCaseCount, maxCaseCount);
+	public Map<String, Integer> caseCountsByMethod(File file) throws IOException {
+		int useCaseCount = 1;
+		String methodName = null;
+		Map<String, Integer> useCaseCountByMethod = new LinkedHashMap<>();
+		Set<String> conditionStatements = new HashSet<>(Arrays.asList("if (", "if(", "else if (", "else if(", "else {", "else{"));
+		for (String code : FileUtils.readLines(file, "UTF-8")) {
+			code = code.trim();
+			if (isMethodStartLine(code)) {// Method Begin
+				useCaseCount = 1;
+				int leftBracketIndex = code.indexOf("(");
+				for (int i = leftBracketIndex - 1; i >= 0; i--) {
+					if (code.charAt(i) == ' ') {
+						methodName = code.substring(i + 1, leftBracketIndex);
+						break;
+					}
+				}
+			} else if (code.endsWith("{")) {
+				for (String conditionStatement : conditionStatements) {
+					if (code.contains(conditionStatement)) {// Conditional Statement
+						useCaseCount++;
+						break;
+					}
+				}
+			} else if (code.endsWith("}")) {
+				useCaseCountByMethod.put(methodName, useCaseCount);
+			}
+		}
+		return useCaseCountByMethod;
 	}
 	
 	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws Exception {
@@ -247,6 +269,14 @@ public class UnitTestGenerator {
 		}
 	}
 	
+	public int saftCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
+		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
+		if (methodCaseCount == null) {
+			return 1;
+		} 
+		return Math.min(methodCaseCount, maxCaseCount);
+	}
+	
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
 			// Generate unit test class related codes.
@@ -310,6 +340,30 @@ public class UnitTestGenerator {
 		}
 	}
 	
+	public String trimEndingComma(String string) {
+		string = string.trim();
+		if (string.endsWith(",")) {
+			return string.substring(0, string.length() - 1);
+		}
+		return string;
+	}
+	
+	public String trimEndingComma(StringBuilder stringBuilder) {
+		return trimEndingComma(stringBuilder.toString());
+	}
+	
+	public String upperFirstCharacter(String string) {
+		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	}
+	
+	public boolean withExtension(Path path, String extension) {
+		return withExtension(path.toString(), extension);
+	}
+	
+	public boolean withExtension(String path, String extension) {
+		return extension.equals(FilenameUtils.getExtension(pathInString(path)));
+	}
+	
 	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
 		StringBuilder s = new StringBuilder();
 		for (Class<?> parameterType : method.getParameterTypes()) {
@@ -328,59 +382,5 @@ public class UnitTestGenerator {
 			codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", returnTypeSimpleName, returnTypeSimpleName, instanceName(clazz), parametersInString));
 		}
 		codeWriter.writeCode("} catch (Exception e){}");
-	}
-	
-	public String trimEndingComma(StringBuilder stringBuilder) {
-		return trimEndingComma(stringBuilder.toString());
-	}
-	
-	public String trimEndingComma(String string) {
-		string = string.trim();
-		if (string.endsWith(",")) {
-			return string.substring(0, string.length() - 1);
-		}
-		return string;
-	}
-	
-	public String upperFirstCharacter(String string) {
-		return string.substring(0, 1).toUpperCase() + string.substring(1);
-	}
-	
-	public Map<String, Integer> caseCountsByMethod(File file) throws IOException {
-		int useCaseCount = 1;
-		String methodName = null;
-		Map<String, Integer> useCaseCountByMethod = new LinkedHashMap<>();
-		Set<String> conditionStatements = new HashSet<>(Arrays.asList("if (", "if(", "else if (", "else if(", "else {", "else{"));
-		for (String code : FileUtils.readLines(file, "UTF-8")) {
-			code = code.trim();
-			if (isMethodStartLine(code)) {// Method Begin
-				useCaseCount = 1;
-				int leftBracketIndex = code.indexOf("(");
-				for (int i = leftBracketIndex - 1; i >= 0; i--) {
-					if (code.charAt(i) == ' ') {
-						methodName = code.substring(i + 1, leftBracketIndex);
-						break;
-					}
-				}
-			} else if (code.endsWith("{")) {
-				for (String conditionStatement : conditionStatements) {
-					if (code.contains(conditionStatement)) {// Conditional Statement
-						useCaseCount++;
-						break;
-					}
-				}
-			} else if (code.endsWith("}")) {
-				useCaseCountByMethod.put(methodName, useCaseCount);
-			}
-		}
-		return useCaseCountByMethod;
-	}
-	
-	public boolean withExtension(Path path, String extension) {
-		return withExtension(path.toString(), extension);
-	}
-	
-	public boolean withExtension(String path, String extension) {
-		return extension.equals(FilenameUtils.getExtension(pathInString(path)));
 	}
 }
