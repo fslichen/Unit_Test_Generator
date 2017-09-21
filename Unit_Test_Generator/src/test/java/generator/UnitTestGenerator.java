@@ -47,8 +47,8 @@ public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
-	public int caseCount(Method method, Map<String, Integer> caseCountByMethod, int maxCaseCount) {
-		Integer methodCaseCount = caseCountByMethod.get(method.getName());
+	public int saftCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
+		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
 		if (methodCaseCount == null) {
 			return 1;
 		} 
@@ -140,10 +140,10 @@ public class UnitTestGenerator {
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
 			int maxUseCaseCount = property("max-use-case-count", Integer.class);
-			Map<String, Integer> useCaseCountByMethod = useCaseCountByMethod(entry.getKey().toFile());
+			Map<String, Integer> useCaseCountByMethod = caseCountsByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < caseCount(method, useCaseCountByMethod, maxUseCaseCount); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < saftCaseCount(method, useCaseCountByMethod, maxUseCaseCount); methodIndex++) {
 					int i = 0;
 					ObjectMocker mocker = new ObjectMocker();
 					List<Object> parameterValues = new LinkedList<>();
@@ -247,7 +247,7 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateUnitTestClassesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
@@ -260,12 +260,12 @@ public class UnitTestGenerator {
 			codeWriter.writeBlankLine();
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
-			Map<String, Integer> caseCountByMethod = useCaseCountByMethod(entry.getKey().toFile());
 			int maxTestCaseCount = property("max-test-case-count", Integer.class);
+			Map<String, Integer> caseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < caseCount(method, caseCountByMethod, maxTestCaseCount); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < saftCaseCount(method, caseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
-					codeWriter.writeCodes(unitTestMethodWriter.write(method));
+					codeWriter.writeCodes(unitTestMethodWriter.write(method));// May contain other annotations.
 					codeWriter.writeMethod(method, "test", methodIndex);
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(List.class);
@@ -279,15 +279,15 @@ public class UnitTestGenerator {
 					String parametersInString = trimEndingComma(parametersBuilder);
 					Class<?> returnType = method.getReturnType();
 					if (method.getModifiers() == Modifier.PRIVATE) {
-						a(clazz, method, parametersInString, codeWriter);
+						writeCodes4InvokingPrivateMethod(clazz, method, parametersInString, codeWriter);
 					} else {
-						if (returnType != void.class && returnType != Void.class) {
+						if (returnType == void.class || returnType == Void.class) {
+							codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), parametersInString));
+						} else {
 							codeWriter.writeImport(returnType);
 							String returnTypeSimpleName = returnType.getSimpleName();
 							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), parametersInString));
 							codeWriter.writeCode(String.format("%s expectedResult = Json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
-						} else {
-							codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), parametersInString));
 						}
 					}
 					codeWriter.writeRightCurlyBrace();
@@ -302,7 +302,7 @@ public class UnitTestGenerator {
 					printWriter.write(codeWriter.generateCodes().toString());
 					System.out.println("The unit test file " + unitTestFile.getAbsolutePath() + " is successfully generated.");
 				} catch (FileNotFoundException e) {
-					System.out.println("Failed to write the file " + unitTestFile.getAbsolutePath() + ".");
+					System.out.println("The file " + unitTestFile.getAbsolutePath() + " is not found.");
 				}
 			} else {
 				System.out.println("The file " + unitTestFile.getAbsolutePath() + " already exists.");
@@ -310,7 +310,7 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void a(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
+	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
 		StringBuilder s = new StringBuilder();
 		for (Class<?> parameterType : method.getParameterTypes()) {
 			codeWriter.writeImport(parameterType);
@@ -346,7 +346,7 @@ public class UnitTestGenerator {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}
 	
-	public Map<String, Integer> useCaseCountByMethod(File file) throws IOException {
+	public Map<String, Integer> caseCountsByMethod(File file) throws IOException {
 		int useCaseCount = 1;
 		String methodName = null;
 		Map<String, Integer> useCaseCountByMethod = new LinkedHashMap<>();
