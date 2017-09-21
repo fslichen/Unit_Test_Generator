@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import generator.pojo.CommonDto;
 import generator.pojo.ControllerDto;
-import generator.pojo.MethodReturnValue;
+import generator.pojo.VoidReturnValue;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
@@ -168,7 +168,7 @@ public class UnitTestGenerator {
 					Object returnValue = null;
 					Class<?> returnType = method.getReturnType();
 					if (returnType == void.class || returnType == Void.class) {
-						returnValue = new MethodReturnValue("OK", "void");
+						returnValue = new VoidReturnValue("OK", "void");
 					} else {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
@@ -178,7 +178,7 @@ public class UnitTestGenerator {
 					}
 					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
 					if (!responseJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
-						objectMapper.writeValue(responseJsonFile, returnValue);
+						objectMapper.writeValue(responseJsonFile, new CommonDto(returnValue));
 					} else {
 						System.out.println("The file " + responseJsonFile.getAbsolutePath() + " already exists.");
 					}
@@ -269,7 +269,7 @@ public class UnitTestGenerator {
 					codeWriter.writeMethod(method, "test", methodIndex);
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(List.class);
-					codeWriter.writeCode("List<String> parameterValues = Json.splitJsonList(requestData, \"data\");");
+					codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
 					StringBuilder parametersBuilder = new StringBuilder();
 					int i = 0;
 					for (Class<?> parameterType : method.getParameterTypes()) {
@@ -287,7 +287,7 @@ public class UnitTestGenerator {
 							codeWriter.writeImport(returnType);
 							String returnTypeSimpleName = returnType.getSimpleName();
 							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), parametersInString));
-							codeWriter.writeCode(String.format("%s expectedResult = Json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
+							codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", returnTypeSimpleName, returnTypeSimpleName));
 						}
 					}
 					codeWriter.writeRightCurlyBrace();

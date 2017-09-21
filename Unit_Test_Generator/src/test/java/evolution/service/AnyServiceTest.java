@@ -23,9 +23,9 @@ public class AnyServiceTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
-        AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class);
+        AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
     }
     
 }

@@ -24,9 +24,9 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         int actualResult = anyController.get();
-        int expectedResult = Json.fromJson(responseData, int.class);
+        int expectedResult = Json.fromSubJson(responseData, "data", int.class);
     }
     
     @Test
@@ -36,9 +36,9 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
     }
     
     @Test
@@ -48,9 +48,9 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
     }
     
     @Test
@@ -60,9 +60,9 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
     }
     
     @Test
@@ -72,9 +72,9 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
     }
     
     @Test
@@ -84,7 +84,7 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         try {
             Method method = AnyController.class.getDeclaredMethod("hide", String.class);
             method.setAccessible(true);
@@ -99,7 +99,7 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         anyController.http();
     }
     
@@ -110,9 +110,9 @@ public class AnyControllerTest extends BaseTest {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
     }
     
 }
