@@ -15,6 +15,6 @@ public class UseCaseGenerator {
 				return clazz.getAnnotation(RestController.class) != null || clazz.getAnnotation(Service.class) != null;
 			}
 		};
-		new UnitTestGenerator().invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues("evolution", classFileter, null);
+		new UnitTestGenerator().invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava("evolution", classFileter, null);
 	}
 }

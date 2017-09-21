@@ -133,29 +133,29 @@ public class UnitTestGenerator {
 		return lowerFirstCharacter(clazz.getSimpleName());
 	}
 	
-	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
-		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
+	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, WebApplicationContext webApplicationContext) throws Exception {
+		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
 			Class<?> clazz = entry.getValue();
 			String jsonDirectoryPath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
 			int maxUseCaseCount = property("max-use-case-count", Integer.class);
-			Map<String, Integer> useCaseCountByMethod = caseCountsByMethod(entry.getKey().toFile());
+			Map<String, Integer> useCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < saftCaseCount(method, useCaseCountByMethod, maxUseCaseCount); methodIndex++) {
+				for (int useCaseIndex = 0; useCaseIndex < saftCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
 					int i = 0;
-					ObjectMocker mocker = new ObjectMocker();
+					ObjectMocker objectMocker = new ObjectMocker();
 					List<Object> parameterValues = new LinkedList<>();
 					Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
 					for (Class<?> parameterType : method.getParameterTypes()) {
-						Object parameterValue = mocker.mockObject(parameterType);
-						parameterValues.add(copyObject(parameterValue));
+						Object parameterValue = objectMocker.mockObject(parameterType);
+						parameterValues.add(copyObject(parameterValue));// Prevents the method from polluting the parameter.
 						parameterValues4InvokingMethod[i++] = parameterValue;
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
-					File requestJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Request" + methodIndex + ".json");
+					File requestJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
 					if (!requestJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
@@ -171,12 +171,12 @@ public class UnitTestGenerator {
 						returnValue = new MethodReturnValue("OK", "void");
 					} else {
 						try {
-							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);
+							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
 						} catch (Exception e) {
 							returnValue = method.getReturnType().newInstance();
 						}
 					}
-					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + methodIndex + ".json");
+					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
 					if (!responseJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
 						objectMapper.writeValue(responseJsonFile, returnValue);
 					} else {
@@ -247,8 +247,8 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> predicate, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
-		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
+		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
 			CodeWriter codeWriter = new CodeWriter();
@@ -261,9 +261,9 @@ public class UnitTestGenerator {
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
 			int maxTestCaseCount = property("max-test-case-count", Integer.class);
-			Map<String, Integer> caseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
+			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < saftCaseCount(method, caseCountsByMethod, maxTestCaseCount); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < saftCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));// May contain other annotations.
 					codeWriter.writeMethod(method, "test", methodIndex);
