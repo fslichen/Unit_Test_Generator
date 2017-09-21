@@ -48,14 +48,14 @@ public class UnitTestGenerator {
 	public static final String SRC_TEST_JAVA = "src/test/java"; 
 	
 	public Map<String, Integer> caseCountsByMethod(File file) throws IOException {
-		int useCaseCount = 1;
+		int caseCount = 0;
 		String methodName = null;
-		Map<String, Integer> useCaseCountByMethod = new LinkedHashMap<>();
+		Map<String, Integer> caseCountByMethod = new LinkedHashMap<>();
 		Set<String> conditionStatements = new HashSet<>(Arrays.asList("if (", "if(", "else if (", "else if(", "else {", "else{"));
 		for (String code : FileUtils.readLines(file, "UTF-8")) {
 			code = code.trim();
-			if (isMethodStartLine(code)) {// Method Begin
-				useCaseCount = 1;
+			if (isMethodStartLine(code)) {
+				caseCount = 1;
 				int leftBracketIndex = code.indexOf("(");
 				for (int i = leftBracketIndex - 1; i >= 0; i--) {
 					if (code.charAt(i) == ' ') {
@@ -65,19 +65,19 @@ public class UnitTestGenerator {
 				}
 			} else if (code.endsWith("{")) {
 				for (String conditionStatement : conditionStatements) {
-					if (code.contains(conditionStatement)) {// Conditional Statement
-						useCaseCount++;
+					if (code.contains(conditionStatement)) {
+						caseCount++;
 						break;
 					}
 				}
 			} else if (code.endsWith("}")) {
-				useCaseCountByMethod.put(methodName, useCaseCount);
+				caseCountByMethod.put(methodName, caseCount);
 			}
 		}
-		return useCaseCountByMethod;
+		return caseCountByMethod;
 	}
 	
-	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> predicate) throws Exception {
+	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> classFilter) throws Exception {
 		final Map<Path, Class<?>> classes = new LinkedHashMap<>();
 		try (Stream<Path> paths = Files.walk(Paths.get(System.getProperty("user.dir")))) {
 			paths.filter(new Predicate<Path>() {
@@ -95,7 +95,7 @@ public class UnitTestGenerator {
 					String className = pathInString.substring(pathInString.lastIndexOf(SRC_MAIN_JAVA) + SRC_MAIN_JAVA.length() + 1).replace("/", ".").replace(".java", "");
 					try {
 						Class<?> clazz = Class.forName(className);
-						if (predicate == null || predicate.test(clazz)) {
+						if (classFilter == null || classFilter.test(clazz)) {
 							classes.put(path, clazz);
 						}
 					} catch (ClassNotFoundException e) {
@@ -108,28 +108,28 @@ public class UnitTestGenerator {
 	}
 	
 	public ControllerDto controllerDto(Method method, Object data) {
-		ControllerDto dto = new ControllerDto();
-		dto.setSession(UUID.randomUUID().toString());
-		dto.setData(data);
+		ControllerDto controllerDto = new ControllerDto();
+		controllerDto.setSession(UUID.randomUUID().toString());
+		controllerDto.setData(data);
 		GetMapping getMapping = method.getAnnotation(GetMapping.class);
 		PostMapping postMapping = method.getAnnotation(PostMapping.class);
 		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
 		if (getMapping != null) {
-			dto.setRequestMethod("GET");
-			dto.setRequestPath(getMapping.value()[0]);
+			controllerDto.setRequestMethod("GET");
+			controllerDto.setRequestPath(getMapping.value()[0]);
 		} else if (postMapping != null) {
-			dto.setRequestMethod("POST");
-			dto.setRequestPath(postMapping.value()[0]);
+			controllerDto.setRequestMethod("POST");
+			controllerDto.setRequestPath(postMapping.value()[0]);
 		} else if (requestMapping != null) {
 			RequestMethod[] requestMethods = requestMapping.method();
 			if (requestMethods.length > 0) {
-				dto.setRequestMethod(requestMapping.method()[0].toString());
+				controllerDto.setRequestMethod(requestMapping.method()[0].toString());
 			} else {
-				dto.setRequestMethod("ANY");
+				controllerDto.setRequestMethod("ANY");
 			}
-			dto.setRequestPath(requestMapping.value()[0]);
+			controllerDto.setRequestPath(requestMapping.value()[0]);
 		}
-		return dto;
+		return controllerDto;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -138,7 +138,7 @@ public class UnitTestGenerator {
 			ObjectMapper objectMapper = new ObjectMapper();
 			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
 		} catch (Exception e) {
-			System.out.println("Unable to copy the object.");
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -214,18 +214,6 @@ public class UnitTestGenerator {
 		return !code.startsWith("public class") && (code.startsWith("public") || code.startsWith("protected") || code.startsWith("private"));// TODO Also consider the protect case without access modifier.
 	}
 	
-	public int keywordCount(List<String> codes, String... keywords) {
-		int keywordCount = 0;
-		for (String code : codes) {
-			for (String keyword : keywords) {
-				if (code.contains(keyword)) {
-					keywordCount++;
-				}
-			}
-		}
-		return keywordCount;
-	}
-	
 	public String lowerFirstCharacter(String string) {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
@@ -237,7 +225,7 @@ public class UnitTestGenerator {
 			return clazz.newInstance();
 		} else {
 			currentInstance = (T) webApplicationContext.getBean(lowerFirstCharacter(clazz.getSimpleName()));
-			return currentInstance == null ? currentInstance = clazz.newInstance() : currentInstance; 
+			return currentInstance == null ? clazz.newInstance() : currentInstance; 
 		}
 	}
 	
@@ -246,7 +234,7 @@ public class UnitTestGenerator {
 	}
 	
 	public String pathInString(String path) {
-		return path.replace("\\", "/");
+		return path.replace("\\", "/");// The issue occurs in Windows.
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -257,9 +245,9 @@ public class UnitTestGenerator {
 			String value = properties.get(key).toString();
 			if (clazz == int.class || clazz == Integer.class) {
 				return (T) new Integer(value);
-			} if (clazz == double.class || clazz == Double.class) {
+			} else if (clazz == double.class || clazz == Double.class) {
 				return (T) new Double(value);
-			} if (clazz == boolean.class || clazz == Boolean.class) {
+			} else if (clazz == boolean.class || clazz == Boolean.class) {
 				return (T) new Boolean(value);
 			}
 			return (T) value;
@@ -365,14 +353,14 @@ public class UnitTestGenerator {
 	}
 	
 	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
-		StringBuilder s = new StringBuilder();
+		StringBuilder parameterTypesBuilder = new StringBuilder();
 		for (Class<?> parameterType : method.getParameterTypes()) {
 			codeWriter.writeImport(parameterType);
-			s.append(parameterType.getSimpleName() + ".class" + ", ");
+			parameterTypesBuilder.append(parameterType.getSimpleName() + ".class" + ", ");
 		}
 		codeWriter.writeImport(Method.class);
 		codeWriter.writeCode("try {");
-		codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), trimEndingComma(s.toString())));
+		codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), trimEndingComma(parameterTypesBuilder)));
 		codeWriter.writeCode("method.setAccessible(true);");
 		Class<?> returnType = method.getReturnType();
 		if (returnType == void.class && returnType == Void.class) {
