@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -265,20 +266,43 @@ public class UnitTestGenerator {
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(List.class);
 					codeWriter.writeCode("List<String> parameterValues = Json.splitJsonList(requestData, \"data\");");
-					StringBuilder parameters = new StringBuilder();
+					StringBuilder parametersBuilder = new StringBuilder();
 					int i = 0;
 					for (Class<?> parameterType : method.getParameterTypes()) {
 						codeWriter.writeImport(parameterType);
-						parameters.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+						parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 					}
+					String parameters = trimEndingComma(parametersBuilder.toString());
 					Class<?> returnType = method.getReturnType();
 					if (returnType != void.class && returnType != Void.class) {
 						codeWriter.writeImport(returnType);
 						String returnTypeSimpleName = returnType.getSimpleName();
-						codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+						String instanceName = instanceName(clazz);
+						if (method.getModifiers() == Modifier.PRIVATE) {
+							// TODO Encapsulate the logic within a block.
+							StringBuilder s = new StringBuilder();
+							for (Class<?> parameterType : method.getParameterTypes()) {
+								codeWriter.writeImport(parameterType);
+								s.append(parameterType.getSimpleName() + ".class" + ", ");
+							}
+							codeWriter.writeImport(Method.class);
+							codeWriter.writeCode("try {");
+							codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), trimEndingComma(s.toString())));
+							codeWriter.writeCode("method.setAccessible(true);");
+							codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", returnTypeSimpleName, returnTypeSimpleName, instanceName, parameters));
+							codeWriter.writeCode("} catch (Exception e){}");
+						} else {
+							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName, method.getName(), parameters));
+						}
 						codeWriter.writeCode(String.format("%s expectedResult = Json.fromJson(responseData, %s.class);", returnTypeSimpleName, returnTypeSimpleName));
 					} else {
-						codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+						if (method.getModifiers() == Modifier.PRIVATE) {
+							// TODO Encapsulate the logic within a block.
+							codeWriter.writeCode("method.setAccessible(true)");
+							codeWriter.writeCode(String.format("method.invoke(%s, %s)", instanceName(clazz), parameters));
+						} else {
+							codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), trimEndingComma(parameters.toString())));
+						}
 					}
 					codeWriter.writeRightCurlyBrace();
 					codeWriter.writeBlankLine();

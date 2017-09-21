@@ -1,6 +1,7 @@
 package generator;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,8 +37,21 @@ public class CodeWriter {
 		}
 	}
 	
+	public List<Class<?>> classesIgnoringImport() {
+		List<Class<?>> classes = new LinkedList<>();
+		classes.addAll(Arrays.asList(byte.class, Byte.class, 
+				short.class, Short.class,
+				int.class, Integer.class, 
+				long.class, Long.class, 
+				float.class, Float.class, 
+				double.class, Double.class, 
+				char.class, Character.class, 
+				boolean.class, Boolean.class));
+		return classes;
+	}
+	
 	public void writeImport(Class<?> clazz) {
-		if (!clazz.getName().contains("lang") && clazz != byte.class && clazz != short.class && clazz != int.class && clazz != long.class && clazz != float.class && clazz != double.class&& clazz != char.class && clazz != boolean.class) {
+		if (!classesIgnoringImport().contains(clazz)) {
 			writeImport(String.format("import %s;", clazz.getName()));
 		}
 	}

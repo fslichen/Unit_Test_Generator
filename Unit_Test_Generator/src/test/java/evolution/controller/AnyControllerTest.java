@@ -1,4 +1,6 @@
 package evolution.controller;
+import java.lang.reflect.Method;
+import java.lang.String;
 import evolution.controller.dto.AnyDto;
 import java.util.List;
 import generator.Json;
@@ -25,18 +27,6 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitJsonList(requestData, "data");
         int actualResult = anyController.get();
         int expectedResult = Json.fromJson(responseData, int.class);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testHide0() {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitJsonList(requestData, "data");
-        String actualResult = anyController.hide(Json.fromJson(parameterValues.get(0), String.class));
-        String expectedResult = Json.fromJson(responseData, String.class);
     }
     
     @Test
@@ -85,6 +75,22 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitJsonList(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromJson(responseData, AnyDto.class);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testHide0() {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitJsonList(requestData, "data");
+        try {
+            Method method = AnyController.class.getDeclaredMethod("hide", String.class);
+            method.setAccessible(true);
+            String actualResult = (String) method.invoke(anyController, Json.fromJson(parameterValues.get(0), String.class));
+        } catch (Exception e){}
+        String expectedResult = Json.fromJson(responseData, String.class);
     }
     
     @Test
