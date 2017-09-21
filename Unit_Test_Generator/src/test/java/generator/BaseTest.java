@@ -22,6 +22,6 @@ public class BaseTest {
 	protected WebApplicationContext webApplicationContext;
 
 	public BaseTest() {
-		testCaseClient = new TestCaseClient();
+		testCaseClient = null;// TODO Add an implementation.
 	}
 }

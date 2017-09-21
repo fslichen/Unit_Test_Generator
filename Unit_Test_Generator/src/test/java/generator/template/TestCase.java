@@ -1,11 +1,7 @@
 package generator.template;
 
-public class TestCase {
-	public String getRequestData() {
-		return null;
-	}
+public interface TestCase {
+	public String getRequestData();
 	
-	public String getResponseData() {
-		return null;
-	}
+	public String getResponseData();
 }
