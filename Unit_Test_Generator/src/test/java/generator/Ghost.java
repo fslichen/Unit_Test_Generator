@@ -42,8 +42,7 @@ public class Ghost {
 	}
 	
 	@Test
-	public void test() throws IOException {
+	public void encode() throws IOException {
 		encode(Paths.get("/Users/chenli/Desktop/Unit_Test_Generator.zip"));
-//		decode(Paths.get("/Users/chenli/Desktop/application.properties"));
 	}
 }

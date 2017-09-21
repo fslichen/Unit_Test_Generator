@@ -19,7 +19,7 @@ public class AnyServiceTest extends BaseTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethod0() {
+    public void testAnyMethod0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();

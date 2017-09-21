@@ -284,7 +284,7 @@ public class UnitTestGenerator {
 				for (int methodIndex = 0; methodIndex < saftCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));// May contain other annotations.
-					codeWriter.writeMethod(method, "test", methodIndex);
+					codeWriter.writeMethod(method, "test", methodIndex, Exception.class);
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(List.class);
 					codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
@@ -363,7 +363,7 @@ public class UnitTestGenerator {
 		codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), trimEndingComma(parameterTypesBuilder)));
 		codeWriter.writeCode("method.setAccessible(true);");
 		Class<?> returnType = method.getReturnType();
-		if (returnType == void.class && returnType == Void.class) {
+		if (returnType == void.class || returnType == Void.class) {
 			codeWriter.writeCode(String.format("method.invoke(%s, %s);", instanceName(clazz), parametersInString));
 		} else {
 			String returnTypeSimpleName = returnType.getSimpleName();

@@ -89,8 +89,12 @@ public class CodeWriter {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
 	
-	public void writeMethod(Method method, String prefix, Object suffix) {
-		String methodSignature = String.format("public void %s%s%s() {", prefix, upperFirstCharacter(method.getName()), suffix);
+	public void writeMethod(Method method, String prefix, Object suffix, Class<?> exceptionClass) {
+		String exceptionString = "";
+		if (exceptionClass != null) {
+			exceptionString = String.format("throws %s", exceptionClass.getSimpleName()); 
+		}
+		String methodSignature = String.format("public void %s%s%s() %s {", prefix, upperFirstCharacter(method.getName()), suffix, exceptionString);
 		for (int i = codes.size() - 1; i >= 0; i--) {
 			String code = codes.get(i);
 			if (code.equals("\n")) {
