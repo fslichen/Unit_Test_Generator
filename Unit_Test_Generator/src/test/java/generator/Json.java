@@ -3,6 +3,7 @@ package generator;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,59 +14,62 @@ public class Json {
 		objectMapper = new ObjectMapper();
 	}
 	
-	public static List<String> splitJsonList(String jsonArray) {
-		int level = 0;
-		int leftBracketIndex = 0;
-		List<String> jsons = new LinkedList<>();
-		for (int i = 0; i < jsonArray.length(); i++) {
-			char character = jsonArray.charAt(i);
-			if (character == '{') {
-				if (level == 0) {
-					leftBracketIndex = i;
-				}
-				level++;
-			} else if (character == '}') {
-				level--;
-				if (level == 0) {
-					jsons.add(jsonArray.substring(leftBracketIndex, i + 1));
-				}
-			}
+	public static <T> T fromJson(String json, Class<T> clazz) {
+		try {
+			return objectMapper.readValue(json, clazz);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
 		}
-		return jsons;
 	}
 	
-	public static <T> List<T> fromJsonList(String json, Class<T> clazz) {
+	public static <T> List<T> fromJsons(String json, Class<T> clazz) {
 		List<T> ts = new LinkedList<>();
-		for (String subJson : splitJsonList(json)) {
+		for (String subJson : splitJsons(json)) {
 			ts.add(fromJson(subJson, clazz));
 		}
 		return ts;
 	}
 	
-	public static List<String> splitJsonList(String json, String fieldName) {
-		int level = 0;
-		int leftBracketIndex = 0;
-		for (int i = json.indexOf(fieldName) + fieldName.length(); i < json.length(); i++) {
-			if (json.charAt(i) == '[') {
-				if (level == 0) {
-					leftBracketIndex = i;
-				}
-				level++;
-			} else if (json.charAt(i) == ']') {
-				level--;
-				if (level == 0) {
-					return splitJsonList(json.substring(leftBracketIndex, i + 1));
-				}
-			}
+	public static <T> T fromSubJson(String json, String fieldName, Class<T> clazz) {
+		try {
+			return objectMapper.readValue(subJson(json, fieldName), clazz);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 	
-	public static <T> T fromJson(String json, Class<T> clazz) {
+	public static <T> List<T> fromSubJsons(String json, String fieldName, Class<T> clazz) {
+		List<T> ts = new LinkedList<>();
+		for (String subJson : splitSubJsons(json, fieldName)) {
+			ts.add(fromJson(subJson, clazz));
+		}
+		return ts;
+	}
+	
+	public static List<String> splitJsons(String json) {
 		try {
-			return objectMapper.readValue(json, clazz);
+			List<String> result = new LinkedList<>();
+			for (Object subJson : objectMapper.readValue(json, List.class)) {
+				result.add(objectMapper.writeValueAsString(subJson));
+			}
+			return result;
 		} catch (IOException e) {
-			System.out.println("Unable to convert JSON into " + clazz.getSimpleName() + ".");
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static List<String> splitSubJsons(String json, String fieldName) {
+		return splitJsons(subJson(json, fieldName));
+	}
+	
+	public static String subJson(String json, String fieldName) {
+		try {
+			return objectMapper.writeValueAsString(objectMapper.readValue(json, Map.class).get(fieldName));
+		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
