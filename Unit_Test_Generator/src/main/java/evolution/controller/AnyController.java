@@ -52,4 +52,8 @@ public class AnyController {
 		anyDto.setAge(27);
 		return anyDto;
 	}
+	
+	private String hide(String info) {
+		return null;
+	}
 }

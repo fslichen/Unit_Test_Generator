@@ -46,6 +46,11 @@ public class CodeWriter {
 		codes.add(String.format("public class %s%s {", clazz.getSimpleName(), suffix));
 	}
 	
+	public void writeClass(Class<?> clazz, String suffix, Class<?> extendedClass) {
+		writeImport(extendedClass);
+		codes.add(String.format("public class %s%s extends %s {", clazz.getSimpleName(), suffix, extendedClass.getSimpleName()));
+	}
+	
 	public void writeAnnotation(Class<?> clazz) {
 		writeImport(clazz);
 		codes.add("@" + clazz.getSimpleName());

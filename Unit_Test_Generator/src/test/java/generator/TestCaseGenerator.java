@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.Test;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
 
 import evolution.Application;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
+import generator.template.TestCase;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
@@ -18,7 +22,7 @@ public class TestCaseGenerator extends BaseTest {
 		Predicate<Class<?>> classFilter = new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
-				return clazz.getAnnotations().length > 0 && clazz != Application.class;
+				return clazz != Application.class && (clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null || clazz.getAnnotation(Service.class) != null || clazz.getSimpleName().endsWith("Mapper"));
 			}
 		};
 		UnitTestClassWriter classWriter = new UnitTestClassWriter() {
@@ -36,8 +40,10 @@ public class TestCaseGenerator extends BaseTest {
 				CodeWriter codeWriter = new CodeWriter();
 				codeWriter.writeAnnotation(Database4UcaseSetup.class);
 				codeWriter.writeAnnotation(ExpectedDatabase4Ucase.class);
-				codeWriter.writeCode("String requestData = null;");
-				codeWriter.writeCode("String responseData = null;");
+				codeWriter.writeImport(TestCase.class);
+				codeWriter.writeCode("TestCase testCase = testCaseClient.getTestCase();");
+				codeWriter.writeCode("String requestData = testCase.getRequestData();");
+				codeWriter.writeCode("String responseData = testCase.getResponseData();");
 				return codeWriter.getCodes();
 			}
 		};

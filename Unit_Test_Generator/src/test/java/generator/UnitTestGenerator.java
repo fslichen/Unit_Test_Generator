@@ -130,16 +130,25 @@ public class UnitTestGenerator {
 		}
 	}
 	
+	public int caseCount(Method method, Map<String, Integer> caseCountByMethod, int maxCaseCount) {
+		Integer methodCaseCount = caseCountByMethod.get(method.getName());
+		if (methodCaseCount == null) {
+			return 1;
+		} 
+		return Math.min(methodCaseCount, maxCaseCount);
+	}
+	
 	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues(String basePackage, Predicate<Class<?>> predicate, WebApplicationContext webApplicationContext) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, predicate).entrySet()) {
 			Class<?> clazz = entry.getValue();
 			String jsonDirectoryPath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
+			int maxUseCaseCount = property("max-use-case-count", Integer.class);
 			Map<String, Integer> useCaseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < Math.min(useCaseCountByMethod.get(method.getName()), property("max-use-case-count", Integer.class)); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < caseCount(method, useCaseCountByMethod, maxUseCaseCount); methodIndex++) {
 					int i = 0;
 					ObjectMocker mocker = new ObjectMocker();
 					List<Object> parameterValues = new LinkedList<>();
@@ -189,14 +198,14 @@ public class UnitTestGenerator {
 		dto.setData(data);
 		GetMapping getMapping = method.getAnnotation(GetMapping.class);
 		PostMapping postMapping = method.getAnnotation(PostMapping.class);
+		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
 		if (getMapping != null) {
 			dto.setRequestMethod("GET");
 			dto.setRequestPath(getMapping.value()[0]);
 		} else if (postMapping != null) {
 			dto.setRequestMethod("POST");
 			dto.setRequestPath(postMapping.value()[0]);
-		} else {
-			RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+		} else if (requestMapping != null) {
 			RequestMethod[] requestMethods = requestMapping.method();
 			if (requestMethods.length > 0) {
 				dto.setRequestMethod(requestMapping.method()[0].toString());
@@ -240,15 +249,16 @@ public class UnitTestGenerator {
 			CodeWriter codeWriter = new CodeWriter();
 			codeWriter.writePackage(clazz);
 			codeWriter.writeImport(Test.class);
-			codeWriter.writeClass(clazz, "Test");
+			codeWriter.writeClass(clazz, "Test", BaseTest.class);
 			codeWriter.writeAnnotation(Autowired.class);
 			codeWriter.writeField(clazz);
 			codeWriter.writeBlankLine();
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
 			Map<String, Integer> caseCountByMethod = ClassStatistics.useCaseCountByMethod(entry.getKey().toFile());
+			int maxTestCaseCount = property("max-test-case-count", Integer.class);
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < Math.min(caseCountByMethod.get(method.getName()), property("max-test-case-count", Integer.class)); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < caseCount(method, caseCountByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));
 					codeWriter.writeMethod(method, "test", methodIndex);
