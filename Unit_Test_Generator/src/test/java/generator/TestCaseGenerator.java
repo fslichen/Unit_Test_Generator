@@ -47,6 +47,7 @@ public class TestCaseGenerator {
 				return codeWriter.getCodes();
 			}
 		};
-		new UnitTestGenerator().scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava("evolution", classFilter, classWriter, methodWriter);
+		UnitTestGenerator unitTestGenerator = new UnitTestGenerator();
+		unitTestGenerator.scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(unitTestGenerator.property("test-case-base-package", String.class), classFilter, classWriter, methodWriter);
 	}
 }

@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class UseCaseGenerator {
 	@Test
-	public void testInvokeMethodsUnderBasePackageOfSrcMainJavaAndGetMockedParameterValuesAndReturnValues() throws Exception {
+	public void run() throws Exception {
 		Predicate<Class<?>> classFileter = new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return clazz.getAnnotation(RestController.class) != null || clazz.getAnnotation(Service.class) != null;
 			}
 		};
-		new UnitTestGenerator().invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava("evolution", classFileter, null);
+		UnitTestGenerator unitTestGenerator = new UnitTestGenerator();
+		unitTestGenerator.invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(unitTestGenerator.property("use-case-base-package", String.class), classFileter, null);
 	}
 }
