@@ -28,4 +28,16 @@ public class AnyServiceTest extends BaseTest {
         AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
     }
     
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testAnotherMethod0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
+        List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+    }
+    
 }

@@ -297,17 +297,15 @@ public class UnitTestGenerator {
 						parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 					}
 					String parametersInString = trimEndingComma(parametersBuilder);
-					Class<?> returnType = method.getReturnType();
 					if (method.getModifiers() == Modifier.PRIVATE) {
 						writeCodes4InvokingPrivateMethod(clazz, method, parametersInString, codeWriter);
 					} else {
+						Class<?> returnType = method.getReturnType();
 						if (returnType == void.class || returnType == Void.class) {
 							codeWriter.writeCode(String.format("%s.%s(%s);", instanceName(clazz), method.getName(), parametersInString));
 						} else {
-							codeWriter.writeImport(returnType);
-							String returnTypeSimpleName = returnType.getSimpleName();
-							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName, instanceName(clazz), method.getName(), parametersInString));
-							codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", returnTypeSimpleName, returnTypeSimpleName));
+							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName(method, codeWriter), instanceName(clazz), method.getName(), parametersInString));
+							codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", returnTypeSimpleName(method, codeWriter), returnType.getSimpleName()));
 						}
 					}
 					codeWriter.writeRightCurlyBrace();
@@ -328,6 +326,39 @@ public class UnitTestGenerator {
 				System.out.println("The file " + unitTestFile.getAbsolutePath() + " already exists.");
 			}
 		}
+	}
+	
+	public String returnTypeSimpleName(Method method, CodeWriter codeWriter) {
+		Class<?> returnType = method.getReturnType();
+		List<Class<?>> typeArguments = typeArguments(method.getGenericReturnType().getTypeName());
+		codeWriter.writeImport(returnType);
+		if (returnType == List.class) {
+			Class<?> typeArgument = typeArguments.get(0);
+			codeWriter.writeImport(typeArgument);
+			return String.format("%s<%s>", List.class.getSimpleName(), typeArgument.getSimpleName());
+		} else if (returnType == Map.class) {
+			Class<?> keyTypeArgument = typeArguments.get(0);
+			Class<?> valueTypeArgument = typeArguments.get(1);
+			codeWriter.writeImport(keyTypeArgument);
+			codeWriter.writeImport(valueTypeArgument);
+			return String.format("%s<%s, %s>", Map.class.getSimpleName(), keyTypeArgument.getSimpleName(), valueTypeArgument.getSimpleName());
+		} else {
+			return returnType.getSimpleName();
+		}
+	}
+	
+	public List<Class<?>> typeArguments(String typeName) {
+		List<Class<?>> classes = new LinkedList<>();
+		if (typeName.contains("<") && typeName.contains(">")) {
+			for (String typeArgumentInString : typeName.substring(typeName.indexOf("<") + 1, typeName.indexOf(">")).split(", ")) {
+				try {
+					classes.add(Class.forName(typeArgumentInString.replace(" ", "")));
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return classes;
 	}
 	
 	public String trimEndingComma(String string) {

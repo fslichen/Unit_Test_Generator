@@ -38,8 +38,8 @@ public class AnyControllerTest extends BaseTest {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        List actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        List expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        List<AnyDto> actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        List<AnyDto> expectedResult = Json.fromSubJson(responseData, "data", List.class);
     }
     
     @Test

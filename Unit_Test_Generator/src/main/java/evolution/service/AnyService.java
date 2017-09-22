@@ -1,5 +1,7 @@
 package evolution.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import evolution.pojo.AnotherPojo;
@@ -10,5 +12,9 @@ public class AnyService {
 	public AnyPojo anyMethod(AnyPojo anyPojo, AnotherPojo anotherPojo) {
 		anyPojo.setName(anyPojo.getName() + anotherPojo.getAddress());
 		return anyPojo;
+	}
+	
+	public List<AnyPojo> anotherMethod(AnyPojo anyPojo) {
+		return null;
 	}
 }
