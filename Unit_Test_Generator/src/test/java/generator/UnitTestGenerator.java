@@ -170,8 +170,7 @@ public class UnitTestGenerator {
 				for (int useCaseIndex = 0; useCaseIndex < saftCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
 					// Request Data
 					int i = 0;
-					ObjectMocker objectMocker = new ObjectMocker();
-					Object[] parameterValues = objectMocker.mockParameterValues(method);
+					Object[] parameterValues = ObjectMocker.mockParameterValues(method);
 					Object[] parameterValues4InvokingMethod = new Object[parameterValues.length];
 					for (Object parameterValue : parameterValues) {
 						if (parameterValue == null) {
@@ -192,7 +191,6 @@ public class UnitTestGenerator {
 						System.out.println("The file " + requestJsonFile.getAbsolutePath() + " already exists.");
 					}
 					// Response Data
-					objectMocker = new ObjectMocker();// Clear the set containing mocked classes.
 					Object returnValue = null;
 					Class<?> returnType = method.getReturnType();
 					if (returnType == void.class || returnType == Void.class) {
@@ -201,7 +199,7 @@ public class UnitTestGenerator {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
 						} catch (Exception e) {
-							returnValue = objectMocker.mockReturnValue(method);
+							returnValue = ObjectMocker.mockReturnValue(method);
 						}
 					}
 					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");

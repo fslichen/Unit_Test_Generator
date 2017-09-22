@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ObjectMocker {
-	private List<String> stringVocabulary;
+	private static List<String> stringVocabulary;
 	private Set<Class<?>> mockedClasses;
 	
 	public ObjectMocker() {
@@ -23,21 +23,22 @@ public class ObjectMocker {
 		stringVocabulary = Arrays.asList("Donald Trump", "Cat", "Dog", "Abraham Lincoln", UUID.randomUUID().toString());
 	}
 	
-	public String capitalizeFirstCharacter(String string) {
+	public static String capitalizeFirstCharacter(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}
 	
-	public Object[] mockParameterValues(Method method) throws Exception {
+	public static Object[] mockParameterValues(Method method) throws Exception {
 		Object[] arguments = new Object[method.getParameterCount()];
 		int i = 0;
 		for (Class<?> parameterType : method.getParameterTypes()) {
+			ObjectMocker objectMocker = new ObjectMocker();
 			if (parameterType == List.class) {
-				arguments[i] = mockList(method, i);
+				arguments[i] = objectMocker.mockList(method, i);
 			} else if (parameterType == Map.class) {
-				arguments[i] = mockMap(method, i);
+				arguments[i] = objectMocker.mockMap(method, i);
 			} else {
 				try {
-					arguments[i] = mockObject(parameterType);
+					arguments[i] = objectMocker.mockObject(parameterType);
 				} catch (Exception e) {
 					arguments[i] = null;
 				}
@@ -48,11 +49,11 @@ public class ObjectMocker {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T mockInvokingMethod(Method method, Object currentInstance) throws Exception {
+	public static <T> T mockInvokingMethod(Method method, Object currentInstance) throws Exception {
 		return (T) method.invoke(currentInstance, mockParameterValues(method));
 	}
 	
-	public String fieldName(Method method) {// Getter or Setter
+	public static String fieldName(Method method) {// Getter or Setter
 		String methodName = method.getName();
 		if ((methodName.startsWith("set") || methodName.startsWith("get"))) {
 			return methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
@@ -62,7 +63,7 @@ public class ObjectMocker {
 		}
 	}
 	
-	public <T> List<Method> getters(Class<T> clazz) throws Exception {
+	public static <T> List<Method> getters(Class<T> clazz) throws Exception {
 		Method[] methods = clazz.getMethods();
 		List<Method> getters = new LinkedList<>();
 		for (Method method : methods) {
@@ -76,15 +77,15 @@ public class ObjectMocker {
 		return getters;
 	}
 	
-	public Double mockDouble() {
+	public static Double mockDouble() {
 		return new Random().nextDouble();
 	}
 	
-	public Integer mockInt() {
+	public static Integer mockInt() {
 		return new Random().nextInt();
 	}
 	
-	public Long mockLong() {
+	public static Long mockLong() {
 		return new Random().nextLong();
 	}
 	
@@ -110,29 +111,29 @@ public class ObjectMocker {
 		return map;
 	}
 	
-	public Byte mockByte() {
+	public static Byte mockByte() {
 		byte[] b = new byte[0];
 		new Random().nextBytes(b);
 		return b[0];
 	}
 	
-	public Short mockShort() {
+	public static Short mockShort() {
 		return new Short(new Random().nextInt(32767) + "");
 	}
 	
-	public Float mockFloat() {
+	public static Float mockFloat() {
 		return new Random().nextFloat();
 	}
 	
-	public Boolean mockBoolean() {
+	public static Boolean mockBoolean() {
 		return new Random().nextBoolean();
 	}
 	
-	public Character mockCharacter() {
+	public static Character mockCharacter() {
 		return Math.random() < .5 ? 'a' : 'z';
 	}
 	
-	public BigDecimal mockBigDecimal() {
+	public static BigDecimal mockBigDecimal() {
 		return new BigDecimal(mockDouble());
 	}
 	
@@ -208,11 +209,11 @@ public class ObjectMocker {
 		return t;
 	}
 	
-	public String mockString() {// Make it smart.
+	public static String mockString() {// Make it smart.
 		return stringVocabulary.get(((Double) Math.floor(Math.random() * stringVocabulary.size())).intValue());
 	}
 	
-	public <T> List<Method> setters(Class<T> clazz) throws Exception {
+	public static <T> List<Method> setters(Class<T> clazz) throws Exception {
 		Method[] methods = clazz.getMethods();
 		List<Method> setters = new LinkedList<>();
 		for (Method method : methods) {
@@ -223,16 +224,16 @@ public class ObjectMocker {
 		return setters;
 	}
 		
-	public List<Class<?>> parameterTypeArguments(Method method, int parameterIndex) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
+	public static List<Class<?>> parameterTypeArguments(Method method, int parameterIndex) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
 		Type[] types = method.getGenericParameterTypes();
 		return typeArguments(types[parameterIndex].getTypeName());
 	}
 	
-	public List<Class<?>> returnTypeArguments(Method method) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
+	public static List<Class<?>> returnTypeArguments(Method method) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
 		return typeArguments(method.getGenericReturnType().getTypeName());
 	}
 	
-	public List<Class<?>> typeArguments(String typeName) throws ClassNotFoundException {
+	public static List<Class<?>> typeArguments(String typeName) throws ClassNotFoundException {
 		List<Class<?>> typeArguments = new LinkedList<>();
 		for (String typeArgumentName : typeName.substring(typeName.indexOf("<") + 1, typeName.indexOf(">")).split(",")) {
 			Class<?> clazz = Class.forName(typeArgumentName.replace(" ", ""));
@@ -242,19 +243,20 @@ public class ObjectMocker {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T mockReturnValue(Method method) throws Exception {
+	public static <T> T mockReturnValue(Method method) throws Exception {
 		Class<?> returnType = method.getReturnType();
+		ObjectMocker objectMocker = new ObjectMocker();
 		if (returnType == List.class) {
-			return (T) Arrays.asList(mockObject(returnTypeArguments(method).get(0)));
+			return (T) Arrays.asList(objectMocker.mockObject(returnTypeArguments(method).get(0)));
 		} else if (returnType == Map.class) {
 			List<Class<?>> typeArguments = returnTypeArguments(method);
 			Map<Object, Object> map = new LinkedHashMap<>();
-			map.put(mockObject(typeArguments.get(0)), typeArguments.get(1));
+			map.put(objectMocker.mockObject(typeArguments.get(0)), typeArguments.get(1));
 			return (T) map;
 		} else if (returnType == void.class || returnType == Void.class) {
 			return null;
 		} else {
-			return (T) mockObject(returnType);
+			return (T) objectMocker.mockObject(returnType);
 		}
 	}
 }
