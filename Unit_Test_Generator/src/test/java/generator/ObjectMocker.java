@@ -7,15 +7,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 public class ObjectMocker {
-private List<String> stringVocabulary;
+	private List<String> stringVocabulary;
+	
 	public ObjectMocker() {
-		stringVocabulary = Arrays.asList("Donald Trump", "cat", "dog", "Abraham Lincoln");
+		stringVocabulary = Arrays.asList("Donald Trump", "Cat", "Dog", "Abraham Lincoln", UUID.randomUUID().toString());
 	}
 	
 	public String capitalizeFirstCharacter(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T mockMethod(Method method, Object currentInstance) throws Exception {
+		Object[] arguments = new Object[method.getParameterCount()];
+		int i = 0;
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			arguments[i++] = mockObject(parameterType);
+		}
+		return (T) method.invoke(currentInstance, arguments);
 	}
 	
 	public String fieldName(Method method) {// Getter or Setter
@@ -43,12 +56,15 @@ private List<String> stringVocabulary;
 	}
 	
 	public Double mockDouble() {
-		return (Math.random() < .5 ? 1 : -1) * Math.random() * Double.MAX_VALUE;
+		return new Random().nextDouble();
 	}
 	
 	public Integer mockInt() {
-		Double result = (Math.random() < .5 ? 1 : -1) * Math.random() * Integer.MAX_VALUE;
-		return result.intValue();
+		return new Random().nextInt();
+	}
+	
+	public Long mockLong() {
+		return new Random().nextLong();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -73,14 +89,48 @@ private List<String> stringVocabulary;
 		return map;
 	}
 	
+	public Byte mockByte() {
+		byte[] b = new byte[0];
+		new Random().nextBytes(b);
+		return b[0];
+	}
+	
+	public Short mockShort() {
+		return new Short(new Random().nextInt(32767) + "");
+	}
+	
+	public Float mockFloat() {
+		return new Random().nextFloat();
+	}
+	
+	public Boolean mockBoolean() {
+		return new Random().nextBoolean();
+	}
+	
+	public Character mockCharacter() {
+		return Math.random() < .5 ? 'a' : 'z';
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T> T mockObject(Class<T> clazz) throws Exception {
-		if (clazz == int.class || clazz == Integer.class) {
+		if (clazz == boolean.class || clazz == Boolean.class) {
+			return (T) mockBoolean();
+		} else if (clazz == byte.class || clazz == Byte.class) {
+			return (T) mockByte();
+		} else if (clazz == short.class || clazz == Short.class) {
+			return (T) mockShort();
+		} else if (clazz == int.class || clazz == Integer.class) {
 			return (T) mockInt();
-		} else if (clazz == String.class) {
-			return (T) mockString();
+		} else if (clazz == long.class || clazz == Long.class) {
+			return (T) mockLong();
+		} else if (clazz == float.class || clazz == Float.class) {
+			return (T) mockFloat();
 		} else if (clazz == double.class || clazz == Double.class) {
 			return (T) mockDouble();
+		} else if (clazz == char.class || clazz == Character.class) {
+			return (T) mockCharacter();
+		} else if (clazz == String.class) {
+			return (T) mockString();
 		} else if (clazz == List.class) {
 			System.out.println("Unable to mock list due to type erasure in JVM.");
 			return null;
@@ -96,10 +146,24 @@ private List<String> stringVocabulary;
 		T t = clazz.newInstance();
 		for (Method setter : setters(clazz)) {
 			Class<?> parameterType = setter.getParameterTypes()[0];
-			if (parameterType == String.class) {
-				setter.invoke(t, mockString());
+			if (parameterType == boolean.class || parameterType == Boolean.class) {
+				setter.invoke(t, mockBoolean());
+			} else if (parameterType == byte.class || parameterType == Byte.class) {
+				setter.invoke(t, mockByte());
+			} else if (parameterType == short.class || parameterType == Short.class) {
+				setter.invoke(t, mockShort());
 			} else if (parameterType == int.class || parameterType == Integer.class) {
 				setter.invoke(t, mockInt());
+			} else if (parameterType == long.class || parameterType == Long.class) {
+				setter.invoke(t, mockLong());
+			} else if (parameterType == float.class || parameterType == Float.class) {
+				setter.invoke(t, mockFloat());
+			} else if (parameterType == double.class || parameterType == Double.class) {
+				setter.invoke(t, mockDouble());
+			} else if (parameterType == char.class || parameterType == Character.class) {
+				setter.invoke(t, mockCharacter());
+			} else if (parameterType == String.class) {
+				setter.invoke(t, mockString());
 			} else if (parameterType == List.class) {
 				setter.invoke(t, mockList(setter, 0));
 			} else if (parameterType == Map.class) {
