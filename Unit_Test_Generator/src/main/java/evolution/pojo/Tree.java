@@ -4,7 +4,14 @@ import java.util.List;
 
 public class Tree {
 	private String id;
+	private Tree tree;
 	private List<Tree> trees;
+	public Tree getTree() {
+		return tree;
+	}
+	public void setTree(Tree tree) {
+		this.tree = tree;
+	}
 	public List<Tree> getTrees() {
 		return trees;
 	}

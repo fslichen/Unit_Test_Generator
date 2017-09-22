@@ -166,15 +166,15 @@ public class ObjectMocker {
 			System.out.println("Unable to mock map due to type erasure in JVM.");
 			return null;
 		} else {
-			if (mockedClasses.contains(clazz)) {
-				return null;
-			}
-			mockedClasses.add(clazz);
 			return mockPojo(clazz);
 		}
 	}
 	
 	public <T> T mockPojo(Class<T> clazz) throws Exception {
+		if (mockedClasses.contains(clazz)) {
+			return null;
+		}
+		mockedClasses.add(clazz);
 		T t = clazz.newInstance();
 		for (Method setter : setters(clazz)) {
 			Class<?> parameterType = setter.getParameterTypes()[0];
