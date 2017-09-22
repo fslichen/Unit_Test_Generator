@@ -2,6 +2,7 @@ package evolution.controller;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.String;
+import evolution.pojo.Tree;
 import evolution.controller.dto.AnyDto;
 import generator.template.ReflectionAssert;
 import java.util.List;
@@ -42,6 +43,19 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         List<AnyDto> actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
         List<AnyDto> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testTree0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        List<Tree> actualResult = anyController.tree(Json.fromJson(parameterValues.get(0), Tree.class));
+        List<Tree> expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
