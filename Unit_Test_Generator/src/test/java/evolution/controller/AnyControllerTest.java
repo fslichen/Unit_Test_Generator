@@ -1,7 +1,7 @@
 package evolution.controller;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.String;
+import javax.servlet.http.HttpServletRequest;
 import evolution.pojo.Tree;
 import evolution.controller.dto.AnyDto;
 import generator.template.ReflectionAssert;
@@ -62,6 +62,19 @@ public class AnyControllerTest extends BaseTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testException0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testHttp0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
@@ -73,14 +86,27 @@ public class AnyControllerTest extends BaseTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testException0() throws Exception {
+    public void testServletGet0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
-        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+        anyController.servletGet(Json.fromJson(parameterValues.get(0), HttpServletRequest.class));
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testHide0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        try {
+            Method method = AnyController.class.getDeclaredMethod("hide", String.class);
+            method.setAccessible(true);
+            String actualResult = (String) method.invoke(anyController, Json.fromJson(parameterValues.get(0), String.class));
+        } catch (Exception e){}
     }
     
     @Test
@@ -133,32 +159,6 @@ public class AnyControllerTest extends BaseTest {
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testHide0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        try {
-            Method method = AnyController.class.getDeclaredMethod("hide", String.class);
-            method.setAccessible(true);
-            String actualResult = (String) method.invoke(anyController, Json.fromJson(parameterValues.get(0), String.class));
-        } catch (Exception e){}
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testServletGet0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        anyController.servletGet(Json.fromJson(parameterValues.get(0), HttpServletRequest.class));
     }
     
 }
