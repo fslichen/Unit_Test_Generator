@@ -172,6 +172,9 @@ public class UnitTestGenerator {
 					Object[] parameterValues = objectMocker.mockParameterValues(method);
 					Object[] parameterValues4InvokingMethod = new Object[parameterValues.length];
 					for (Object parameterValue : parameterValues) {
+						if (parameterValue == null) {
+							parameterValue = new SpecialParameterValue(method.getParameterTypes()[i]);
+						}
 						parameterValues4InvokingMethod[i++] = copyObject(parameterValue);
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
