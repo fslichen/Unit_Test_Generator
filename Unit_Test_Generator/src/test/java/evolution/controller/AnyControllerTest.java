@@ -33,6 +33,18 @@ public class AnyControllerTest extends BaseTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testList0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        List actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        List expectedResult = Json.fromSubJson(responseData, "data", List.class);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testPost0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
