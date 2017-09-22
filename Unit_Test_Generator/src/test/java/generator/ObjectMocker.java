@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +22,29 @@ public class ObjectMocker {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T> T mockMethod(Method method, Object currentInstance) throws Exception {
+	public Object[] mockParameterValues(Method method) throws Exception {
 		Object[] arguments = new Object[method.getParameterCount()];
 		int i = 0;
 		for (Class<?> parameterType : method.getParameterTypes()) {
-			arguments[i++] = mockObject(parameterType);
+			if (parameterType == List.class) {
+				arguments[i] = mockList(method, i);
+			} else if (parameterType == Map.class) {
+				arguments[i] = mockMap(method, i);
+			} else {
+				try {
+					arguments[i] = mockObject(parameterType);
+				} catch (Exception e) {
+					arguments[i] = null;
+				}
+			}
+			i++;
 		}
-		return (T) method.invoke(currentInstance, arguments);
+		return arguments;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T mockInvokingMethod(Method method, Object currentInstance) throws Exception {
+		return (T) method.invoke(currentInstance, mockParameterValues(method));
 	}
 	
 	public String fieldName(Method method) {// Getter or Setter
@@ -69,7 +85,7 @@ public class ObjectMocker {
 	
 	@SuppressWarnings("unchecked")
 	public <T> List<T> mockList(Method method, int parameterIndex) throws Exception {
-		Class<?> clazz = typeArguments(method, parameterIndex).get(0);
+		Class<?> clazz = parameterTypeArguments(method, parameterIndex).get(0);
 		List<T> list = new LinkedList<>();
 		for (int i = 0; i < 2; i++) {
 			list.add((T) mockObject(clazz));
@@ -79,7 +95,7 @@ public class ObjectMocker {
 	
 	@SuppressWarnings("unchecked")
 	public <T, V> Map<T, V> mockMap(Method method, int parameterIndex) throws Exception {
-		List<Class<?>> typeArguments = typeArguments(method, parameterIndex);
+		List<Class<?>> typeArguments = parameterTypeArguments(method, parameterIndex);
 		Class<?> keyClass = typeArguments.get(0);
 		Class<?> valueClass = typeArguments.get(1);
 		Map<T, V> map = new HashMap<>();
@@ -190,14 +206,38 @@ public class ObjectMocker {
 		return setters;
 	}
 		
-	public List<Class<?>> typeArguments(Method method, int parameterIndex) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
+	public List<Class<?>> parameterTypeArguments(Method method, int parameterIndex) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
 		Type[] types = method.getGenericParameterTypes();
-		String typeName = types[parameterIndex].getTypeName();
+		return typeArguments(types[parameterIndex].getTypeName());
+	}
+	
+	public List<Class<?>> returnTypeArguments(Method method) throws NoSuchMethodException, SecurityException, ClassNotFoundException {
+		return typeArguments(method.getGenericReturnType().getTypeName());
+	}
+	
+	public List<Class<?>> typeArguments(String typeName) throws ClassNotFoundException {
 		List<Class<?>> typeArguments = new LinkedList<>();
 		for (String typeArgumentName : typeName.substring(typeName.indexOf("<") + 1, typeName.indexOf(">")).split(",")) {
 			Class<?> clazz = Class.forName(typeArgumentName.replace(" ", ""));
 			typeArguments.add(clazz);
 		}
 		return typeArguments;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T mockReturnValue(Method method) throws Exception {
+		Class<?> returnType = method.getReturnType();
+		if (returnType == List.class) {
+			return (T) Arrays.asList(mockObject(returnTypeArguments(method).get(0)));
+		} else if (returnType == Map.class) {
+			List<Class<?>> typeArguments = returnTypeArguments(method);
+			Map<Object, Object> map = new LinkedHashMap<>();
+			map.put(mockObject(typeArguments.get(0)), typeArguments.get(1));
+			return (T) map;
+		} else if (returnType == void.class || returnType == Void.class) {
+			return null;
+		} else {
+			return (T) mockObject(returnType);
+		}
 	}
 }

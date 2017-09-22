@@ -1,5 +1,8 @@
 package evolution.controller;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,5 +65,11 @@ public class AnyController {
 	@GetMapping("/servlet/get")
 	public void servletGet(HttpServletRequest request) {
 		
+	}
+	
+	@GetMapping("list")
+	public List<AnyDto> list(AnyDto anyDto) {
+		int i = 1 / 0;
+		return Arrays.asList(anyDto);
 	}
 }

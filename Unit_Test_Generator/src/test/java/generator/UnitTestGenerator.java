@@ -169,17 +169,10 @@ public class UnitTestGenerator {
 				for (int useCaseIndex = 0; useCaseIndex < saftCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
 					int i = 0;
 					ObjectMocker objectMocker = new ObjectMocker();
-					List<Object> parameterValues = new LinkedList<>();
-					Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
-					for (Class<?> parameterType : method.getParameterTypes()) {
-						Object parameterValue = null;
-						try {
-							parameterValue = objectMocker.mockObject(parameterType);
-						} catch (Exception e) {
-							parameterValue = new SpecialParameterValue(parameterType);
-						}
-						parameterValues.add(copyObject(parameterValue));// Prevents the method from polluting the parameter.
-						parameterValues4InvokingMethod[i++] = parameterValue;
+					Object[] parameterValues = objectMocker.mockParameterValues(method);
+					Object[] parameterValues4InvokingMethod = new Object[parameterValues.length];
+					for (Object parameterValue : parameterValues) {
+						parameterValues4InvokingMethod[i++] = copyObject(parameterValue);
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
@@ -201,7 +194,7 @@ public class UnitTestGenerator {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
 						} catch (Exception e) {
-							returnValue = method.getReturnType().newInstance();
+							returnValue = objectMocker.mockReturnValue(method);
 						}
 					}
 					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
