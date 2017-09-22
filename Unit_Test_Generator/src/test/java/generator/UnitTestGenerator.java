@@ -168,6 +168,7 @@ public class UnitTestGenerator {
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int useCaseIndex = 0; useCaseIndex < saftCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
+					// Request Data
 					int i = 0;
 					ObjectMocker objectMocker = new ObjectMocker();
 					Object[] parameterValues = objectMocker.mockParameterValues(method);
@@ -190,6 +191,8 @@ public class UnitTestGenerator {
 					} else {
 						System.out.println("The file " + requestJsonFile.getAbsolutePath() + " already exists.");
 					}
+					// Response Data
+					objectMocker = new ObjectMocker();// Clear the set containing mocked classes.
 					Object returnValue = null;
 					Class<?> returnType = method.getReturnType();
 					if (returnType == void.class || returnType == Void.class) {
