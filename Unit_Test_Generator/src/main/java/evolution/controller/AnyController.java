@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import evolution.controller.dto.AnyDto;
 import evolution.pojo.AnotherPojo;
 import evolution.pojo.AnyPojo;
+import evolution.pojo.Tree;
 import evolution.service.AnyService;
 
 @RestController
@@ -71,5 +72,10 @@ public class AnyController {
 	public List<AnyDto> list(AnyDto anyDto) {
 		int i = 1 / 0;
 		return Arrays.asList(anyDto);
+	}
+	
+	@GetMapping("tree")
+	public List<Tree> tree(Tree tree) {
+		return null;
 	}
 }

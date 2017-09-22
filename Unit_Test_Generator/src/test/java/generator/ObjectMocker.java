@@ -4,17 +4,21 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 public class ObjectMocker {
 	private List<String> stringVocabulary;
+	private Set<Class<?>> mockedClasses;
 	
 	public ObjectMocker() {
+		mockedClasses = new HashSet<>();
 		stringVocabulary = Arrays.asList("Donald Trump", "Cat", "Dog", "Abraham Lincoln", UUID.randomUUID().toString());
 	}
 	
@@ -154,6 +158,10 @@ public class ObjectMocker {
 			System.out.println("Unable to mock map due to type erasure in JVM.");
 			return null;
 		} else {
+			if (mockedClasses.contains(clazz)) {
+				return null;
+			}
+			mockedClasses.add(clazz);
 			return mockPojo(clazz);
 		}
 	}
