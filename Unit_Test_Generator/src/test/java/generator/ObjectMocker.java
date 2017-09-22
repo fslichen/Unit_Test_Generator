@@ -2,6 +2,7 @@ package generator;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -131,6 +132,10 @@ public class ObjectMocker {
 		return Math.random() < .5 ? 'a' : 'z';
 	}
 	
+	public BigDecimal mockBigDecimal() {
+		return new BigDecimal(mockDouble());
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T> T mockObject(Class<T> clazz) throws Exception {
 		if (clazz == boolean.class || clazz == Boolean.class) {
@@ -149,6 +154,8 @@ public class ObjectMocker {
 			return (T) mockDouble();
 		} else if (clazz == char.class || clazz == Character.class) {
 			return (T) mockCharacter();
+		} else if (clazz == BigDecimal.class) {
+			return (T) mockBigDecimal();
 		} else if (clazz == String.class) {
 			return (T) mockString();
 		} else if (clazz == List.class) {
@@ -186,6 +193,8 @@ public class ObjectMocker {
 				setter.invoke(t, mockDouble());
 			} else if (parameterType == char.class || parameterType == Character.class) {
 				setter.invoke(t, mockCharacter());
+			} else if (parameterType == BigDecimal.class) {
+				setter.invoke(t, mockBigDecimal());
 			} else if (parameterType == String.class) {
 				setter.invoke(t, mockString());
 			} else if (parameterType == List.class) {

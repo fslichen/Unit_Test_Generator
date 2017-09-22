@@ -1,8 +1,17 @@
 package evolution.controller.dto;
 
+import java.math.BigDecimal;
+
 public class AnyDto {
 	private String name;
 	private Integer age;
+	private BigDecimal bigDecimal;
+	public BigDecimal getBigDecimal() {
+		return bigDecimal;
+	}
+	public void setBigDecimal(BigDecimal bigDecimal) {
+		this.bigDecimal = bigDecimal;
+	}
 	public String getName() {
 		return name;
 	}
