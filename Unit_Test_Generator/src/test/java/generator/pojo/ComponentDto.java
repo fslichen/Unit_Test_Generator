@@ -1,11 +1,11 @@
 package generator.pojo;
 
-public class CommonDto {
+public class ComponentDto {
 	private Object data;
-	public CommonDto() {
+	public ComponentDto() {
 
 	}
-	public CommonDto(Object data) {
+	public ComponentDto(Object data) {
 		this.data = data;
 	}
 	public Object getData() {

@@ -37,8 +37,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import generator.pojo.CommonDto;
+import generator.pojo.ComponentDto;
 import generator.pojo.ControllerDto;
+import generator.pojo.SpecialParameterValue;
 import generator.pojo.VoidReturnValue;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
@@ -171,7 +172,12 @@ public class UnitTestGenerator {
 					List<Object> parameterValues = new LinkedList<>();
 					Object[] parameterValues4InvokingMethod = new Object[method.getParameterCount()];
 					for (Class<?> parameterType : method.getParameterTypes()) {
-						Object parameterValue = objectMocker.mockObject(parameterType);
+						Object parameterValue = null;
+						try {
+							parameterValue = objectMocker.mockObject(parameterType);
+						} catch (Exception e) {
+							parameterValue = new SpecialParameterValue(parameterType);
+						}
 						parameterValues.add(copyObject(parameterValue));// Prevents the method from polluting the parameter.
 						parameterValues4InvokingMethod[i++] = parameterValue;
 					}
@@ -182,7 +188,7 @@ public class UnitTestGenerator {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
 						} else {
-							objectMapper.writeValue(requestJsonFile, new CommonDto(parameterValues));
+							objectMapper.writeValue(requestJsonFile, new ComponentDto(parameterValues));
 						}
 					} else {
 						System.out.println("The file " + requestJsonFile.getAbsolutePath() + " already exists.");
@@ -200,7 +206,7 @@ public class UnitTestGenerator {
 					}
 					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
 					if (!responseJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
-						objectMapper.writeValue(responseJsonFile, new CommonDto(returnValue));
+						objectMapper.writeValue(responseJsonFile, new ComponentDto(returnValue));
 					} else {
 						System.out.println("The file " + responseJsonFile.getAbsolutePath() + " already exists.");
 					}

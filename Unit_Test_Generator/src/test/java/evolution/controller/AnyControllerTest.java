@@ -1,4 +1,5 @@
 package evolution.controller;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.String;
 import evolution.controller.dto.AnyDto;
@@ -90,6 +91,17 @@ public class AnyControllerTest extends BaseTest {
             method.setAccessible(true);
             String actualResult = (String) method.invoke(anyController, Json.fromJson(parameterValues.get(0), String.class));
         } catch (Exception e){}
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testServletGet0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        anyController.servletGet(Json.fromJson(parameterValues.get(0), HttpServletRequest.class));
     }
     
     @Test
