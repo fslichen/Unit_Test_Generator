@@ -3,6 +3,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.String;
 import evolution.controller.dto.AnyDto;
+import generator.template.ReflectionAssert;
 import java.util.List;
 import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
@@ -28,6 +29,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         int actualResult = anyController.get();
         int expectedResult = Json.fromSubJson(responseData, "data", int.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
@@ -40,6 +42,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         List<AnyDto> actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
         List<AnyDto> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
@@ -52,6 +55,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
@@ -64,6 +68,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
@@ -76,6 +81,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
@@ -88,6 +94,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.post(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
@@ -126,6 +133,7 @@ public class AnyControllerTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test

@@ -41,6 +41,7 @@ import generator.pojo.ComponentDto;
 import generator.pojo.ControllerDto;
 import generator.pojo.SpecialParameterValue;
 import generator.pojo.VoidReturnValue;
+import generator.template.ReflectionAssert;
 import generator.template.UnitTestClassWriter;
 import generator.template.UnitTestMethodWriter;
 
@@ -306,6 +307,8 @@ public class UnitTestGenerator {
 						} else {
 							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", returnTypeSimpleName(method, codeWriter), instanceName(clazz), method.getName(), parametersInString));
 							codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", returnTypeSimpleName(method, codeWriter), returnType.getSimpleName()));
+							codeWriter.writeImport(ReflectionAssert.class);
+							codeWriter.writeCode("ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 						}
 					}
 					codeWriter.writeRightCurlyBrace();

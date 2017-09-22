@@ -1,5 +1,6 @@
 package evolution.service;
 import evolution.pojo.AnotherPojo;
+import generator.template.ReflectionAssert;
 import evolution.pojo.AnyPojo;
 import java.util.List;
 import generator.Json;
@@ -19,18 +20,6 @@ public class AnyServiceTest extends BaseTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethod0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
-        AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testAnotherMethod0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
@@ -38,6 +27,20 @@ public class AnyServiceTest extends BaseTest {
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
         List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testAnyMethod0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
+        AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
 }
