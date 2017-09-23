@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import evolution.controller.dto.AnyAbstractDto;
 import evolution.controller.dto.AnyDto;
 import evolution.pojo.AnotherPojo;
 import evolution.pojo.AnyPojo;
@@ -77,5 +78,10 @@ public class AnyController {
 	@GetMapping("tree")
 	public List<Tree> tree(Tree tree) {
 		return null;
+	}
+	
+	@GetMapping("/abstract")
+	public void abstractPojo(AnyAbstractDto dto) {
+		
 	}
 }
