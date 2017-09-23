@@ -88,7 +88,7 @@ public class Mocker {
 	}
 	
 	public Collection<Object> mockCollection(String genericTypeName, Collection<Object> collection) {
-		for (int i = 0; i < mockInteger(Project.property("max-collection-size", Integer.class)) + 1; i++) {
+		for (int i = 0; i < mockInteger(Lang.property("max-collection-size", Integer.class)) + 1; i++) {
 			collection.add(mockObject(Pointer.typeArgumentNames(genericTypeName).get(0)));
 		}
 		return collection;
@@ -121,7 +121,7 @@ public class Mocker {
 			return mockCollection(genericTypeName, new LinkedHashSet<>());
 		} else if (genericTypeName.startsWith(Map.class.getName())) {
 			Map<Object, Object> map = new LinkedHashMap<>();
-			for (int i = 0; i < mockInteger(Project.property("max-collection-size", Integer.class)) + 1; i++) {
+			for (int i = 0; i < mockInteger(Lang.property("max-collection-size", Integer.class)) + 1; i++) {
 				List<String> typeArgumentNames = Pointer.typeArgumentNames(genericTypeName);
 				map.put(mockObject(typeArgumentNames.get(0)), mockObject(typeArgumentNames.get(1)));
 			}
@@ -140,7 +140,7 @@ public class Mocker {
 					return instance;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println(String.format("Unable to create %s.", genericTypeName));
 			}
 		}
 		return null;

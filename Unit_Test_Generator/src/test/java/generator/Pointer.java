@@ -58,4 +58,8 @@ public class Pointer {
 		}
 		return typeArgumentNames;
 	}
+	
+	public static String instanceName(Class<?> clazz) {
+		return Lang.lowerFirstCharacter(clazz.getSimpleName());
+	}
 }

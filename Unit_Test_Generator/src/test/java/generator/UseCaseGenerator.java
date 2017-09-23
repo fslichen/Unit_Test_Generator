@@ -16,6 +16,6 @@ public class UseCaseGenerator {
 			}
 		};
 		UnitTestGenerator unitTestGenerator = new UnitTestGenerator();
-		unitTestGenerator.invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(Project.property("use-case-base-package", String.class), classFileter, null);
+		unitTestGenerator.invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(Lang.property("use-case-base-package", String.class), classFileter, null);
 	}
 }
