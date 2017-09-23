@@ -167,7 +167,7 @@ public class UnitTestGenerator {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
 						} else {
-							objectMapper.writeValue(requestJsonFile, new ComponentDto(parameterValues));
+							objectMapper.writeValue(requestJsonFile, new ComponentDto(parameterValues, "Success"));
 						}
 					} else {
 						System.out.println("The file " + requestJsonFile.getAbsolutePath() + " already exists.");
@@ -175,18 +175,20 @@ public class UnitTestGenerator {
 					// Response Data
 					Object returnValue = null;
 					Class<?> returnType = method.getReturnType();
+					String responseStatus = "Success";
 					if (returnType == void.class || returnType == Void.class) {
 						returnValue = new VoidReturnValue("OK", "void");
 					} else {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
 						} catch (Exception e) {
+							responseStatus = "Mocked";
 							returnValue = Mocker.mockReturnValue(method);
 						}
 					}
 					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
 					if (!responseJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
-						objectMapper.writeValue(responseJsonFile, new ComponentDto(returnValue));
+						objectMapper.writeValue(responseJsonFile, new ComponentDto(returnValue, responseStatus));
 					} else {
 						System.out.println("The file " + responseJsonFile.getAbsolutePath() + " already exists.");
 					}
