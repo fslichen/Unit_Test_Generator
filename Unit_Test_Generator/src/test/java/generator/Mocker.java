@@ -19,6 +19,25 @@ import evolution.pojo.AnyPojo;
 import evolution.pojo.Tree;
 
 public class Mocker {
+	@SuppressWarnings("unchecked")
+	public static <T> T mockInvokingMethod(Method method, Object currentInstance) throws Exception {
+		return (T) method.invoke(currentInstance, mockParameterValues(method));
+	}
+	
+	public static Object[] mockParameterValues(Method method) throws Exception {
+		Mocker mocker = new Mocker();
+		int parameterCount = method.getParameterCount();
+		Object[] parameterValues = new Object[parameterCount];
+		for (int i = 0; i < parameterCount; i++) {
+			parameterValues[i] = mocker.mockObject(method.getGenericParameterTypes()[i].getTypeName());
+		}
+		return parameterValues;
+	}
+
+	public static Object mockReturnValue(Method method) throws Exception {
+		return new Mocker().mockObject(method.getGenericReturnType().getTypeName());
+	}
+	
 	public static String mockString() {
 		List<String> strings = Arrays.asList("George Washington", "Abraham Lincoln", "Donald Trump", "Richard Nixon", "Bill Clinton", "Barack Obama");
 		return strings.get(mockInteger(strings.size()));

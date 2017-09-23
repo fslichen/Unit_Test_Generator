@@ -73,4 +73,15 @@ public class Json {
 			return null;
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T copyObject(T t) {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

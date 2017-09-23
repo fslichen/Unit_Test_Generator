@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -134,17 +133,6 @@ public class UnitTestGenerator {
 		return controllerDto;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T> T copyObject(T t) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
 	public File createDirectoriesAndFile(String filePath) {
 		File fileDirectory = new File(filePath.substring(0, filePath.lastIndexOf("/")));
 		if (!fileDirectory.exists()) {
@@ -163,25 +151,25 @@ public class UnitTestGenerator {
 			String jsonDirectoryPath = pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
-			int maxUseCaseCount = property("max-use-case-count", Integer.class);
+			int maxUseCaseCount = Project.property("max-use-case-count", Integer.class);
 			Map<String, Integer> useCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int useCaseIndex = 0; useCaseIndex < saftCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
 					// Request Data
 					int i = 0;
-					Object[] parameterValues = ObjectMocker.mockParameterValues(method);
+					Object[] parameterValues = Mocker.mockParameterValues(method);
 					Object[] parameterValues4InvokingMethod = new Object[parameterValues.length];
 					for (Object parameterValue : parameterValues) {
 						if (parameterValue == null) {
 							parameterValue = new SpecialParameterValue(method.getParameterTypes()[i]);
 						}
-						parameterValues4InvokingMethod[i++] = copyObject(parameterValue);
+						parameterValues4InvokingMethod[i++] = Json.copyObject(parameterValue);
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
 					File requestJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
-					if (!requestJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
+					if (!requestJsonFile.exists() || Project.property("overwrite-use-case", Boolean.class)) {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
 						} else {
@@ -199,11 +187,11 @@ public class UnitTestGenerator {
 						try {
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
 						} catch (Exception e) {
-							returnValue = ObjectMocker.mockReturnValue(method);
+							returnValue = Mocker.mockReturnValue(method);
 						}
 					}
 					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
-					if (!responseJsonFile.exists() || property("overwrite-use-case", Boolean.class)) {
+					if (!responseJsonFile.exists() || Project.property("overwrite-use-case", Boolean.class)) {
 						objectMapper.writeValue(responseJsonFile, new ComponentDto(returnValue));
 					} else {
 						System.out.println("The file " + responseJsonFile.getAbsolutePath() + " already exists.");
@@ -241,26 +229,6 @@ public class UnitTestGenerator {
 		return path.replace("\\", "/");// The issue occurs in Windows.
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T> T property(String key, Class<T> clazz) {
-		Properties properties = new Properties();
-		try {
-			properties.load(UnitTestGenerator.class.getResourceAsStream("/unit-test.properties"));
-			String value = properties.get(key).toString();
-			if (clazz == int.class || clazz == Integer.class) {
-				return (T) new Integer(value);
-			} else if (clazz == double.class || clazz == Double.class) {
-				return (T) new Double(value);
-			} else if (clazz == boolean.class || clazz == Boolean.class) {
-				return (T) new Boolean(value);
-			}
-			return (T) value;
-		} catch (IOException e) {
-			System.out.println("Please create unit-test.properties under src/test/resources");
-			return null;
-		}
-	}
-	
 	public int saftCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
 		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
 		if (methodCaseCount == null) {
@@ -282,7 +250,7 @@ public class UnitTestGenerator {
 			codeWriter.writeBlankLine();
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
-			int maxTestCaseCount = property("max-test-case-count", Integer.class);
+			int maxTestCaseCount = Project.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < saftCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
@@ -319,7 +287,7 @@ public class UnitTestGenerator {
 			codeWriter.writeRightCurlyBrace();
 			// Write unit test file.
 			File unitTestFile = createDirectoriesAndFile(pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java"));
-			if (!unitTestFile.exists() || property("overwrite-test-case", Boolean.class)) {
+			if (!unitTestFile.exists() || Project.property("overwrite-test-case", Boolean.class)) {
 				try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
 					printWriter.write(codeWriter.generateCodes().toString());
 					System.out.println("The unit test file " + unitTestFile.getAbsolutePath() + " is successfully generated.");
@@ -332,37 +300,14 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public String returnTypeSimpleName(Method method, CodeWriter codeWriter) {
+	public String returnTypeSimpleName(Method method, CodeWriter codeWriter) throws ClassNotFoundException {
 		Class<?> returnType = method.getReturnType();
-		List<Class<?>> typeArguments = typeArguments(method.getGenericReturnType().getTypeName());
 		codeWriter.writeImport(returnType);
-		if (returnType == List.class) {
-			Class<?> typeArgument = typeArguments.get(0);
-			codeWriter.writeImport(typeArgument);
-			return String.format("%s<%s>", List.class.getSimpleName(), typeArgument.getSimpleName());
-		} else if (returnType == Map.class) {
-			Class<?> keyTypeArgument = typeArguments.get(0);
-			Class<?> valueTypeArgument = typeArguments.get(1);
-			codeWriter.writeImport(keyTypeArgument);
-			codeWriter.writeImport(valueTypeArgument);
-			return String.format("%s<%s, %s>", Map.class.getSimpleName(), keyTypeArgument.getSimpleName(), valueTypeArgument.getSimpleName());
+		if (returnType == List.class || returnType == Set.class || returnType == Map.class) {
+			return method.getGenericReturnType().getTypeName();
 		} else {
 			return returnType.getSimpleName();
 		}
-	}
-	
-	public List<Class<?>> typeArguments(String typeName) {
-		List<Class<?>> classes = new LinkedList<>();
-		if (typeName.contains("<") && typeName.contains(">")) {
-			for (String typeArgumentInString : typeName.substring(typeName.indexOf("<") + 1, typeName.indexOf(">")).split(", ")) {
-				try {
-					classes.add(Class.forName(typeArgumentInString.replace(" ", "")));
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return classes;
 	}
 	
 	public String trimEndingComma(String string) {
@@ -389,7 +334,7 @@ public class UnitTestGenerator {
 		return extension.equals(FilenameUtils.getExtension(pathInString(path)));
 	}
 	
-	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
+	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) throws ClassNotFoundException {
 		StringBuilder parameterTypesBuilder = new StringBuilder();
 		for (Class<?> parameterType : method.getParameterTypes()) {
 			codeWriter.writeImport(parameterType);
@@ -404,7 +349,11 @@ public class UnitTestGenerator {
 			codeWriter.writeCode(String.format("method.invoke(%s, %s);", instanceName(clazz), parametersInString));
 		} else {
 			String returnTypeSimpleName = returnType.getSimpleName();
-			codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", returnTypeSimpleName, returnTypeSimpleName, instanceName(clazz), parametersInString));
+			codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", returnTypeSimpleName(method, codeWriter), returnTypeSimpleName, instanceName(clazz), parametersInString));
+			codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", returnTypeSimpleName(method, codeWriter), returnType.getSimpleName()));
+			codeWriter.writeImport(ReflectionAssert.class);
+			codeWriter.writeCode("ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
+			
 		}
 		codeWriter.writeCode("} catch (Exception e){}");
 	}
