@@ -5,6 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Pointer {
+	public static String genericParameterTypeName(Method method, int parameterIndex) {
+		return method.getGenericParameterTypes()[parameterIndex].getTypeName();
+	}
+	
 	public static String concatenatedTypeArgumentNames(String genericTypeName) {
 		return genericTypeName.substring(genericTypeName.indexOf("<") + 1, genericTypeName.lastIndexOf(">"));
 	}

@@ -133,9 +133,18 @@ public class Mocker {
 				Class<?> clazz = Class.forName(genericTypeName);
 				if (!mockedClasses.contains(clazz)) {
 					mockedClasses.add(clazz);
-					Object instance = clazz.newInstance();
-					for (Method setter : Pointer.setters(clazz)) {
-						setter.invoke(instance, mockObject(setter.getGenericParameterTypes()[0].getTypeName()));
+					Object instance = null;
+					if (!Lang.property("enable-map-engine", Boolean.class)) {
+						instance = clazz.newInstance();
+						for (Method setter : Pointer.setters(clazz)) {
+							setter.invoke(instance, mockObject(Pointer.genericParameterTypeName(setter, 0)));
+						}
+					} else {
+						Map<Object, Object> mapInstance = new LinkedHashMap<>();
+						for (Method setter : Pointer.setters(clazz)) {
+							mapInstance.put(Pointer.fieldName(setter), mockObject(Pointer.genericParameterTypeName(setter, 0)));
+						}
+						instance = mapInstance;
 					}
 					return instance;
 				}
