@@ -9,6 +9,7 @@ import org.junit.Test;
 import evolution.pojo.AnyPojo;
 import evolution.pojo.Tree;
 import generator.Mocker;
+import generator.test.pojo.AnyPojo4Test;
 
 public class MockerTest {
 	public void anyMethod(List<Map<String, String>> string) {
@@ -27,6 +28,10 @@ public class MockerTest {
 		
 	}
 	
+	public void gammaMethod(AnyPojo4Test pojo) {
+		
+	}
+	
 	@Test
 	public void test() throws NoSuchMethodException, SecurityException {
 		Mocker mocker = new Mocker();
@@ -38,5 +43,7 @@ public class MockerTest {
 		System.out.println(mocker.mockObject(method1.getGenericParameterTypes()[0].getTypeName()));
 		Method method2 = MockerTest.class.getDeclaredMethod("betaMethod", Tree.class);
 		System.out.println(mocker.mockObject(method2.getGenericParameterTypes()[0].getTypeName()));
+		Method method3 = MockerTest.class.getDeclaredMethod("gammaMethod", AnyPojo4Test.class);
+		System.out.println(mocker.mockObject(method3.getGenericParameterTypes()[0].getTypeName()));
 	}
 }
