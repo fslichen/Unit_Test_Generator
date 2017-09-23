@@ -9,6 +9,16 @@ public class Pointer {
 		return genericTypeName.substring(genericTypeName.indexOf("<") + 1, genericTypeName.lastIndexOf(">"));
 	}
 	
+	public static String fieldName(Method method) {// Getter or Setter
+		String methodName = method.getName();
+		if ((methodName.startsWith("set") || methodName.startsWith("get"))) {
+			return methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
+		} else {
+			System.out.println("The method is neither a getter or a setter.");
+			return null;
+		}
+	}
+	
 	public static int level(char character, char openCharacter, char endCharacter, int level) {
 		if (character == openCharacter) {
 			level++;
@@ -16,6 +26,17 @@ public class Pointer {
 			level--;
 		}
 		return level;
+	}
+	
+	public static <T> List<Method> setters(Class<T> clazz) throws Exception {
+		Method[] methods = clazz.getMethods();
+		List<Method> setters = new LinkedList<>();
+		for (Method method : methods) {
+			if (method.getName().startsWith("set") && method.getParameterCount() == 1) {
+				setters.add(method);
+			}
+		}
+		return setters;
 	}
 	
 	public static List<String> typeArgumentNames(String genericTypeName) {
@@ -36,26 +57,5 @@ public class Pointer {
 			typeArgumentNames.add(concatenatedTypeArgumentNames.substring(separatorIndexes.get(i) + 1, separatorIndexes.get(i + 1)).replace(",", ", "));
 		}
 		return typeArgumentNames;
-	}
-	
-	public static <T> List<Method> setters(Class<T> clazz) throws Exception {
-		Method[] methods = clazz.getMethods();
-		List<Method> setters = new LinkedList<>();
-		for (Method method : methods) {
-			if (method.getName().startsWith("set") && method.getParameterCount() == 1) {
-				setters.add(method);
-			}
-		}
-		return setters;
-	}
-	
-	public static String fieldName(Method method) {// Getter or Setter
-		String methodName = method.getName();
-		if ((methodName.startsWith("set") || methodName.startsWith("get"))) {
-			return methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
-		} else {
-			System.out.println("The method is neither a getter or a setter.");
-			return null;
-		}
 	}
 }

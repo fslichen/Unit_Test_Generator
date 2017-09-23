@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -229,6 +228,16 @@ public class UnitTestGenerator {
 		return path.replace("\\", "/");// The issue occurs in Windows.
 	}
 	
+	public String returnTypeSimpleName(Method method, CodeWriter codeWriter) throws ClassNotFoundException {
+		Class<?> returnType = method.getReturnType();
+		codeWriter.writeImport(returnType);
+		if (returnType == List.class || returnType == Set.class || returnType == Map.class) {
+			return method.getGenericReturnType().getTypeName();
+		} else {
+			return returnType.getSimpleName();
+		}
+	}
+	
 	public int saftCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
 		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
 		if (methodCaseCount == null) {
@@ -297,16 +306,6 @@ public class UnitTestGenerator {
 			} else {
 				System.out.println("The file " + unitTestFile.getAbsolutePath() + " already exists.");
 			}
-		}
-	}
-	
-	public String returnTypeSimpleName(Method method, CodeWriter codeWriter) throws ClassNotFoundException {
-		Class<?> returnType = method.getReturnType();
-		codeWriter.writeImport(returnType);
-		if (returnType == List.class || returnType == Set.class || returnType == Map.class) {
-			return method.getGenericReturnType().getTypeName();
-		} else {
-			return returnType.getSimpleName();
 		}
 	}
 	
