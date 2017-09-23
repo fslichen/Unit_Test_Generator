@@ -13,15 +13,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.Test;
-
-import evolution.pojo.AnyPojo;
-import evolution.pojo.Tree;
-
 public class Mocker {
-	@SuppressWarnings("unchecked")
-	public static <T> T mockInvokingMethod(Method method, Object currentInstance) throws Exception {
-		return (T) method.invoke(currentInstance, mockParameterValues(method));
+	public static Object mockInvokingMethod(Method method, Object currentInstance) throws Exception {
+		return method.invoke(currentInstance, mockParameterValues(method));
 	}
 	
 	public static Object[] mockParameterValues(Method method) throws Exception {
@@ -112,33 +106,7 @@ public class Mocker {
 		mockedClasses = new HashSet<>();
 	}
 	
-	public void anyMethod(List<Map<String, String>> string) {
-		
-	}
-	
-	public void anotherMethod(Map<Map<String, String>, Map<String, String>> map) {
-		
-	}
-	
-	public void alphaMethod(Map<AnyPojo, List<Map<Map<List<AnyPojo>, Map<String, List<AnyPojo>>>, List<AnyPojo>>>> map) {
-		
-	}
-	
-	public void betaMethod(Tree tree) {
-		
-	}
-	
-	@Test
-	public void test() throws NoSuchMethodException, SecurityException {
-//		Method method = Mocker.class.getDeclaredMethod("anyMethod", List.class);
-//		System.out.println(mockObject(method.getGenericParameterTypes()[0].getTypeName()));
-//		Method method0 = Mocker.class.getDeclaredMethod("anotherMethod", Map.class);
-//		System.out.println(mockObject(method0.getGenericParameterTypes()[0].getTypeName()));
-//		Method method1 = Mocker.class.getDeclaredMethod("alphaMethod", Map.class);
-//		System.out.println(mockObject(method1.getGenericParameterTypes()[0].getTypeName()));
-		Method method2 = Mocker.class.getDeclaredMethod("betaMethod", Tree.class);
-		System.out.println(mockObject(method2.getGenericParameterTypes()[0].getTypeName()));
-	}
+
 	
 	public static BigDecimal mockBigDecimal() {
 		return new BigDecimal(mockDouble());
