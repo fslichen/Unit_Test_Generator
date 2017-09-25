@@ -292,18 +292,30 @@ public class UnitTestGenerator {
 		}
 		codeWriter.writeImport(Method.class);
 		codeWriter.writeCode("try {");
-		codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), Lang.trimEndingComma(parameterTypesBuilder)));
+		int parameterCount = method.getParameterCount();
+		if (parameterCount > 0) {
+			codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\", %s);", clazz.getSimpleName(), method.getName(), Lang.trimEndingComma(parameterTypesBuilder)));
+		} else {
+			codeWriter.writeCode(String.format("Method method = %s.class.getDeclaredMethod(\"%s\");", clazz.getSimpleName(), method.getName()));
+		}
 		codeWriter.writeCode("method.setAccessible(true);");
 		Class<?> returnType = method.getReturnType();
 		if (returnType == void.class || returnType == Void.class) {
-			codeWriter.writeCode(String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), parametersInString));
+			if (parameterCount > 0) {
+				codeWriter.writeCode(String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), parametersInString));
+			} else {
+				codeWriter.writeCode(String.format("method.invoke(%s);", Pointer.instanceName(clazz)));
+			}
 		} else {
 			String returnTypeSimpleName = returnType.getSimpleName();
-			codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), parametersInString));
+			if (parameterCount > 0) {
+				codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), parametersInString));
+			} else {
+				codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
+			}
 			codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
 			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode("ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
-			
 		}
 		codeWriter.writeCode("} catch (Exception e){}");
 	}

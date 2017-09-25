@@ -17,4 +17,8 @@ public class AnyService {
 	public List<AnyPojo> anotherMethod(AnyPojo anyPojo) {
 		return null;
 	}
+	
+	private void anyMethod() {
+		
+	}
 }
