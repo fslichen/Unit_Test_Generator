@@ -170,11 +170,23 @@ public class CodeWriter {
 	public void patchTypeParameterToMethod(String typeParameterName) {
 		for (int i = codes.size() - 1; i >= 0; i--) {
 			String code = codes.get(i);
-			if ((!code.contains("<" + typeParameterName + ">") && !code.contains("class") && code.endsWith("{")) && (code.startsWith("public") || code.startsWith("private") || code.startsWith("protected"))) {// TODO Also consider the case when the access modifier is missing. Consider using regular expression.
+			if (isMethod(code) && !code.contains("<" + typeParameterName + ">")) {// TODO Also consider the case when the access modifier is missing. Consider using regular expression.
 				int blankIndex = code.indexOf(" ");
 				codes.set(i, String.format("%s <%s> %s", code.substring(0, blankIndex), typeParameterName, code.substring(blankIndex + 1)));
 				break;
 			}
 		}
+	}
+	
+	public static boolean isClass(String code) {
+		return code.contains(" class ");
+	}
+	
+	public static boolean isMethod(String code) {
+		code = code.trim();
+		if (!isClass(code)) {
+			return code.endsWith("{") && (code.startsWith("public") || code.startsWith("private") || code.startsWith("protected"));
+		}
+		return false;
 	}
 }

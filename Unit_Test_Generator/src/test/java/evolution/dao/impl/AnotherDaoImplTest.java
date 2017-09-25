@@ -1,45 +1,45 @@
-package evolution.service;
+package evolution.dao.impl;
+import evolution.pojo.AnyBasePojo;
 import generator.template.ReflectionAssert;
-import evolution.pojo.AnotherPojo;
-import evolution.pojo.AnyPojo;
+import evolution.pojo.AnyPojoImpl;
 import java.util.List;
 import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
-import evolution.service.AnyService;
+import evolution.dao.impl.AnotherDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import generator.BaseTestCase;
 import org.junit.Test;
-public class AnyServiceTest extends BaseTestCase {
+public class AnotherDaoImplTest extends BaseTestCase {
     @Autowired
-    private AnyService anyService;
+    private AnotherDaoImpl anotherDaoImpl;
     
     private String name;
     
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethodWithParameterTypesAnyPojoAnotherPojoAndReturnTypeAnyPojo0() throws Exception {
+    public void testAnyMethodWithParameterTypesAndReturnTypeAnyPojoImpl0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
-        AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
+        AnyPojoImpl actualResult = anotherDaoImpl.anyMethod();
+        AnyPojoImpl expectedResult = Json.fromSubJson(responseData, "data", AnyPojoImpl.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnotherMethodWithParameterTypesAnyPojoAndReturnTypeList0() throws Exception {
+    public void testAnyMethodWithParameterTypesAndReturnTypeAnyBasePojo0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
-        List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        AnyBasePojo actualResult = anotherDaoImpl.anyMethod();
+        AnyBasePojo expectedResult = Json.fromSubJson(responseData, "data", AnyBasePojo.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
