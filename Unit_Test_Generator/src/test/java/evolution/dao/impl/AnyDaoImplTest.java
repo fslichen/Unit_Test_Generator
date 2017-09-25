@@ -1,45 +1,45 @@
-package evolution.service;
-import evolution.pojo.AnotherPojo;
+package evolution.dao.impl;
 import generator.template.ReflectionAssert;
-import evolution.pojo.AnyPojo;
+import java.lang.Object;
+import java.util.LinkedList;
 import java.util.List;
 import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
-import evolution.service.AnyService;
+import evolution.dao.impl.AnyDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import generator.BaseTestCase;
 import org.junit.Test;
-public class AnyServiceTest extends BaseTestCase {
+public class AnyDaoImplTest extends BaseTestCase {
     @Autowired
-    private AnyService anyService;
+    private AnyDaoImpl anyDaoImpl;
     
     private String name;
     
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnotherMethodWithParameterTypesAnyPojoListAndReturnTypeList0() throws Exception {
+    public void testAnyMethodWithParameterTypesLinkedListAndReturnTypeLinkedList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
-        List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        Object actualResult = anyDaoImpl.anyMethod();
+        Object expectedResult = Json.fromSubJson(responseData, "data", LinkedList.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethodWithParameterTypesAnyPojoAnotherPojoAnyPojoAndReturnTypeAnyPojo0() throws Exception {
+    public void testAnyMethodWithParameterTypesListAndReturnTypeList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
-        AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
+        List actualResult = anyDaoImpl.anyMethod();
+        List expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     

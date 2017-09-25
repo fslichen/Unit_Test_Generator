@@ -89,7 +89,9 @@ public class Pointer {
 						try {
 							clazz = Class.forName(genericTypeName.substring(classNameStartIndex, (j == length - 1 && jCharacter != ',' && jCharacter != '<' && jCharacter != '>') ? j + 1 : j));
 						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
+							clazz = Object.class;
+							simpleGenericTypeName = Object.class.getName();
+							System.out.println(String.format("Unable to determine class %s.", genericTypeName));
 						}
 						codeWriter.writeImport(clazz);
 						simpleGenericTypeName = simpleGenericTypeName.replace(clazz.getName(), clazz.getSimpleName());
@@ -101,5 +103,21 @@ public class Pointer {
 			}
 		}
 		return simpleGenericTypeName;
+	}
+	
+	public static String concatenateParameterTypeSimpleNames(Method method) {
+		StringBuilder result = new StringBuilder();
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			result.append(parameterType.getSimpleName());
+		}
+		return result.toString();
+	}
+	
+	public static String returnTypeSimpleName(Method method) {
+		Class<?> returnType = method.getReturnType();
+		if (returnType.isPrimitive()) {
+			return "Primitive" + Lang.upperFirstCharacter(returnType.getSimpleName());
+		}
+		return returnType.getSimpleName();
 	}
 }

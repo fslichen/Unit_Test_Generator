@@ -149,7 +149,7 @@ public class UnitTestGenerator {
 			Map<String, Integer> useCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int useCaseIndex = 0; useCaseIndex < saftCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
+				for (int useCaseIndex = 0; useCaseIndex < safeCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
 					// Request Data
 					int i = 0;
 					Object[] parameterValues = Mocker.mockParameterValues(method);
@@ -213,7 +213,7 @@ public class UnitTestGenerator {
 		}
 	}
 		
-	public int saftCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
+	public int safeCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
 		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
 		if (methodCaseCount == null) {
 			return 1;
@@ -237,10 +237,10 @@ public class UnitTestGenerator {
 			int maxTestCaseCount = Lang.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				for (int methodIndex = 0; methodIndex < saftCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
+				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));// May contain other annotations.
-					codeWriter.writeMethod(method, "test", methodIndex, Exception.class);
+					codeWriter.writeMethod(method, "test", "WithParameterTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + "AndReturnType" + Pointer.returnTypeSimpleName(method) + methodIndex, Exception.class);
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(List.class);
 					codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
