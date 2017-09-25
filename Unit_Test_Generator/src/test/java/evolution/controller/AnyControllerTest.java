@@ -1,4 +1,5 @@
 package evolution.controller;
+import evolution.controller.dto.AnyAbstractDto;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.String;
@@ -137,6 +138,17 @@ public class AnyControllerTest extends BaseTest {
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         anyController.servletGet(Json.fromJson(parameterValues.get(0), HttpServletRequest.class));
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testAbstractPojo0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        anyController.abstractPojo(Json.fromJson(parameterValues.get(0), AnyAbstractDto.class));
     }
     
     @Test
