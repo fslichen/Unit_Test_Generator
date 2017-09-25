@@ -7,6 +7,14 @@ import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 
 public class Lang {
+	public static boolean isUpperCase(char character) {
+		return 'A' <= character && character <= 'Z';
+	}
+	
+	public static boolean isUpperCase(String string, int index) {
+		return isUpperCase(string.charAt(index));
+	}
+	
 	public static String lowerFirstCharacter(String string) {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}

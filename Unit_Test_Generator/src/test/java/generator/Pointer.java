@@ -66,4 +66,40 @@ public class Pointer {
 	public static String instanceName(Class<?> clazz) {
 		return Lang.lowerFirstCharacter(clazz.getSimpleName());
 	}
+	
+	public static String simpleReturnTypeName(Method method, CodeWriter codeWriter) {
+		return simpleTypeName(method.getGenericReturnType().getTypeName(), codeWriter);
+	}
+	
+	public static String simpleParameterTypeName(Method method, int parameterIndex, CodeWriter codeWriter) {
+		return simpleTypeName(method.getGenericParameterTypes()[parameterIndex].getTypeName(), codeWriter);
+	}
+	
+	public static String simpleTypeName(String genericTypeName, CodeWriter codeWriter) {
+		int classNameStartIndex = 0;
+		int length = genericTypeName.length();
+		String simpleGenericTypeName = genericTypeName;
+		for (int i = 0; i < length; i++) {
+			char iCharacter = genericTypeName.charAt(i);
+			if (Lang.isUpperCase(iCharacter)) {
+				for (int j = i + 1; j < length; j++) {
+					char jCharacter = genericTypeName.charAt(j);
+					if (jCharacter == ',' || jCharacter == '<' || jCharacter == '>' || j == length - 1) {
+						Class<?> clazz = null;
+						try {
+							clazz = Class.forName(genericTypeName.substring(classNameStartIndex, (j == length - 1 && jCharacter != ',' && jCharacter != '<' && jCharacter != '>') ? j + 1 : j));
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+						codeWriter.writeImport(clazz);
+						simpleGenericTypeName = simpleGenericTypeName.replace(clazz.getName(), clazz.getSimpleName());
+						break;
+					}
+				}
+			} else if (iCharacter == ' ' || iCharacter == '<') {
+				classNameStartIndex = i + 1;
+			}
+		}
+		return simpleGenericTypeName;
+	}
 }

@@ -38,8 +38,8 @@ public class AnyServiceTest extends BaseTest {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        java.util.List<evolution.pojo.AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
-        java.util.List<evolution.pojo.AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
+        List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     

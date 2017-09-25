@@ -42,8 +42,8 @@ public class AnyControllerTest extends BaseTest {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        java.util.List<evolution.controller.dto.AnyDto> actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
-        java.util.List<evolution.controller.dto.AnyDto> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        List<AnyDto> actualResult = anyController.list(Json.fromJson(parameterValues.get(0), AnyDto.class));
+        List<AnyDto> expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
@@ -55,8 +55,8 @@ public class AnyControllerTest extends BaseTest {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        java.util.List<evolution.pojo.Tree> actualResult = anyController.tree(Json.fromJson(parameterValues.get(0), Tree.class));
-        java.util.List<evolution.pojo.Tree> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        List<Tree> actualResult = anyController.tree(Json.fromJson(parameterValues.get(0), Tree.class));
+        List<Tree> expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
@@ -154,6 +154,17 @@ public class AnyControllerTest extends BaseTest {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
+    public void testHttp0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        anyController.http();
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
     public void testException0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
@@ -162,17 +173,6 @@ public class AnyControllerTest extends BaseTest {
         AnyDto actualResult = anyController.exception(Json.fromJson(parameterValues.get(0), AnyDto.class));
         AnyDto expectedResult = Json.fromSubJson(responseData, "data", AnyDto.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testHttp0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        anyController.http();
     }
     
 }
