@@ -119,4 +119,16 @@ public class Pointer {
 		}
 		return returnType.getSimpleName();
 	}
+	
+	public static boolean isClass(String code) {
+		return code.contains(" class ");
+	}
+	
+	public static boolean isMethod(String code) {
+		code = code.trim();
+		if (!isClass(code)) {
+			return code.endsWith("{") && (code.startsWith("public") || code.startsWith("private") || code.startsWith("protected"));
+		}
+		return false;
+	}
 }

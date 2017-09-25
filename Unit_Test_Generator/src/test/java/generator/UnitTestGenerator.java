@@ -53,7 +53,7 @@ public class UnitTestGenerator {
 		Set<String> conditionStatements = new HashSet<>(Arrays.asList("if (", "if(", "else if (", "else if(", "else {", "else{"));
 		for (String code : FileUtils.readLines(file, "UTF-8")) {
 			code = code.trim();
-			if (isMethodStartLine(code)) {
+			if (Pointer.isMethod(code)) {
 				caseCount = 1;
 				int leftBracketIndex = code.indexOf("(");
 				for (int i = leftBracketIndex - 1; i >= 0; i--) {
@@ -195,11 +195,6 @@ public class UnitTestGenerator {
 				}
 			}
 		}
-	}
-	
-	public boolean isMethodStartLine(String code) {
-		code = code.trim();
-		return !code.startsWith("public class") && (code.startsWith("public") || code.startsWith("protected") || code.startsWith("private"));// TODO Also consider the protect case without access modifier.
 	}
 	
 	@SuppressWarnings("unchecked")
