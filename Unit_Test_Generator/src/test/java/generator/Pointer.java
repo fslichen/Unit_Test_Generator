@@ -86,15 +86,14 @@ public class Pointer {
 					char jCharacter = genericTypeName.charAt(j);
 					if (jCharacter == ',' || jCharacter == '<' || jCharacter == '>' || j == length - 1) {
 						Class<?> clazz = null;
+						String subGenericTypeName = genericTypeName.substring(classNameStartIndex, (j == length - 1 && jCharacter != ',' && jCharacter != '<' && jCharacter != '>') ? j + 1 : j);
 						try {
-							clazz = Class.forName(genericTypeName.substring(classNameStartIndex, (j == length - 1 && jCharacter != ',' && jCharacter != '<' && jCharacter != '>') ? j + 1 : j));
+							clazz = Class.forName(subGenericTypeName);
+							codeWriter.writeImport(clazz);
+							simpleGenericTypeName = simpleGenericTypeName.replace(clazz.getName(), clazz.getSimpleName());
 						} catch (ClassNotFoundException e) {
-							clazz = Object.class;
-							simpleGenericTypeName = Object.class.getName();
-							System.out.println(String.format("Unable to determine class %s.", genericTypeName));
+							// TODO
 						}
-						codeWriter.writeImport(clazz);
-						simpleGenericTypeName = simpleGenericTypeName.replace(clazz.getName(), clazz.getSimpleName());
 						break;
 					}
 				}

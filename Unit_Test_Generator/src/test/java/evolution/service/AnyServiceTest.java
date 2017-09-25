@@ -20,7 +20,7 @@ public class AnyServiceTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnotherMethodWithParameterTypesAnyPojoListAndReturnTypeList0() throws Exception {
+    public void testAnotherMethodWithParameterTypesAnyPojoAndReturnTypeList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -33,7 +33,7 @@ public class AnyServiceTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethodWithParameterTypesAnyPojoAnotherPojoAnyPojoAndReturnTypeAnyPojo0() throws Exception {
+    public void testAnyMethodWithParameterTypesAnyPojoAnotherPojoAndReturnTypeAnyPojo0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
