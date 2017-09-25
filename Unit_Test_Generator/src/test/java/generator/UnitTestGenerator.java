@@ -228,7 +228,7 @@ public class UnitTestGenerator {
 			CodeWriter codeWriter = new CodeWriter();
 			codeWriter.writePackage(clazz);
 			codeWriter.writeImport(Test.class);
-			codeWriter.writeClass(clazz, "Test", BaseTest.class);
+			codeWriter.writeClass(clazz, "Test", BaseTestCase.class);
 			codeWriter.writeAnnotation(Autowired.class);
 			codeWriter.writeField(clazz);
 			codeWriter.writeBlankLine();

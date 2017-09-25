@@ -13,9 +13,9 @@ import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.controller.AnyController;
 import org.springframework.beans.factory.annotation.Autowired;
-import generator.BaseTest;
+import generator.BaseTestCase;
 import org.junit.Test;
-public class AnyControllerTest extends BaseTest {
+public class AnyControllerTest extends BaseTestCase {
     @Autowired
     private AnyController anyController;
     

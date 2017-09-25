@@ -15,13 +15,13 @@ import generator.template.TestCaseClient;
 @ContextConfiguration(classes = Application.class) 
 @WebAppConfiguration
 @TestPropertySource("classpath:application.properties")
-public class BaseTest {
+public class BaseTestCase {
 	protected TestCaseClient testCaseClient;
 	
 	@Autowired
 	protected WebApplicationContext webApplicationContext;
 
-	public BaseTest() {
+	public BaseTestCase() {
 		testCaseClient = null;// TODO Add an implementation.
 	}
 }

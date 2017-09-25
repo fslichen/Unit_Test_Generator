@@ -9,9 +9,9 @@ import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.service.AnyService;
 import org.springframework.beans.factory.annotation.Autowired;
-import generator.BaseTest;
+import generator.BaseTestCase;
 import org.junit.Test;
-public class AnyServiceTest extends BaseTest {
+public class AnyServiceTest extends BaseTestCase {
     @Autowired
     private AnyService anyService;
     
