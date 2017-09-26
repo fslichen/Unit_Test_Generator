@@ -278,7 +278,7 @@ public class UnitTestGenerator {
 	}
 	
 	public void writeCodes4InvokingControllerMethod(Class<?> clazz, Method method, CodeWriter codeWriter) {
-		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(method);
+		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(clazz, method);
 		RequestMethod requestMethod = pojo.getRequestMethod();
 		codeWriter.writeImport(MockMvcRequestBuilders.class);
 		codeWriter.writeImport(MediaType.class);

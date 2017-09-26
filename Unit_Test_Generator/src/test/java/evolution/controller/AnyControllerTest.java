@@ -25,7 +25,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/get")).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get("/project/get")).andExpect(status().isOk());
     }
     
     @Test
@@ -35,7 +35,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/list")).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get("/project/list")).andExpect(status().isOk());
     }
     
     @Test
@@ -45,7 +45,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/tree")).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get("/project/tree")).andExpect(status().isOk());
     }
     
     @Test
@@ -56,7 +56,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -67,7 +67,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -78,7 +78,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -89,7 +89,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -100,7 +100,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -111,7 +111,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -122,7 +122,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -133,7 +133,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(MockMvcRequestBuilders.post("/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -143,7 +143,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.post("/another/test/post").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        mockMvc.perform(MockMvcRequestBuilders.post("/project/another/test/post").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -170,7 +170,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/servlet/get")).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get("/project/servlet/get")).andExpect(status().isOk());
     }
     
     @Test
@@ -180,7 +180,17 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/abstract")).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get("/project/abstract")).andExpect(status().isOk());
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        mockMvc.perform(MockMvcRequestBuilders.get("/project/exception")).andExpect(status().isOk());
     }
     
     @Test
@@ -191,16 +201,6 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         anyController.http();
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/exception")).andExpect(status().isOk());
     }
     
 }

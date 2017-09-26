@@ -21,6 +21,7 @@ import evolution.pojo.Tree;
 import evolution.service.AnyService;
 
 @RestController
+@RequestMapping(value = "/project")
 public class AnyController {
 	@Autowired
 	private AnyService anyService;

@@ -46,12 +46,17 @@ public class Pointer {
 		return result.toString();
 	}
 	
-	public static ControllerMethodPojo controllerMethodPojo(Method method) {
+	public static ControllerMethodPojo controllerMethodPojo(Class<?> clazz, Method method) {
 		ControllerMethodPojo pojo = new ControllerMethodPojo();
-		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-		if (requestMapping != null) {
-			pojo.setRequestPath(requestMapping.value()[0]);
-			RequestMethod[] requestMethods = requestMapping.method();
+		String requestPath = "";
+		RequestMapping classRequestMapping = clazz.getAnnotation(RequestMapping.class);
+		if (classRequestMapping != null) {
+			requestPath = classRequestMapping.value()[0];
+		}
+		RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
+		if (methodRequestMapping != null) {
+			pojo.setRequestPath(requestPath + methodRequestMapping.value()[0]);
+			RequestMethod[] requestMethods = methodRequestMapping.method();
 			if (requestMethods.length > 0) {
 				pojo.setRequestMethod(requestMethods[0]);
 			} else {
@@ -61,12 +66,12 @@ public class Pointer {
 		}
 		GetMapping getMapping = method.getAnnotation(GetMapping.class);
 		if (getMapping != null) {
-			pojo.setRequestPath(getMapping.value()[0]);
+			pojo.setRequestPath(requestPath + getMapping.value()[0]);
 			pojo.setRequestMethod(RequestMethod.GET);
 		}
 		PostMapping postMapping = method.getAnnotation(PostMapping.class);
 		if (postMapping != null) {
-			pojo.setRequestPath(postMapping.value()[0]);
+			pojo.setRequestPath(requestPath + postMapping.value()[0]);
 			pojo.setRequestMethod(RequestMethod.POST);
 		}// TODO Add supports for PATCH, PUT
 		pojo.setReturnType(method.getReturnType());
