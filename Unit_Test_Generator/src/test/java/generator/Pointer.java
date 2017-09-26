@@ -19,6 +19,33 @@ import generator.pojo.ControllerMethodPojo;
 
 @Controller
 public class Pointer {
+	public static Class<?> classAnnotationType(Class<?> clazz) {
+		for (Annotation annotation : clazz.getAnnotations()) {
+			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
+				return Controller.class;
+			} else if (annotation.annotationType() == Service.class) {
+				return Service.class;
+			} else if (annotation.annotationType() == Repository.class || clazz.getSimpleName().endsWith("Mapper")) {
+				return Repository.class;
+			} else if (annotation.annotationType() == Component.class) {
+				return Component.class;
+			}
+		}
+		return null;
+	}
+	
+	public static String concatenatedTypeArgumentNames(String genericTypeName) {
+		return genericTypeName.substring(genericTypeName.indexOf("<") + 1, genericTypeName.lastIndexOf(">"));
+	}
+	
+	public static String concatenateParameterTypeSimpleNames(Method method) {
+		StringBuilder result = new StringBuilder();
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			result.append(parameterType.getSimpleName());
+		}
+		return result.toString();
+	}
+	
 	public static ControllerMethodPojo controllerMethodPojo(Method method) {
 		ControllerMethodPojo pojo = new ControllerMethodPojo();
 		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
@@ -41,29 +68,6 @@ public class Pointer {
 		return pojo;
 	}
 	
-	public static Class<?> classAnnotationType(Class<?> clazz) {
-		for (Annotation annotation : clazz.getAnnotations()) {
-			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
-				return Controller.class;
-			} else if (annotation.annotationType() == Service.class) {
-				return Service.class;
-			} else if (annotation.annotationType() == Repository.class || clazz.getSimpleName().endsWith("Mapper")) {
-				return Repository.class;
-			} else if (annotation.annotationType() == Component.class) {
-				return Component.class;
-			}
-		}
-		return null;
-	}
-	
-	public static String genericParameterTypeName(Method method, int parameterIndex) {
-		return method.getGenericParameterTypes()[parameterIndex].getTypeName();
-	}
-	
-	public static String concatenatedTypeArgumentNames(String genericTypeName) {
-		return genericTypeName.substring(genericTypeName.indexOf("<") + 1, genericTypeName.lastIndexOf(">"));
-	}
-	
 	public static String fieldName(Method method) {// Getter or Setter
 		String methodName = method.getName();
 		if ((methodName.startsWith("set") || methodName.startsWith("get"))) {
@@ -74,6 +78,26 @@ public class Pointer {
 		}
 	}
 	
+	public static String genericParameterTypeName(Method method, int parameterIndex) {
+		return method.getGenericParameterTypes()[parameterIndex].getTypeName();
+	}
+	
+	public static String instanceName(Class<?> clazz) {
+		return Lang.lowerFirstCharacter(clazz.getSimpleName());
+	}
+	
+	public static boolean isClass(String code) {
+		return code.contains(" class ");
+	}
+	
+	public static boolean isMethod(String code) {
+		code = code.trim();
+		if (!isClass(code)) {
+			return code.endsWith("{") && (code.startsWith("public") || code.startsWith("private") || code.startsWith("protected"));
+		}
+		return false;
+	}
+	
 	public static int level(char character, char openCharacter, char endCharacter, int level) {
 		if (character == openCharacter) {
 			level++;
@@ -81,6 +105,14 @@ public class Pointer {
 			level--;
 		}
 		return level;
+	}
+	
+	public static String returnTypeSimpleName(Method method) {
+		Class<?> returnType = method.getReturnType();
+		if (returnType.isPrimitive()) {
+			return "Primitive" + Lang.upperFirstCharacter(returnType.getSimpleName());
+		}
+		return returnType.getSimpleName();
 	}
 	
 	public static <T> List<Method> setters(Class<T> clazz) throws Exception {
@@ -94,36 +126,12 @@ public class Pointer {
 		return setters;
 	}
 	
-	public static List<String> typeArgumentNames(String genericTypeName) {
-		int level = 0;
-		String concatenatedTypeArgumentNames = concatenatedTypeArgumentNames(genericTypeName).replace(", ", ",");
-		List<Integer> separatorIndexes = new LinkedList<>();
-		separatorIndexes.add(-1);
-		for (int i = 0; i < concatenatedTypeArgumentNames.length(); i++) {
-			char character = concatenatedTypeArgumentNames.charAt(i);
-			level = level(character, '<', '>', level);
-			if (level == 0 && character == ',') {
-				separatorIndexes.add(i);
-			}
-		}
-		separatorIndexes.add(concatenatedTypeArgumentNames.length());
-		List<String> typeArgumentNames = new LinkedList<>();
-		for (int i = 0; i < separatorIndexes.size() - 1; i++) {
-			typeArgumentNames.add(concatenatedTypeArgumentNames.substring(separatorIndexes.get(i) + 1, separatorIndexes.get(i + 1)).replace(",", ", "));
-		}
-		return typeArgumentNames;
-	}
-	
-	public static String instanceName(Class<?> clazz) {
-		return Lang.lowerFirstCharacter(clazz.getSimpleName());
+	public static String simpleParameterTypeName(Method method, int parameterIndex, CodeWriter codeWriter) {
+		return simpleTypeName(method.getGenericParameterTypes()[parameterIndex].getTypeName(), codeWriter);
 	}
 	
 	public static String simpleReturnTypeName(Method method, CodeWriter codeWriter) {
 		return simpleTypeName(method.getGenericReturnType().getTypeName(), codeWriter);
-	}
-	
-	public static String simpleParameterTypeName(Method method, int parameterIndex, CodeWriter codeWriter) {
-		return simpleTypeName(method.getGenericParameterTypes()[parameterIndex].getTypeName(), codeWriter);
 	}
 	
 	public static String simpleTypeName(String genericTypeName, CodeWriter codeWriter) {
@@ -155,31 +163,23 @@ public class Pointer {
 		return simpleGenericTypeName;
 	}
 	
-	public static String concatenateParameterTypeSimpleNames(Method method) {
-		StringBuilder result = new StringBuilder();
-		for (Class<?> parameterType : method.getParameterTypes()) {
-			result.append(parameterType.getSimpleName());
+	public static List<String> typeArgumentNames(String genericTypeName) {
+		int level = 0;
+		String concatenatedTypeArgumentNames = concatenatedTypeArgumentNames(genericTypeName).replace(", ", ",");
+		List<Integer> separatorIndexes = new LinkedList<>();
+		separatorIndexes.add(-1);
+		for (int i = 0; i < concatenatedTypeArgumentNames.length(); i++) {
+			char character = concatenatedTypeArgumentNames.charAt(i);
+			level = level(character, '<', '>', level);
+			if (level == 0 && character == ',') {
+				separatorIndexes.add(i);
+			}
 		}
-		return result.toString();
-	}
-	
-	public static String returnTypeSimpleName(Method method) {
-		Class<?> returnType = method.getReturnType();
-		if (returnType.isPrimitive()) {
-			return "Primitive" + Lang.upperFirstCharacter(returnType.getSimpleName());
+		separatorIndexes.add(concatenatedTypeArgumentNames.length());
+		List<String> typeArgumentNames = new LinkedList<>();
+		for (int i = 0; i < separatorIndexes.size() - 1; i++) {
+			typeArgumentNames.add(concatenatedTypeArgumentNames.substring(separatorIndexes.get(i) + 1, separatorIndexes.get(i + 1)).replace(",", ", "));
 		}
-		return returnType.getSimpleName();
-	}
-	
-	public static boolean isClass(String code) {
-		return code.contains(" class ");
-	}
-	
-	public static boolean isMethod(String code) {
-		code = code.trim();
-		if (!isClass(code)) {
-			return code.endsWith("{") && (code.startsWith("public") || code.startsWith("private") || code.startsWith("protected"));
-		}
-		return false;
+		return typeArgumentNames;
 	}
 }

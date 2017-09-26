@@ -14,29 +14,6 @@ public class CodeWriter {
 		codes = new LinkedList<>();
 	}
 
-	public List<String> getCodes() {
-		return codes;
-	}
-	
-	public void writeRightCurlyBrace() {
-		codes.add("}");
-	}
-	
-	public void writePackage(Class<?> clazz) {
-		String className = clazz.getName();
-		codes.add(0, String.format("package %s;", className.substring(0, clazz.getName().lastIndexOf("."))));
-	}
-	
-	public void writeImport(String code) {
-		if (!codes.contains(code)) {
-			if (codes.size() == 0) {
-				codes.add(0, code);
-			} else {
-				codes.add(1, code);
-			}
-		}
-	}
-	
 	public List<Class<?>> classesIgnoringImport() {
 		List<Class<?>> classes = new LinkedList<>();
 		classes.addAll(Arrays.asList(byte.class, Byte.class, 
@@ -48,98 +25,6 @@ public class CodeWriter {
 				char.class, Character.class, 
 				boolean.class, Boolean.class));
 		return classes;
-	}
-	
-	public void writeImport(Class<?> clazz) {
-		if (!classesIgnoringImport().contains(clazz)) {
-			writeImport(String.format("import %s;", clazz.getName()));
-		}
-	}
-	
-	public void writeStaticImport(String className) {
-		String code = String.format("import static %s.*;", className);
-		if (!codes.contains(code)) {
-			codes.add(code);
-		}
-	}
-	
-	public void writeStaticImport(Class<?> clazz) {
-		writeStaticImport(clazz.getName());
-	}
-	
-	public void writeClass(Class<?> clazz, String suffix) {
-		codes.add(String.format("public class %s%s {", clazz.getSimpleName(), suffix));
-	}
-	
-	public void writeClass(Class<?> clazz, String suffix, Class<?> extendedClass) {
-		writeImport(extendedClass);
-		codes.add(String.format("public class %s%s extends %s {", clazz.getSimpleName(), suffix, extendedClass.getSimpleName()));
-	}
-	
-	public void writeAnnotation(Class<?> clazz) {
-		writeImport(clazz);
-		codes.add("@" + clazz.getSimpleName());
-	}
-	
-	public void writeField(Class<?> clazz) {
-		writeImport(clazz);
-		String simpleClassName = clazz.getSimpleName();
-		String fieldName = lowerFirstCharacter(simpleClassName);
-		codes.add(String.format("private %s %s;", simpleClassName, fieldName));
-	}
-	
-	public void writeBlankLine() {
-		codes.add("\n");
-	}
-	
-	public String upperFirstCharacter(String string) {
-		return string.substring(0, 1).toUpperCase() + string.substring(1);
-	}
-	
-	public String lowerFirstCharacter(String string) {
-		return string.substring(0, 1).toLowerCase() + string.substring(1);
-	}
-	
-	public void writeMethod(Method method, String prefix, Object suffix, Class<?> exceptionClass) {
-		String exceptionString = "";
-		if (exceptionClass != null) {
-			exceptionString = String.format("throws %s", exceptionClass.getSimpleName()); 
-		}
-		String methodSignature = String.format("public void %s%s%s() %s {", prefix, upperFirstCharacter(method.getName()), suffix, exceptionString);
-		for (int i = codes.size() - 1; i >= 0; i--) {
-			String code = codes.get(i);
-			if (code.equals("\n")) {
-				break;
-			} else if (code.startsWith("@")) {
-				codes.add(i + 1, methodSignature);
-				return;
-			}
-		}
-		codes.add(methodSignature);
-	}
-	
-	public void writeCode(String code) {
-		if (code.startsWith("package")) {
-			codes.add(0, code);
-		} else if (code.startsWith("import")) {
-			writeImport(code);
-		} else {
-			codes.add(code);
-		}
-	}
-	
-	public void writeCodes(List<String> codesToBeWritten) {
-		for (String codeToBeWritten : codesToBeWritten) {
-			writeCode(codeToBeWritten);
-		}
-	}
-	
-	public void generateIndent(StringBuilder completeCodes) {
-		for (int i = 0; i < indentCount; i++) {
-			for (int j = 0; j < 4; j++) {
-				completeCodes.append(" ");
-			}
-		}
 	}
 	
 	public void generateCode(String code, StringBuilder completeCodes) {
@@ -178,6 +63,22 @@ public class CodeWriter {
 		return completeCodes.toString();
 	}
 	
+	public void generateIndent(StringBuilder completeCodes) {
+		for (int i = 0; i < indentCount; i++) {
+			for (int j = 0; j < 4; j++) {
+				completeCodes.append(" ");
+			}
+		}
+	}
+	
+	public List<String> getCodes() {
+		return codes;
+	}
+	
+	public String lowerFirstCharacter(String string) {
+		return string.substring(0, 1).toLowerCase() + string.substring(1);
+	}
+	
 	public void patchTypeParameterToMethod(String typeParameterName) {
 		for (int i = codes.size() - 1; i >= 0; i--) {
 			String code = codes.get(i);
@@ -186,6 +87,105 @@ public class CodeWriter {
 				codes.set(i, String.format("%s <%s> %s", code.substring(0, blankIndex), typeParameterName, code.substring(blankIndex + 1)));
 				break;
 			}
+		}
+	}
+	
+	public String upperFirstCharacter(String string) {
+		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	}
+	
+	public void writeAnnotation(Class<?> clazz) {
+		writeImport(clazz);
+		codes.add("@" + clazz.getSimpleName());
+	}
+	
+	public void writeBlankLine() {
+		codes.add("\n");
+	}
+	
+	public void writeClass(Class<?> clazz, String suffix) {
+		codes.add(String.format("public class %s%s {", clazz.getSimpleName(), suffix));
+	}
+	
+	public void writeClass(Class<?> clazz, String suffix, Class<?> extendedClass) {
+		writeImport(extendedClass);
+		codes.add(String.format("public class %s%s extends %s {", clazz.getSimpleName(), suffix, extendedClass.getSimpleName()));
+	}
+	
+	public void writeCode(String code) {
+		if (code.startsWith("package")) {
+			codes.add(0, code);
+		} else if (code.startsWith("import")) {
+			writeImport(code);
+		} else {
+			codes.add(code);
+		}
+	}
+	
+	public void writeCodes(List<String> codesToBeWritten) {
+		for (String codeToBeWritten : codesToBeWritten) {
+			writeCode(codeToBeWritten);
+		}
+	}
+	
+	public void writeField(Class<?> clazz) {
+		writeImport(clazz);
+		String simpleClassName = clazz.getSimpleName();
+		String fieldName = lowerFirstCharacter(simpleClassName);
+		codes.add(String.format("private %s %s;", simpleClassName, fieldName));
+	}
+	
+	public void writeImport(Class<?> clazz) {
+		if (!classesIgnoringImport().contains(clazz)) {
+			writeImport(String.format("import %s;", clazz.getName()));
+		}
+	}
+	
+	public void writeImport(String code) {
+		if (!codes.contains(code)) {
+			if (codes.size() == 0) {
+				codes.add(0, code);
+			} else {
+				codes.add(1, code);
+			}
+		}
+	}
+	
+	public void writeMethod(Method method, String prefix, Object suffix, Class<?> exceptionClass) {
+		String exceptionString = "";
+		if (exceptionClass != null) {
+			exceptionString = String.format("throws %s", exceptionClass.getSimpleName()); 
+		}
+		String methodSignature = String.format("public void %s%s%s() %s {", prefix, upperFirstCharacter(method.getName()), suffix, exceptionString);
+		for (int i = codes.size() - 1; i >= 0; i--) {
+			String code = codes.get(i);
+			if (code.equals("\n")) {
+				break;
+			} else if (code.startsWith("@")) {
+				codes.add(i + 1, methodSignature);
+				return;
+			}
+		}
+		codes.add(methodSignature);
+	}
+	
+	public void writePackage(Class<?> clazz) {
+		String className = clazz.getName();
+		codes.add(0, String.format("package %s;", className.substring(0, clazz.getName().lastIndexOf("."))));
+	}
+	
+	public void writeRightCurlyBrace() {
+		codes.add("}");
+	}
+	
+	public void writeStaticImport(Class<?> clazz) {
+		writeStaticImport(clazz.getName());
+	}
+	
+	public void writeStaticImport(String className) {
+		String code = String.format("import static %s.*;", className);
+		if (!codes.contains(code)) {
+			codes.add(code);
 		}
 	}
 }

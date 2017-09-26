@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -281,18 +280,6 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter) {
-		StringBuilder parametersBuilder = new StringBuilder();
-		codeWriter.writeImport(List.class);
-		codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
-		int i = 0;
-		for (Class<?> parameterType : method.getParameterTypes()) {
-			codeWriter.writeImport(parameterType);
-			parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
-		}
-		return Lang.trimEndingComma(parametersBuilder);
-	}
-	
 	public void writeCodes4InvokingControllerMethod(Method method, CodeWriter codeWriter) {
 		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(method);
 		RequestMethod requestMethod = pojo.getRequestMethod();
@@ -356,5 +343,17 @@ public class UnitTestGenerator {
 			codeWriter.writeCode("ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 		codeWriter.writeCode("} catch (Exception e){}");
+	}
+	
+	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter) {
+		StringBuilder parametersBuilder = new StringBuilder();
+		codeWriter.writeImport(List.class);
+		codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
+		int i = 0;
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			codeWriter.writeImport(parameterType);
+			parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+		}
+		return Lang.trimEndingComma(parametersBuilder);
 	}
 }

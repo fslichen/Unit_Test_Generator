@@ -14,12 +14,6 @@ import java.util.Random;
 import java.util.Set;
 
 public class Mocker {
-	private Set<Class<?>> mockedClasses;
-	
-	public Mocker() {
-		mockedClasses = new HashSet<>();
-	}
-	
 	public static BigDecimal mockBigDecimal() {
 		return new BigDecimal(mockDouble());
 	}
@@ -27,7 +21,7 @@ public class Mocker {
 	public static Boolean mockBoolean() {
 		return new Random().nextBoolean();
 	}
-
+	
 	public static Byte mockByte() {
 		byte[] b = new byte[0];
 		new Random().nextBytes(b);
@@ -37,7 +31,7 @@ public class Mocker {
 	public static Character mockCharacter() {
 		return Math.random() < .5 ? 'a' : 'z';
 	}
-	
+
 	public static Double mockDouble() {
 		return new Random().nextDouble();
 	}
@@ -58,8 +52,6 @@ public class Mocker {
 		return method.invoke(currentInstance, mockParameterValues(method));
 	}
 	
-
-	
 	public static Long mockLong() {
 		return new Random().nextLong();
 	}
@@ -74,6 +66,8 @@ public class Mocker {
 		return parameterValues;
 	}
 	
+
+	
 	public static Object mockReturnValue(Method method) throws Exception {
 		return new Mocker().mockObject(method.getGenericReturnType().getTypeName());
 	}
@@ -85,6 +79,12 @@ public class Mocker {
 	public static String mockString() {
 		List<String> strings = Arrays.asList("George Washington", "Abraham Lincoln", "Donald Trump", "Richard Nixon", "Bill Clinton", "Barack Obama");
 		return strings.get(mockInteger(strings.size()));
+	}
+	
+	private Set<Class<?>> mockedClasses;
+	
+	public Mocker() {
+		mockedClasses = new HashSet<>();
 	}
 	
 	public Collection<Object> mockCollection(String genericTypeName, Collection<Object> collection) {

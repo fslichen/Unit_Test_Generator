@@ -14,6 +14,17 @@ public class Json {
 		objectMapper = new ObjectMapper();
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T> T copyObject(T t) {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public static <T> T fromJson(String json, Class<T> clazz) {
 		try {
 			return objectMapper.readValue(json, clazz);
@@ -69,17 +80,6 @@ public class Json {
 		try {
 			return objectMapper.writeValueAsString(objectMapper.readValue(json, Map.class).get(fieldName));
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static <T> T copyObject(T t) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			return (T) objectMapper.readValue(objectMapper.writeValueAsString(t), t.getClass());
-		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
