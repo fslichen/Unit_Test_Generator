@@ -233,10 +233,6 @@ public class UnitTestGenerator {
 			codeWriter.writeField(clazz);
 			codeWriter.writeBlankLine();
 			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
-			if (classAnnotationType == Controller.class) {
-				codeWriter.writeField(MockMvc.class);
-				codeWriter.writeBlankLine();
-			}
 			UnitTestClassWriter unitTestClassWriter = unitTestClassWriters.get(classAnnotationType);
 			if (unitTestClassWriter == null) {
 				unitTestClassWriter = unitTestClassWriters.get(null);

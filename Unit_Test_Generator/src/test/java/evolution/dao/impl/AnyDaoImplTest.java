@@ -17,7 +17,7 @@ public class AnyDaoImplTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public <T> void testAnyMethodWithParameterTypesAndReturnTypeLinkedList0() throws Exception {
+    public <T> void testAnyMethodWithTypesLinkedList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -29,7 +29,7 @@ public class AnyDaoImplTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethodWithParameterTypesAndReturnTypeList0() throws Exception {
+    public void testAnyMethodWithTypesList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
