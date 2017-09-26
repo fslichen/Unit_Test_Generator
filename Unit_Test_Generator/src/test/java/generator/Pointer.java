@@ -51,7 +51,12 @@ public class Pointer {
 		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
 		if (requestMapping != null) {
 			pojo.setRequestPath(requestMapping.value()[0]);
-			pojo.setRequestMethod(requestMapping.method()[0]);
+			RequestMethod[] requestMethods = requestMapping.method();
+			if (requestMethods.length > 0) {
+				pojo.setRequestMethod(requestMethods[0]);
+			} else {
+				pojo.setRequestMethod(RequestMethod.POST);
+			}
 			return pojo;
 		}
 		GetMapping getMapping = method.getAnnotation(GetMapping.class);

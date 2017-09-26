@@ -250,15 +250,12 @@ public class UnitTestGenerator {
 					codeWriter.writeCodes(unitTestMethodWriter.write(method));
 					codeWriter.writeMethod(method, "test", "WithTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method) + methodIndex, Exception.class);
 					codeWriter.writeImport(Json.class);
-					String parametersInString = method.getParameterCount() > 0 ? writeCodes4PreparingParameterValues(method, codeWriter) : "";
-					if (method.getModifiers() == Modifier.PRIVATE) {
-						writeCodes4InvokingPrivateMethod(clazz, method, parametersInString, codeWriter);
+					if (classAnnotationType == Controller.class) {
+						writeCodes4InvokingControllerMethod(method, codeWriter);
+					} else if (method.getModifiers() == Modifier.PRIVATE) {
+						writeCodes4InvokingPrivateMethod(clazz, method, codeWriter);
 					} else {
-						if (classAnnotationType == Controller.class) {
-							writeCodes4InvokingControllerMethod(method, codeWriter);
-						} else {
-							writeCodes4InvokingOrdinaryMethod(clazz, method, parametersInString, codeWriter);
-						}
+						writeCodes4InvokingOrdinaryMethod(clazz, method, codeWriter);
 					}
 					codeWriter.writeRightCurlyBrace();
 					codeWriter.writeBlankLine();
@@ -287,7 +284,13 @@ public class UnitTestGenerator {
 		codeWriter.writeImport(MediaType.class);
 		codeWriter.writeStaticImport(MockMvcResultMatchers.class);
 		if (requestMethod == RequestMethod.POST) {
-			String code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+			String code = null;
+			if (method.getParameterCount() > 0) {
+				writeCodes4PreparingParameterValues(method, codeWriter, false);
+				code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+			} else {
+				code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+			}
 			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
 				code += ".andExpect(content().json(Json.subJson(responseData, \"data\"), false))";
 			}
@@ -297,8 +300,9 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void writeCodes4InvokingOrdinaryMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
+	public void writeCodes4InvokingOrdinaryMethod(Class<?> clazz, Method method, CodeWriter codeWriter) {
 		Class<?> returnType = method.getReturnType();
+		String parametersInString = method.getParameterCount() > 0 ? writeCodes4PreparingParameterValues(method, codeWriter, true) : "";
 		if (returnType == void.class || returnType == Void.class) {
 			codeWriter.writeCode(String.format("%s.%s(%s);", Pointer.instanceName(clazz), method.getName(), parametersInString));
 		} else {
@@ -309,7 +313,7 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) throws ClassNotFoundException {
+	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, CodeWriter codeWriter) throws ClassNotFoundException {
 		StringBuilder parameterTypesBuilder = new StringBuilder();
 		for (Class<?> parameterType : method.getParameterTypes()) {
 			codeWriter.writeImport(parameterType);
@@ -325,6 +329,7 @@ public class UnitTestGenerator {
 		}
 		codeWriter.writeCode("method.setAccessible(true);");
 		Class<?> returnType = method.getReturnType();
+		String parametersInString = writeCodes4PreparingParameterValues(method, codeWriter, true);
 		if (returnType == void.class || returnType == Void.class) {
 			if (parameterCount > 0) {
 				codeWriter.writeCode(String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), parametersInString));
@@ -345,13 +350,15 @@ public class UnitTestGenerator {
 		codeWriter.writeCode("} catch (Exception e){}");
 	}
 	
-	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter) {
+	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter, boolean writeImports4Parameters) {
 		StringBuilder parametersBuilder = new StringBuilder();
 		codeWriter.writeImport(List.class);
 		codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
 		int i = 0;
 		for (Class<?> parameterType : method.getParameterTypes()) {
-			codeWriter.writeImport(parameterType);
+			if (writeImports4Parameters) {
+				codeWriter.writeImport(parameterType);
+			}
 			parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 		}
 		return Lang.trimEndingComma(parametersBuilder);

@@ -25,6 +25,16 @@ public class AnyController {
 	@Autowired
 	private AnyService anyService;
 	
+	@RequestMapping("/test/post")
+	public void post(AnyPojo anyPojo) {
+		
+	}
+	
+	@RequestMapping("/another/test/post")
+	public void postAnother() {
+		
+	}
+	
 	@GetMapping("/get")
 	public int get() {
 		return 0;
