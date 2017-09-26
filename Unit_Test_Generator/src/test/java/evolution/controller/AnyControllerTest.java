@@ -186,21 +186,21 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        mockMvc.perform(MockMvcRequestBuilders.get("/exception")).andExpect(status().isOk());
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testHttpWithTypesPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         anyController.http();
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        mockMvc.perform(MockMvcRequestBuilders.get("/exception")).andExpect(status().isOk());
     }
     
 }
