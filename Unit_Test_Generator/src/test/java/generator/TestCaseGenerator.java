@@ -1,7 +1,9 @@
 package generator;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.Test;
@@ -20,13 +22,16 @@ import generator.template.UnitTestMethodWriter;
 public class TestCaseGenerator {
 	@Test
 	public void run() throws Exception {
+		// Class Filter
 		Predicate<Class<?>> classFilter = new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return clazz != Application.class && (clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null || clazz.getAnnotation(Service.class) != null || clazz.getAnnotation(Repository.class) != null || clazz.getSimpleName().endsWith("Mapper"));
 			}
 		};
-		UnitTestClassWriter classWriter = new UnitTestClassWriter() {
+		// Unit Test Class Writer
+		Map<Class<?>, UnitTestClassWriter> unitTestClassWriters = new LinkedHashMap<>();
+		UnitTestClassWriter defaultClassWriter = new UnitTestClassWriter() {
 			@Override
 			public List<String> write() {
 				CodeWriter codeWriter = new CodeWriter();
@@ -35,7 +40,10 @@ public class TestCaseGenerator {
 				return codeWriter.getCodes();
 			}
 		};
-		UnitTestMethodWriter methodWriter = new UnitTestMethodWriter() {
+		unitTestClassWriters.put(null, defaultClassWriter);
+		// Unit Test Method Writer
+		Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters = new LinkedHashMap<>();
+		UnitTestMethodWriter defaultMethodWriter = new UnitTestMethodWriter() {
 			@Override
 			public List<String> write(Method method) {
 				CodeWriter codeWriter = new CodeWriter();
@@ -48,7 +56,8 @@ public class TestCaseGenerator {
 				return codeWriter.getCodes();
 			}
 		};
+		unitTestMethodWriters.put(null, defaultMethodWriter);
 		UnitTestGenerator unitTestGenerator = new UnitTestGenerator();
-		unitTestGenerator.scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(Lang.property("test-case-base-package", String.class), classFilter, classWriter, methodWriter);
+		unitTestGenerator.scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(Lang.property("test-case-base-package", String.class), classFilter, unitTestClassWriters, unitTestMethodWriters);
 	}
 }

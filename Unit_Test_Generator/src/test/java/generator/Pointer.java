@@ -1,10 +1,34 @@
 package generator;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.Test;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
 public class Pointer {
+	public static Class<?> classAnnotationType(Class<?> clazz) {
+		for (Annotation annotation : clazz.getAnnotations()) {
+			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
+				return Controller.class;
+			} else if (annotation.annotationType() == Service.class) {
+				return Service.class;
+			} else if (annotation.annotationType() == Repository.class || clazz.getSimpleName().endsWith("Mapper")) {
+				return Repository.class;
+			} else if (annotation.annotationType() == Component.class) {
+				return Component.class;
+			}
+		}
+		return null;
+	}
+	
 	public static String genericParameterTypeName(Method method, int parameterIndex) {
 		return method.getGenericParameterTypes()[parameterIndex].getTypeName();
 	}

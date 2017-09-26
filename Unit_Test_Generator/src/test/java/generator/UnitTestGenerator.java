@@ -216,7 +216,7 @@ public class UnitTestGenerator {
 		return Math.min(methodCaseCount, maxCaseCount);
 	}
 	
-	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, final UnitTestClassWriter unitTestClassWriter, final UnitTestMethodWriter unitTestMethodWriter) throws Exception {
+	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, final Map<Class<?>, UnitTestClassWriter> unitTestClassWriters, final Map<Class<?>, UnitTestMethodWriter> unitTestMethodWriters) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
 			// Generate unit test class related codes.
 			Class<?> clazz = entry.getValue();
@@ -227,10 +227,21 @@ public class UnitTestGenerator {
 			codeWriter.writeAnnotation(Autowired.class);
 			codeWriter.writeField(clazz);
 			codeWriter.writeBlankLine();
+			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
+			UnitTestClassWriter unitTestClassWriter = unitTestClassWriters.get(classAnnotationType);
+			if (unitTestClassWriter == null) {
+				unitTestClassWriter = unitTestClassWriters.get(null);
+				System.out.println(String.format("No unit test class writer is found for class %s, use the default unit test class writer instead.", clazz.getName()));
+			}
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
 			int maxTestCaseCount = Lang.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
+			UnitTestMethodWriter unitTestMethodWriter = unitTestMethodWriters.get(classAnnotationType);
+			if (unitTestMethodWriter == null) {
+				unitTestMethodWriter = unitTestMethodWriters.get(null);
+				System.out.println(String.format("No unit test method writer is found for class %s, use the default unit test method writer instead.", clazz.getName()));
+			}
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
