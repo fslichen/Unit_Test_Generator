@@ -24,7 +24,11 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import generator.pojo.ComponentDto;
 import generator.pojo.ControllerDto;
+import generator.pojo.ControllerMethodPojo;
 import generator.pojo.SpecialParameterValue;
 import generator.pojo.VoidReturnValue;
 import generator.template.ReflectionAssert;
@@ -228,10 +233,13 @@ public class UnitTestGenerator {
 			codeWriter.writeField(clazz);
 			codeWriter.writeBlankLine();
 			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
+			if (classAnnotationType == Controller.class) {
+				codeWriter.writeField(MockMvc.class);
+				codeWriter.writeBlankLine();
+			}
 			UnitTestClassWriter unitTestClassWriter = unitTestClassWriters.get(classAnnotationType);
 			if (unitTestClassWriter == null) {
 				unitTestClassWriter = unitTestClassWriters.get(null);
-				System.out.println(String.format("No unit test class writer is found for class %s, use the default unit test class writer instead.", clazz.getName()));
 			}
 			codeWriter.writeCodes(unitTestClassWriter.write());
 			// Generate unit test method related codes.
@@ -240,7 +248,6 @@ public class UnitTestGenerator {
 			UnitTestMethodWriter unitTestMethodWriter = unitTestMethodWriters.get(classAnnotationType);
 			if (unitTestMethodWriter == null) {
 				unitTestMethodWriter = unitTestMethodWriters.get(null);
-				System.out.println(String.format("No unit test method writer is found for class %s, use the default unit test method writer instead.", clazz.getName()));
 			}
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
@@ -260,14 +267,10 @@ public class UnitTestGenerator {
 					if (method.getModifiers() == Modifier.PRIVATE) {
 						writeCodes4InvokingPrivateMethod(clazz, method, parametersInString, codeWriter);
 					} else {
-						Class<?> returnType = method.getReturnType();
-						if (returnType == void.class || returnType == Void.class) {
-							codeWriter.writeCode(String.format("%s.%s(%s);", Pointer.instanceName(clazz), method.getName(), parametersInString));
+						if (classAnnotationType == Controller.class) {
+							writeCodes4InvokingControllerMethod(method, codeWriter);
 						} else {
-							codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", Pointer.simpleReturnTypeName(method, codeWriter), Pointer.instanceName(clazz), method.getName(), parametersInString));
-							codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
-							codeWriter.writeImport(ReflectionAssert.class);
-							codeWriter.writeCode("ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
+							writeCodes4InvokingOrdinaryMethod(clazz, method, parametersInString, codeWriter);
 						}
 					}
 					codeWriter.writeRightCurlyBrace();
@@ -287,6 +290,32 @@ public class UnitTestGenerator {
 			} else {
 				System.out.println("The file " + unitTestFile.getAbsolutePath() + " already exists.");
 			}
+		}
+	}
+	
+	public void writeCodes4InvokingControllerMethod(Method method, CodeWriter codeWriter) {
+		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(method);
+		if (pojo.getRequestMethod() == RequestMethod.POST) {
+			codeWriter.writeImport(MockMvcRequestBuilders.class);
+			codeWriter.writeImport(MediaType.class);
+			codeWriter.writeStaticImport(MockMvcResultMatchers.class);
+			String code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
+				code += ".andExpect(content().json(Json.subJson(responseData, \"data\"), false))";
+			}
+			codeWriter.writeCode(code + ";");
+		}
+	}
+	
+	public void writeCodes4InvokingOrdinaryMethod(Class<?> clazz, Method method, String parametersInString, CodeWriter codeWriter) {
+		Class<?> returnType = method.getReturnType();
+		if (returnType == void.class || returnType == Void.class) {
+			codeWriter.writeCode(String.format("%s.%s(%s);", Pointer.instanceName(clazz), method.getName(), parametersInString));
+		} else {
+			codeWriter.writeCode(String.format("%s actualResult = %s.%s(%s);", Pointer.simpleReturnTypeName(method, codeWriter), Pointer.instanceName(clazz), method.getName(), parametersInString));
+			codeWriter.writeCode(String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
+			codeWriter.writeImport(ReflectionAssert.class);
+			codeWriter.writeCode("ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 	}
 	

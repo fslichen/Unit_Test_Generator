@@ -56,6 +56,14 @@ public class CodeWriter {
 		}
 	}
 	
+	public void writeStaticImport(String className) {
+		codes.add(String.format("import static %s.*;", className));
+	}
+	
+	public void writeStaticImport(Class<?> clazz) {
+		writeStaticImport(clazz.getName());
+	}
+	
 	public void writeClass(Class<?> clazz, String suffix) {
 		codes.add(String.format("public class %s%s {", clazz.getSimpleName(), suffix));
 	}

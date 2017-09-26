@@ -5,15 +5,42 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import generator.pojo.ControllerMethodPojo;
 
 @Controller
 public class Pointer {
+	public static ControllerMethodPojo controllerMethodPojo(Method method) {
+		ControllerMethodPojo pojo = new ControllerMethodPojo();
+		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+		if (requestMapping != null) {
+			pojo.setRequestPath(requestMapping.value()[0]);
+			pojo.setRequestMethod(requestMapping.method()[0]);
+			return pojo;
+		}
+		GetMapping getMapping = method.getAnnotation(GetMapping.class);
+		if (getMapping != null) {
+			pojo.setRequestPath(getMapping.value()[0]);
+			pojo.setRequestMethod(RequestMethod.GET);
+		}
+		PostMapping postMapping = method.getAnnotation(PostMapping.class);
+		if (postMapping != null) {
+			pojo.setRequestPath(postMapping.value()[0]);
+			pojo.setRequestMethod(RequestMethod.POST);
+		}// TODO Add supports for PATCH, PUT
+		pojo.setReturnType(method.getReturnType());
+		return pojo;
+	}
+	
 	public static Class<?> classAnnotationType(Class<?> clazz) {
 		for (Annotation annotation : clazz.getAnnotations()) {
 			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {

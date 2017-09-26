@@ -14,8 +14,6 @@ public class AnyDaoImplTest extends BaseTestCase {
     @Autowired
     private AnyDaoImpl anyDaoImpl;
     
-    private String name;
-    
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase

@@ -35,8 +35,6 @@ public class TestCaseGenerator {
 			@Override
 			public List<String> write() {
 				CodeWriter codeWriter = new CodeWriter();
-				codeWriter.writeCode("private String name;");
-				codeWriter.writeBlankLine();
 				return codeWriter.getCodes();
 			}
 		};
