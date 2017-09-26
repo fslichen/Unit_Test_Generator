@@ -251,7 +251,7 @@ public class UnitTestGenerator {
 					codeWriter.writeMethod(method, "test", "WithTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method) + methodIndex, Exception.class);
 					codeWriter.writeImport(Json.class);
 					if (classAnnotationType == Controller.class) {
-						writeCodes4InvokingControllerMethod(method, codeWriter);
+						writeCodes4InvokingControllerMethod(clazz, method, codeWriter);
 					} else if (method.getModifiers() == Modifier.PRIVATE) {
 						writeCodes4InvokingPrivateMethod(clazz, method, codeWriter);
 					} else {
@@ -277,7 +277,7 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void writeCodes4InvokingControllerMethod(Method method, CodeWriter codeWriter) {
+	public void writeCodes4InvokingControllerMethod(Class<?> clazz, Method method, CodeWriter codeWriter) {
 		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(method);
 		RequestMethod requestMethod = pojo.getRequestMethod();
 		codeWriter.writeImport(MockMvcRequestBuilders.class);
@@ -297,6 +297,12 @@ public class UnitTestGenerator {
 			codeWriter.writeCode(code + ";");
 		} else if (requestMethod == RequestMethod.GET) {
 			codeWriter.writeCode(String.format("mockMvc.perform(MockMvcRequestBuilders.get(%s)).andExpect(status().isOk());", "\"" + pojo.getRequestPath() + "\""));
+		} else {
+			if (method.getModifiers() == Modifier.PRIVATE) {
+				writeCodes4InvokingPrivateMethod(clazz, method, codeWriter);
+			} else {
+				writeCodes4InvokingOrdinaryMethod(clazz, method, codeWriter);
+			}
 		}
 	}
 	
@@ -313,7 +319,7 @@ public class UnitTestGenerator {
 		}
 	}
 	
-	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, CodeWriter codeWriter) throws ClassNotFoundException {
+	public void writeCodes4InvokingPrivateMethod(Class<?> clazz, Method method, CodeWriter codeWriter) {
 		StringBuilder parameterTypesBuilder = new StringBuilder();
 		for (Class<?> parameterType : method.getParameterTypes()) {
 			codeWriter.writeImport(parameterType);
@@ -329,17 +335,16 @@ public class UnitTestGenerator {
 		}
 		codeWriter.writeCode("method.setAccessible(true);");
 		Class<?> returnType = method.getReturnType();
-		String parametersInString = writeCodes4PreparingParameterValues(method, codeWriter, true);
 		if (returnType == void.class || returnType == Void.class) {
 			if (parameterCount > 0) {
-				codeWriter.writeCode(String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), parametersInString));
+				codeWriter.writeCode(String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, true)));
 			} else {
 				codeWriter.writeCode(String.format("method.invoke(%s);", Pointer.instanceName(clazz)));
 			}
 		} else {
 			String returnTypeSimpleName = returnType.getSimpleName();
 			if (parameterCount > 0) {
-				codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), parametersInString));
+				codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, true)));
 			} else {
 				codeWriter.writeCode(String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
 			}

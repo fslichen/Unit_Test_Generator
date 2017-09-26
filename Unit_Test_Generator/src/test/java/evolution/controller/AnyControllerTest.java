@@ -1,4 +1,7 @@
 package evolution.controller;
+import generator.template.ReflectionAssert;
+import java.lang.reflect.Method;
+import java.lang.String;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -150,6 +153,14 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        try {
+            Method method = AnyController.class.getDeclaredMethod("hide", String.class);
+            method.setAccessible(true);
+            List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+            String actualResult = (String) method.invoke(anyController, Json.fromJson(parameterValues.get(0), String.class));
+            String expectedResult = Json.fromSubJson(responseData, "data", String.class);
+            ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+        } catch (Exception e){}
     }
     
     @Test
@@ -175,20 +186,21 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         mockMvc.perform(MockMvcRequestBuilders.get("/exception")).andExpect(status().isOk());
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        anyController.http();
     }
     
 }
