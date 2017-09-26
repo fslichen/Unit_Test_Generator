@@ -1,7 +1,7 @@
 package evolution.dao.impl;
+import java.util.List;
 import generator.template.ReflectionAssert;
 import java.util.LinkedList;
-import java.util.List;
 import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.template.TestCase;
@@ -21,7 +21,6 @@ public class AnyDaoImplTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         LinkedList<T> actualResult = anyDaoImpl.anyMethod();
         LinkedList<T> expectedResult = Json.fromSubJson(responseData, "data", LinkedList.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
@@ -34,7 +33,6 @@ public class AnyDaoImplTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         List actualResult = anyDaoImpl.anyMethod();
         List expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);

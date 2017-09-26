@@ -4,11 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 import generator.template.ReflectionAssert;
 import java.lang.reflect.Method;
 import java.lang.String;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import evolution.pojo.Tree;
 import evolution.controller.dto.AnyDto;
 import java.util.List;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.template.TestCase;
@@ -18,9 +18,6 @@ import evolution.controller.AnyController;
 import org.springframework.beans.factory.annotation.Autowired;
 import generator.BaseTestCase;
 import org.junit.Test;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 public class AnyControllerTest extends BaseTestCase {
     @Autowired
@@ -35,7 +32,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(MockMvcRequestBuilders.get("/get")).andExpect(status().isOk());
     }
     
     @Test
@@ -46,6 +43,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(MockMvcRequestBuilders.get("/list")).andExpect(status().isOk());
     }
     
     @Test
@@ -56,6 +54,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(MockMvcRequestBuilders.get("/tree")).andExpect(status().isOk());
     }
     
     @Test
@@ -127,6 +126,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(MockMvcRequestBuilders.get("/servlet/get")).andExpect(status().isOk());
     }
     
     @Test
@@ -137,6 +137,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(MockMvcRequestBuilders.get("/abstract")).andExpect(status().isOk());
     }
     
     @Test
@@ -146,7 +147,6 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
     }
     
     @Test
@@ -157,6 +157,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(MockMvcRequestBuilders.get("/exception")).andExpect(status().isOk());
     }
     
 }

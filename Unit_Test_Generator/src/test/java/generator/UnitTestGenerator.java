@@ -252,18 +252,10 @@ public class UnitTestGenerator {
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					codeWriter.writeAnnotation(Test.class);
-					codeWriter.writeCodes(unitTestMethodWriter.write(method));// May contain other annotations.
-					codeWriter.writeMethod(method, "test", "WithParameterTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + "AndReturnType" + Pointer.returnTypeSimpleName(method) + methodIndex, Exception.class);
+					codeWriter.writeCodes(unitTestMethodWriter.write(method));
+					codeWriter.writeMethod(method, "test", "WithTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method) + methodIndex, Exception.class);
 					codeWriter.writeImport(Json.class);
-					codeWriter.writeImport(List.class);
-					codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
-					StringBuilder parametersBuilder = new StringBuilder();
-					int i = 0;
-					for (Class<?> parameterType : method.getParameterTypes()) {
-						codeWriter.writeImport(parameterType);
-						parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
-					}
-					String parametersInString = Lang.trimEndingComma(parametersBuilder);
+					String parametersInString = method.getParameterCount() > 0 ? writeCodes4PreparingParameterValues(method, codeWriter) : "";
 					if (method.getModifiers() == Modifier.PRIVATE) {
 						writeCodes4InvokingPrivateMethod(clazz, method, parametersInString, codeWriter);
 					} else {
@@ -293,17 +285,32 @@ public class UnitTestGenerator {
 		}
 	}
 	
+	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter) {
+		StringBuilder parametersBuilder = new StringBuilder();
+		codeWriter.writeImport(List.class);
+		codeWriter.writeCode("List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
+		int i = 0;
+		for (Class<?> parameterType : method.getParameterTypes()) {
+			codeWriter.writeImport(parameterType);
+			parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+		}
+		return Lang.trimEndingComma(parametersBuilder);
+	}
+	
 	public void writeCodes4InvokingControllerMethod(Method method, CodeWriter codeWriter) {
 		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(method);
-		if (pojo.getRequestMethod() == RequestMethod.POST) {
-			codeWriter.writeImport(MockMvcRequestBuilders.class);
-			codeWriter.writeImport(MediaType.class);
-			codeWriter.writeStaticImport(MockMvcResultMatchers.class);
+		RequestMethod requestMethod = pojo.getRequestMethod();
+		codeWriter.writeImport(MockMvcRequestBuilders.class);
+		codeWriter.writeImport(MediaType.class);
+		codeWriter.writeStaticImport(MockMvcResultMatchers.class);
+		if (requestMethod == RequestMethod.POST) {
 			String code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
 				code += ".andExpect(content().json(Json.subJson(responseData, \"data\"), false))";
 			}
 			codeWriter.writeCode(code + ";");
+		} else if (requestMethod == RequestMethod.GET) {
+			codeWriter.writeCode(String.format("mockMvc.perform(MockMvcRequestBuilders.get(%s)).andExpect(status().isOk());", "\"" + pojo.getRequestPath() + "\""));
 		}
 	}
 	

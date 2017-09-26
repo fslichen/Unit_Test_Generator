@@ -2,7 +2,6 @@ package evolution.dao.impl;
 import evolution.pojo.AnyBasePojo;
 import generator.template.ReflectionAssert;
 import evolution.pojo.AnyPojoImpl;
-import java.util.List;
 import generator.Json;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.template.TestCase;
@@ -22,7 +21,6 @@ public class AnotherDaoImplTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyPojoImpl actualResult = anotherDaoImpl.anyMethod();
         AnyPojoImpl expectedResult = Json.fromSubJson(responseData, "data", AnyPojoImpl.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
@@ -35,7 +33,6 @@ public class AnotherDaoImplTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyBasePojo actualResult = anotherDaoImpl.anyMethod();
         AnyBasePojo expectedResult = Json.fromSubJson(responseData, "data", AnyBasePojo.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);

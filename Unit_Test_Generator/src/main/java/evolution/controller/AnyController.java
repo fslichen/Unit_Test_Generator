@@ -69,13 +69,13 @@ public class AnyController {
 		
 	}
 	
-	@GetMapping("list")
+	@GetMapping("/list")
 	public List<AnyDto> list(AnyDto anyDto) {
 		int i = 1 / 0;
 		return Arrays.asList(anyDto);
 	}
 	
-	@GetMapping("tree")
+	@GetMapping("/tree")
 	public List<Tree> tree(Tree tree) {
 		return null;
 	}

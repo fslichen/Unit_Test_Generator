@@ -57,7 +57,10 @@ public class CodeWriter {
 	}
 	
 	public void writeStaticImport(String className) {
-		codes.add(String.format("import static %s.*;", className));
+		String code = String.format("import static %s.*;", className);
+		if (!codes.contains(code)) {
+			codes.add(code);
+		}
 	}
 	
 	public void writeStaticImport(Class<?> clazz) {
