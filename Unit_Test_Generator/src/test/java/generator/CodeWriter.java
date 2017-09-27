@@ -17,13 +17,15 @@ public class CodeWriter {
 		codes = new LinkedList<>();
 	}
 
-	public void writeMockito4InvokingComponentMethod(Field autowiredComponent, Method method) {
+	public void writeMockito4InvokingComponentMethod(Field autowiredComponent) {
 		writeStaticImport(Mockito.class);
 		StringBuilder parameterValuesInString = new StringBuilder();
-		for (int i = 0; i < method.getParameterCount(); i++) {
-			parameterValuesInString.append("null, ");
+		for (Method method : autowiredComponent.getType().getDeclaredMethods()) {
+			for (int i = 0; i < method.getParameterCount(); i++) {
+				parameterValuesInString.append("null, ");
+			}
+			writeCode(String.format("when(%s.%s(%s)).thenReturn(%s)", autowiredComponent.getName(), method.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
 		}
-		writeCode(String.format("when(%s.%s(%s)).thenReturn(%s)", autowiredComponent.getName(), method.getName(), parameterValuesInString.substring(0, parameterValuesInString.length() - 2), "null"));
 	}
 	
 	public List<Class<?>> classesIgnoringImport() {
