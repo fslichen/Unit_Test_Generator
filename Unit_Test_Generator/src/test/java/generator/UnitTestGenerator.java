@@ -281,23 +281,23 @@ public class UnitTestGenerator {
 	public void writeCodes4InvokingControllerMethod(Class<?> clazz, Method method, CodeWriter codeWriter) {
 		ControllerMethodPojo pojo = Pointer.controllerMethodPojo(clazz, method);
 		RequestMethod requestMethod = pojo.getRequestMethod();
-		codeWriter.writeImport(MockMvcRequestBuilders.class);
 		codeWriter.writeImport(MediaType.class);
 		codeWriter.writeStaticImport(MockMvcResultMatchers.class);
+		codeWriter.writeStaticImport(MockMvcRequestBuilders.class);
 		if (requestMethod == RequestMethod.POST) {
 			String code = null;
 			if (method.getParameterCount() > 0) {
 				writeCodes4PreparingParameterValues(method, codeWriter, false);
-				code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+				code = String.format("mockMvc.perform(post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			} else {
-				code = String.format("mockMvc.perform(MockMvcRequestBuilders.post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+				code = String.format("mockMvc.perform(post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			}
 			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
 				code += ".andExpect(content().json(Json.subJson(responseData, \"data\"), false))";
 			}
 			codeWriter.writeCode(code + ";");
 		} else if (requestMethod == RequestMethod.GET) {
-			codeWriter.writeCode(String.format("mockMvc.perform(MockMvcRequestBuilders.get(%s)).andExpect(status().isOk());", "\"" + pojo.getRequestPath() + "\""));
+			codeWriter.writeCode(String.format("mockMvc.perform(get(%s)).andExpect(status().isOk());", "\"" + pojo.getRequestPath() + "\""));
 		} else {
 			if (method.getModifiers() == Modifier.PRIVATE) {
 				writeCodes4InvokingPrivateMethod(clazz, method, codeWriter);
