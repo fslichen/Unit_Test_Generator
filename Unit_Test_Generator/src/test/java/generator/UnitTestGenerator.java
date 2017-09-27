@@ -184,6 +184,7 @@ public class UnitTestGenerator {
 						returnValue = new VoidReturnValue("OK", "void");
 					} else {
 						try {
+							method.setAccessible(true);
 							returnValue = method.invoke(newInstance(clazz, webApplicationContext), parameterValues4InvokingMethod);// The method invocation may fail due to failing to start WebApplicationContext, coding errors within method, exceptions caused by boundary conditions, or calling remote services.
 						} catch (Exception e) {
 							responseStatus = "Mocked";
