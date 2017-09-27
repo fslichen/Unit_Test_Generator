@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import evolution.controller.AnyController;
 import evolution.pojo.AnyPojo;
 import generator.CodeWriter;
 import generator.Pointer;
@@ -34,5 +35,10 @@ public class PointerTest {
 		CodeWriter codeWriter = new CodeWriter();
 		String simple = Pointer.simpleReturnTypeName(method, codeWriter);
 		System.out.println(simple);
+	}
+	
+	@Test
+	public void testAutowiredFields() {
+		System.out.println(Pointer.autowiredFields(AnyController.class));
 	}
 }

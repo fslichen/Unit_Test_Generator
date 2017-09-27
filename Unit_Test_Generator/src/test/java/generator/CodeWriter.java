@@ -1,9 +1,12 @@
 package generator;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.mockito.Mockito;
 
 public class CodeWriter {
 	private Integer indentCount;
@@ -14,6 +17,15 @@ public class CodeWriter {
 		codes = new LinkedList<>();
 	}
 
+	public void writeMockito4InvokingComponentMethod(Field autowiredComponent, Method method) {
+		writeStaticImport(Mockito.class);
+		StringBuilder parameterValuesInString = new StringBuilder();
+		for (int i = 0; i < method.getParameterCount(); i++) {
+			parameterValuesInString.append("null, ");
+		}
+		writeCode(String.format("when(%s.%s(%s)).thenReturn(%s)", autowiredComponent.getName(), method.getName(), parameterValuesInString.substring(0, parameterValuesInString.length() - 2), "null"));
+	}
+	
 	public List<Class<?>> classesIgnoringImport() {
 		List<Class<?>> classes = new LinkedList<>();
 		classes.addAll(Arrays.asList(byte.class, Byte.class, 

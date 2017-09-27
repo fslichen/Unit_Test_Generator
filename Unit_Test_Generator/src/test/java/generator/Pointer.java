@@ -1,10 +1,12 @@
 package generator;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
@@ -19,6 +21,17 @@ import generator.pojo.ControllerMethodPojo;
 
 @Controller
 public class Pointer {
+	public static List<Field> autowiredFields(Class<?> clazz) {
+		List<Field> autowiredFields = new LinkedList<>();
+		for (Field field : clazz.getDeclaredFields()) {
+			Autowired autowired = field.getAnnotation(Autowired.class);
+			if (autowired != null) {
+				autowiredFields.add(field);
+			}
+		}
+		return autowiredFields;
+	}
+	
 	public static Class<?> classAnnotationType(Class<?> clazz) {
 		for (Annotation annotation : clazz.getAnnotations()) {
 			if (annotation.annotationType() == Controller.class || annotation.annotationType() == RestController.class) {
