@@ -134,7 +134,7 @@ public class Mocker {
 				if (!mockedClasses.contains(clazz)) {
 					mockedClasses.add(clazz);
 					Object instance = null;
-					if (!Lang.property("enable-map-engine", Boolean.class)) {
+					try {
 						instance = clazz.newInstance();
 						List<Method> setters = Pointer.setters(clazz);
 						if (setters.size() > 0) {
@@ -142,9 +142,9 @@ public class Mocker {
 								setter.invoke(instance, mockObject(Pointer.genericParameterTypeName(setter, 0)));
 							}
 						} else {
-							instance = "Empty Object(Consider Revising)";
+							instance = "The object does not have any setters.";
 						}
-					} else {
+					} catch (Exception e) {
 						Map<Object, Object> mapInstance = new LinkedHashMap<>();
 						for (Method setter : Pointer.setters(clazz)) {
 							mapInstance.put(Pointer.fieldName(setter), mockObject(Pointer.genericParameterTypeName(setter, 0)));

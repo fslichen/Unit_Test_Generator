@@ -204,7 +204,7 @@ public class UnitTestGenerator {
 	@SuppressWarnings("unchecked")
 	public <T> T newInstance(Class<T> clazz, WebApplicationContext webApplicationContext) throws InstantiationException, IllegalAccessException {
 		T currentInstance = null;
-		if (webApplicationContext == null) {
+		if (webApplicationContext == null || !Lang.property("use-web-application-context", Boolean.class)) {
 			return clazz.newInstance();
 		} else {
 			currentInstance = (T) webApplicationContext.getBean(Lang.lowerFirstCharacter(clazz.getSimpleName()));

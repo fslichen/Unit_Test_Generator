@@ -1,5 +1,6 @@
 package evolution.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ public class AnyService {
 	}
 	
 	public List<AnyPojo> anotherMethod(AnyPojo anyPojo) {
-		return null;
+		return Arrays.asList(anyPojo);
 	}
 	
 	private void anyMethod() {

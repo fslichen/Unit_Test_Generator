@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
-public class UseCaseGenerator {
+public class UseCaseGenerator extends BaseTestCase {
 	@Test
 	public void run() throws Exception {
 		Predicate<Class<?>> classFileter = new Predicate<Class<?>>() {
@@ -16,6 +16,6 @@ public class UseCaseGenerator {
 			}
 		};
 		UnitTestGenerator unitTestGenerator = new UnitTestGenerator();
-		unitTestGenerator.invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(Lang.property("use-case-base-package", String.class), classFileter, null);
+		unitTestGenerator.invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(Lang.property("use-case-base-package", String.class), classFileter, webApplicationContext);
 	}
 }
