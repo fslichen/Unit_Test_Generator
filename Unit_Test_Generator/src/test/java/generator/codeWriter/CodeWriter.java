@@ -44,72 +44,73 @@ public class CodeWriter {
 		return classes;
 	}
 
-	public String combineCodes() {
-		StringBuilder completeCodes = new StringBuilder();
-		List<String> sortedCodes = new LinkedList<>();
+	public String generateCodes() {
+		List<String> codes = new LinkedList<>();
 		// Package
-		sortedCodes.add(iHeader.getPackageName());
+		codes.add(iHeader.getPackageName());
 		// Import
 		for (String className : iHeader.getClassNames()) {
-			sortedCodes.add(className);
+			codes.add(className);
 		}
 		// Class
 		String classCode = String.format("public class %s ", simpleClassNameWithSurfix(iClass.getClazz(), iClass.getSurfix()));
-		Class<?> extendedClass = iClass.getExtendedClass();
+		Class<?> extendedClass = iClass.getExtendedClass();// Extended Class
 		if (extendedClass != null) {
-			classCode += String.format("extends %s", extendedClass.getSimpleName());
+			classCode += String.format("extends %s ", extendedClass.getSimpleName());
 		}
-		sortedCodes.add(classCode + " {");
+		List<Class<?>> implementedInterfaces = iClass.getImplementedInterfaces();// Implemented Interfaces
+		if (implementedInterfaces != null && !implementedInterfaces.isEmpty()) {
+			classCode += "implements ";
+			for (Class<?> implementedInterface : iClass.getImplementedInterfaces()) {
+				classCode += implementedInterface.getSimpleName() + ", ";
+			}
+			classCode = classCode.substring(0, classCode.length() - 2) + " ";
+		}
+		codes.add(classCode + "{");// Class Begin
 		// Field
 		for (IField iField : iFields.values()) {
-			String fieldName = iField.getFieldType().getSimpleName();
-			for (Class<?> annotationType : iField.getAnnotationTypes()) {
-				sortedCodes.add("@" + annotationType.getSimpleName());
+			for (Class<?> annotationType : iField.getAnnotationTypes()) {// Field Annotations
+				codes.add("@" + annotationType.getSimpleName());
 			}
-			sortedCodes.add(String.format("private %s %s;", fieldName, Lang.lowerFirstCharacter(fieldName)));
-			sortedCodes.add("");// Field End
+			String fieldName = iField.getFieldType().getSimpleName();// Field Definition
+			codes.add(String.format("private %s %s;", fieldName, Lang.lowerFirstCharacter(fieldName)));
+			codes.add("");// Field End
 		}
 		// Method
 		for (IMethod iMethod : iMethods.values()) {
-			for (Class<?> annotationType : iMethod.getAnnotationTypes()) {
-				sortedCodes.add("@" + annotationType.getSimpleName());
+			for (Class<?> annotationType : iMethod.getAnnotationTypes()) {// Method Annotations
+				codes.add("@" + annotationType.getSimpleName());
 			}
-			String exceptionString = "";
+			String typeParameterName = iMethod.getTypeParameterName() != null ? "<" + iMethod.getTypeParameterName() + ">" : "";// Type Parameter
+			String exceptionString = "";// Exception
 			Class<?> exceptionType = iMethod.getExceptionType();
 			if (exceptionType != null) {
 				exceptionString = String.format("throws %s", exceptionType.getSimpleName()); 
 			}
-			String typeParameterName = iMethod.getTypeParameterName() != null ? "<" + iMethod.getTypeParameterName() + ">" : "";
-			String methodSignature = String.format("public %s void %s%s%s() %s {", typeParameterName, iMethod.getPrefix(), upperFirstCharacter(iMethod.getMethod().getName()), iMethod.getSuffix(), exceptionString);
-			sortedCodes.add(methodSignature);
+			String methodSignature = String.format("public %s void %s%s%s() %s {", typeParameterName, iMethod.getPrefix(), upperFirstCharacter(iMethod.getMethod().getName()), iMethod.getSuffix(), exceptionString);// Method Begin
+			codes.add(methodSignature);
 			for (String code : iMethod.getCodes()) {
-				sortedCodes.add(code);
+				codes.add(code);
 			}
-			sortedCodes.addAll(Arrays.asList("}", ""));// Method End
+			codes.addAll(Arrays.asList("}", ""));// Method End
 		}
-		sortedCodes.add("}");// Class End
-		for (String sortedCode : sortedCodes) {
-			String trimedCode = sortedCode.trim();
+		codes.add("}");// Class End
+		// Combine Codes
+		StringBuilder result = new StringBuilder();
+		for (String code : codes) {
+			String trimedCode = code.trim();
 			if (trimedCode.endsWith("{")) {
-				updateIndent(completeCodes);
+				updateIndent(result);
 				indentCount++;
 			} else if (trimedCode.endsWith("}")) {
 				indentCount--;
-				updateIndent(completeCodes);
+				updateIndent(result);
 			} else {
-				updateIndent(completeCodes);
+				updateIndent(result);
 			}
-			completeCodes.append(trimedCode).append("\n");
+			result.append(trimedCode).append("\n");
 		}
-		return completeCodes.toString();
-	}
-
-	public void updateIndent(StringBuilder completeCodes) {
-		for (int i = 0; i < indentCount; i++) {
-			for (int j = 0; j < 4; j++) {
-				completeCodes.append(" ");
-			}
-		}
+		return result.toString();
 	}
 
 	public IClass getiClass() {
@@ -146,12 +147,12 @@ public class CodeWriter {
 		this.iFields.putAll(codeWriter.getiFields());
 	}
 
-
-	
 	public void patchTypeParameterToMethod(Method method, String typeParameterName) {
 		IMethod iMethod = iMethods.get(method);
 		iMethod.setTypeParameterName(typeParameterName);
 	}
+
+
 	
 	public void setiClass(IClass iClass) {
 		this.iClass = iClass;
@@ -175,6 +176,14 @@ public class CodeWriter {
 	
 	public String simpleClassNameWithSurfix(Class<?> clazz, String suffix) {
 		return clazz.getSimpleName() + Lang.upperFirstCharacter(suffix);
+	}
+	
+	public void updateIndent(StringBuilder completeCodes) {
+		for (int i = 0; i < indentCount; i++) {
+			for (int j = 0; j < 4; j++) {
+				completeCodes.append(" ");
+			}
+		}
 	}
 	
 	public String upperFirstCharacter(String string) {
