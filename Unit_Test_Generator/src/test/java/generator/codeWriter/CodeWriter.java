@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import generator.Lang;
-import generator.Pointer;
 import generator.codeWriter.pojo.IClass;
 import generator.codeWriter.pojo.IField;
 import generator.codeWriter.pojo.IHeader;
@@ -20,65 +19,17 @@ import generator.codeWriter.pojo.IMethod;
 
 public class CodeWriter {
 	private Integer indentCount;
+	private IHeader iHeader;
+	private IClass iClass;
 	private Map<Class<?>, IField> iFields;
 	private Map<Method, IMethod> iMethods;
-	private IClass iClass;
-	private IHeader iHeader;
 	
-	public void merge(CodeWriter codeWriter) {
-		this.iHeader.getClassNames().addAll(codeWriter.getiHeader().getClassNames());
-		this.iMethods.putAll(codeWriter.getiMethods());
-		this.iFields.putAll(codeWriter.getiFields());
-	}
-	
-	public Integer getIndentCount() {
-		return indentCount;
-	}
-
-	public void setIndentCount(Integer indentCount) {
-		this.indentCount = indentCount;
-	}
-
-	public Map<Class<?>, IField> getiFields() {
-		return iFields;
-	}
-
-	public void setiFields(Map<Class<?>, IField> iFields) {
-		this.iFields = iFields;
-	}
-
-	public Map<Method, IMethod> getiMethods() {
-		return iMethods;
-	}
-
-	public void setiMethods(Map<Method, IMethod> iMethods) {
-		this.iMethods = iMethods;
-	}
-
-	public IClass getiClass() {
-		return iClass;
-	}
-
-	public void setiClass(IClass iClass) {
-		this.iClass = iClass;
-	}
-
-	public IHeader getiHeader() {
-		return iHeader;
-	}
-
-	public void setiHeader(IHeader iHeader) {
-		this.iHeader = iHeader;
-	}
-
 	public CodeWriter() {
 		indentCount = 0;
 		iFields = new LinkedHashMap<>();
 		iMethods = new LinkedHashMap<>();
 		iHeader = new IHeader();
 	}
-
-
 	
 	public List<Class<?>> classesIgnoringImport() {
 		List<Class<?>> classes = new LinkedList<>();
@@ -92,22 +43,8 @@ public class CodeWriter {
 				boolean.class, Boolean.class));
 		return classes;
 	}
-	
-	public void generateCode(String code, StringBuilder completeCodes) {
-		String trimedCode = code.trim();
-		if (trimedCode.endsWith("{")) {
-			generateIndent(completeCodes);
-			indentCount++;
-		} else if (trimedCode.endsWith("}")) {
-			indentCount--;
-			generateIndent(completeCodes);
-		} else {
-			generateIndent(completeCodes);
-		}
-		completeCodes.append(trimedCode).append("\n");
-	}
-	
-	public String generateCodes() {
+
+	public String combineCodes() {
 		StringBuilder completeCodes = new StringBuilder();
 		List<String> sortedCodes = new LinkedList<>();
 		// Package
@@ -152,22 +89,96 @@ public class CodeWriter {
 		}
 		sortedCodes.add("}");// Class End
 		for (String sortedCode : sortedCodes) {
-			generateCode(sortedCode, completeCodes);
+			String trimedCode = sortedCode.trim();
+			if (trimedCode.endsWith("{")) {
+				updateIndent(completeCodes);
+				indentCount++;
+			} else if (trimedCode.endsWith("}")) {
+				indentCount--;
+				updateIndent(completeCodes);
+			} else {
+				updateIndent(completeCodes);
+			}
+			completeCodes.append(trimedCode).append("\n");
 		}
 		return completeCodes.toString();
 	}
-	
-	public void generateIndent(StringBuilder completeCodes) {
+
+	public void updateIndent(StringBuilder completeCodes) {
 		for (int i = 0; i < indentCount; i++) {
 			for (int j = 0; j < 4; j++) {
 				completeCodes.append(" ");
 			}
 		}
 	}
+
+	public IClass getiClass() {
+		return iClass;
+	}
+
+	public Map<Class<?>, IField> getiFields() {
+		return iFields;
+	}
+
+	public IHeader getiHeader() {
+		return iHeader;
+	}
+
+	public Map<Method, IMethod> getiMethods() {
+		return iMethods;
+	}
+
+	public Integer getIndentCount() {
+		return indentCount;
+	}
+
+	public void importAnnotations(Class<?>... annotationTypes) {
+		if (annotationTypes != null) {
+			for (Class<?> annotationType : annotationTypes) {
+				writeImport(annotationType);
+			}
+		}
+	}
+
+	public void merge(CodeWriter codeWriter) {
+		this.iHeader.getClassNames().addAll(codeWriter.getiHeader().getClassNames());
+		this.iMethods.putAll(codeWriter.getiMethods());
+		this.iFields.putAll(codeWriter.getiFields());
+	}
+
+
 	
 	public void patchTypeParameterToMethod(Method method, String typeParameterName) {
 		IMethod iMethod = iMethods.get(method);
 		iMethod.setTypeParameterName(typeParameterName);
+	}
+	
+	public void setiClass(IClass iClass) {
+		this.iClass = iClass;
+	}
+	
+	public void setiFields(Map<Class<?>, IField> iFields) {
+		this.iFields = iFields;
+	}
+	
+	public void setiHeader(IHeader iHeader) {
+		this.iHeader = iHeader;
+	}
+	
+	public void setiMethods(Map<Method, IMethod> iMethods) {
+		this.iMethods = iMethods;
+	}
+	
+	public void setIndentCount(Integer indentCount) {
+		this.indentCount = indentCount;
+	}
+	
+	public String simpleClassNameWithSurfix(Class<?> clazz, String suffix) {
+		return clazz.getSimpleName() + Lang.upperFirstCharacter(suffix);
+	}
+	
+	public String upperFirstCharacter(String string) {
+		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}
 	
 	public void writeAnnotation(Method method, Class<?>... annotationTypes) {
@@ -177,14 +188,6 @@ public class CodeWriter {
 			iMethod = new IMethod();
 		}
 		iMethod.getAnnotationTypes().addAll(Arrays.asList(annotationTypes));
-	}
-	
-	public String upperFirstCharacter(String string) {
-		return string.substring(0, 1).toUpperCase() + string.substring(1);
-	}
-	
-	public String simpleClassNameWithSurfix(Class<?> clazz, String suffix) {
-		return clazz.getSimpleName() + Lang.upperFirstCharacter(suffix);
 	}
 	
 	public void writeClass(Class<?> clazz, String surfix, Class<?> extendedClass, List<Class<?>> implementedInterfaces, Class<?>... annotationTypes) {
@@ -202,14 +205,6 @@ public class CodeWriter {
 		if (annotationTypes != null) {
 			iClass.setAnnotationTypes(Arrays.asList(annotationTypes));
 			importAnnotations(annotationTypes);
-		}
-	}
-	
-	public void importAnnotations(Class<?>... annotationTypes) {
-		if (annotationTypes != null) {
-			for (Class<?> annotationType : annotationTypes) {
-				writeImport(annotationType);
-			}
 		}
 	}
 	

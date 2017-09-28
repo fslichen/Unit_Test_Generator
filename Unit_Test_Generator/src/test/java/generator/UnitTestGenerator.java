@@ -266,7 +266,7 @@ public class UnitTestGenerator {
 			File unitTestFile = createDirectoriesAndFile(Lang.pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java"));
 			if (!unitTestFile.exists() || Lang.property("overwrite-test-case", Boolean.class)) {
 				try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
-					printWriter.write(codeWriter.generateCodes().toString());
+					printWriter.write(codeWriter.combineCodes().toString());
 					System.out.println("The unit test file " + unitTestFile.getAbsolutePath() + " is successfully generated.");
 				} catch (FileNotFoundException e) {
 					System.out.println("The file " + unitTestFile.getAbsolutePath() + " is not found.");
