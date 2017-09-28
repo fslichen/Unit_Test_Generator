@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import generator.codeWriter.CodeWriter;
 import generator.pojo.ControllerMethodPojo;
 
 @Controller
@@ -211,14 +212,14 @@ public class Pointer {
 	}
 	
 	public static String simpleParameterTypeName(Method method, int parameterIndex, CodeWriter codeWriter) {
-		return simpleTypeName(method.getGenericParameterTypes()[parameterIndex].getTypeName(), codeWriter);
+		return simpleTypeName(method, method.getGenericParameterTypes()[parameterIndex].getTypeName(), codeWriter);
 	}
 	
 	public static String simpleReturnTypeName(Method method, CodeWriter codeWriter) {
-		return simpleTypeName(method.getGenericReturnType().getTypeName(), codeWriter);
+		return simpleTypeName(method, method.getGenericReturnType().getTypeName(), codeWriter);
 	}
 	
-	public static String simpleTypeName(String genericTypeName, CodeWriter codeWriter) {
+	public static String simpleTypeName(Method method, String genericTypeName, CodeWriter codeWriter) {
 		int classNameStartIndex = 0;
 		int length = genericTypeName.length();
 		String simpleGenericTypeName = genericTypeName;
@@ -235,7 +236,8 @@ public class Pointer {
 							codeWriter.writeImport(clazz);
 							simpleGenericTypeName = simpleGenericTypeName.replace(clazz.getName(), clazz.getSimpleName());
 						} catch (ClassNotFoundException e) {
-							codeWriter.patchTypeParameterToMethod(subGenericTypeName);
+							System.out.println(">>>>>>>>>>>>>>>>>>>Oh, congratulations " + method.getName());
+							codeWriter.patchTypeParameterToMethod(method, subGenericTypeName);
 						}
 						break;
 					}

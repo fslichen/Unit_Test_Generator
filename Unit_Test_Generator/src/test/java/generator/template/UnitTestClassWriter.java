@@ -1,8 +1,8 @@
 package generator.template;
 
-import java.util.List;
+import generator.codeWriter.CodeWriter;
 
 @FunctionalInterface
 public interface UnitTestClassWriter {
-	public List<String> write();
+	public CodeWriter write();
 }

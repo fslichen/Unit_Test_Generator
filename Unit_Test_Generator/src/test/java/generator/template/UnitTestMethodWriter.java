@@ -1,9 +1,10 @@
 package generator.template;
 
 import java.lang.reflect.Method;
-import java.util.List;
+
+import generator.codeWriter.CodeWriter;
 
 @FunctionalInterface
 public interface UnitTestMethodWriter {
-	public List<String> write(Method method);
+	public CodeWriter write(Method method);
 }
