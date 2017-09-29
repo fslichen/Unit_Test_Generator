@@ -177,14 +177,6 @@ public class CodeWriter {
 		return clazz.getSimpleName() + Lang.upperFirstCharacter(suffix);
 	}
 	
-	public void writeIndent(StringBuilder completeCodes) {
-		for (int i = 0; i < indentCount; i++) {
-			for (int j = 0; j < 4; j++) {
-				completeCodes.append(" ");
-			}
-		}
-	}
-	
 	public void writeAnnotation(Method method, Class<?>... annotationTypes) {
 		IMethod iMethod = iMethods.get(method);
 		if (iMethod == null) {
@@ -254,6 +246,14 @@ public class CodeWriter {
 		}
 	}
 	
+	public void writeIndent(StringBuilder completeCodes) {
+		for (int i = 0; i < indentCount; i++) {
+			for (int j = 0; j < 4; j++) {
+				completeCodes.append(" ");
+			}
+		}
+	}
+	
 	public void writeMethod(Method method, String prefix, String suffix, Class<?> exceptionType, Class<?>... annotationTypes) {
 		IMethod iMethod = new IMethod();
 		iMethod.setMethod(method);
@@ -267,16 +267,15 @@ public class CodeWriter {
 		iMethods.put(method, iMethod);
 	}
 	
-	public void writeMockito4InvokingComponentMethod(Method currentMethod, Field autowiredComponent) {
+	public void writeMockito4InvokingComponentMethod(Method currentMethod, Field field) {
 		writeStaticImport(Mockito.class);
 		StringBuilder parameterValuesInString = new StringBuilder();
-		writeStaticImport(Mockito.class);
-		writeField(autowiredComponent.getType(), MockBean.class);
-		for (Method method : autowiredComponent.getType().getDeclaredMethods()) {
+		writeField(field.getType(), MockBean.class);
+		for (Method method : field.getType().getDeclaredMethods()) {
 			for (int i = 0; i < method.getParameterCount(); i++) {
 				parameterValuesInString.append("null, ");
 			}
-			writeCode(currentMethod, String.format("when(%s.%s(%s)).thenReturn(%s)", Lang.lowerFirstCharacter(autowiredComponent.getType().getSimpleName()), method.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
+			writeCode(currentMethod, String.format("when(%s.%s(%s)).thenReturn(%s)", Lang.lowerFirstCharacter(field.getType().getSimpleName()), method.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
 		}
 	}
 	
