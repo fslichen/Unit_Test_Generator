@@ -21,7 +21,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testGetWithTypesPrimitiveInt0() throws Exception {
+    public void testGetWithTypesPrimitiveInt0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -31,7 +31,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testListWithTypesAnyDtoList0() throws Exception {
+    public void testListWithTypesAnyDtoList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -41,7 +41,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testTreeWithTypesTreeList0() throws Exception {
+    public void testTreeWithTypesTreeList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -51,7 +51,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testPostWithTypesAnyPojoPrimitiveVoid3() throws Exception {
+    public void testPostWithTypesAnyPojoPrimitiveVoid3() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -62,7 +62,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testPostWithTypesAnyDtoAnyDto3() throws Exception {
+    public void testPostWithTypesAnyDtoAnyDto3() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -73,7 +73,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testPostAnotherWithTypesPrimitiveVoid0() throws Exception {
+    public void testPostAnotherWithTypesPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -83,7 +83,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testHideWithTypesStringString0() throws Exception {
+    public void testHideWithTypesStringString0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -100,7 +100,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testServletGetWithTypesHttpServletRequestPrimitiveVoid0() throws Exception {
+    public void testServletGetWithTypesHttpServletRequestPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -110,7 +110,7 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testAbstractPojoWithTypesAnyAbstractDtoPrimitiveVoid0() throws Exception {
+    public void testAbstractPojoWithTypesAnyAbstractDtoPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -120,21 +120,21 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testHttpWithTypesPrimitiveVoid0() throws Exception {
+    public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        anyController.http();
+        mockMvc.perform(get("/project/exception")).andExpect(status().isOk());
     }
     
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
+    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        mockMvc.perform(get("/project/exception")).andExpect(status().isOk());
+        anyController.http();
     }
     
 }

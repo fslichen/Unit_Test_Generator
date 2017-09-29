@@ -5,7 +5,7 @@ import java.util.List;
 
 public class IClass {
 	private Class<?> clazz;
-	private String surfix;
+	private String suffix;
 	private Class<?> extendedClass;
 	private List<Class<?>> implementedInterfaces;
 	private List<Class<?>> annotationTypes;
@@ -19,11 +19,11 @@ public class IClass {
 	public void setClazz(Class<?> clazz) {
 		this.clazz = clazz;
 	}
-	public String getSurfix() {
-		return surfix;
+	public String getSuffix() {
+		return suffix;
 	}
-	public void setSurfix(String surfix) {
-		this.surfix = surfix;
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
 	}
 	public Class<?> getExtendedClass() {
 		return extendedClass;

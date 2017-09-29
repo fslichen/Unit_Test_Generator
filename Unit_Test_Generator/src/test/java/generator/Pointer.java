@@ -236,8 +236,7 @@ public class Pointer {
 							codeWriter.writeImport(clazz);
 							simpleGenericTypeName = simpleGenericTypeName.replace(clazz.getName(), clazz.getSimpleName());
 						} catch (ClassNotFoundException e) {
-							System.out.println(">>>>>>>>>>>>>>>>>>>Oh, congratulations " + method.getName());
-							codeWriter.patchTypeParameterToMethod(method, subGenericTypeName);
+							codeWriter.patchTypeParameter(method, subGenericTypeName);
 						}
 						break;
 					}

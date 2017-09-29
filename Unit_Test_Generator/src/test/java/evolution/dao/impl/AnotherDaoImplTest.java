@@ -17,7 +17,7 @@ public class AnotherDaoImplTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testAnyMethodWithTypesAnyPojoImpl0() throws Exception {
+    public void testAnyMethodWithTypesAnyPojoImpl0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
@@ -29,7 +29,7 @@ public class AnotherDaoImplTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public  void testAnyMethodWithTypesAnyBasePojo0() throws Exception {
+    public void testAnyMethodWithTypesAnyBasePojo0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();

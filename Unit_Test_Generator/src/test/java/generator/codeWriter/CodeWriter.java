@@ -31,7 +31,7 @@ public class CodeWriter {
 		iHeader = new IHeader();
 	}
 	
-	public List<Class<?>> classesIgnoringImport() {
+	public List<Class<?>> classesDontNeedToBeImported() {
 		List<Class<?>> classes = new LinkedList<>();
 		classes.addAll(Arrays.asList(byte.class, Byte.class, 
 				short.class, Short.class,
@@ -53,7 +53,7 @@ public class CodeWriter {
 			codes.add(className);
 		}
 		// Class
-		String classCode = String.format("public class %s ", simpleClassNameWithSurfix(iClass.getClazz(), iClass.getSurfix()));
+		String classCode = String.format("public class %s ", simpleClassNameWithSuffix(iClass.getClazz(), iClass.getSuffix()));
 		Class<?> extendedClass = iClass.getExtendedClass();// Extended Class
 		if (extendedClass != null) {
 			classCode += String.format("extends %s ", extendedClass.getSimpleName());
@@ -81,14 +81,17 @@ public class CodeWriter {
 			for (Class<?> annotationType : iMethod.getAnnotationTypes()) {// Method Annotations
 				codes.add("@" + annotationType.getSimpleName());
 			}
-			String typeParameterName = iMethod.getTypeParameterName() != null ? "<" + iMethod.getTypeParameterName() + ">" : "";// Type Parameter
-			String exceptionString = "";// Exception
+			String methodCode = "public ";
+			String typeParameterName = iMethod.getTypeParameterName();// Type Parameter
+			if (typeParameterName != null) {
+				methodCode += "<" + iMethod.getTypeParameterName() + "> ";
+			}
+			methodCode += String.format("void %s%s%s() ", iMethod.getPrefix(), Lang.upperFirstCharacter(iMethod.getMethod().getName()), iMethod.getSuffix());// Method Begin
 			Class<?> exceptionType = iMethod.getExceptionType();
 			if (exceptionType != null) {
-				exceptionString = String.format("throws %s", exceptionType.getSimpleName()); 
+				methodCode += "throws " + exceptionType.getSimpleName() + " ";
 			}
-			String methodSignature = String.format("public %s void %s%s%s() %s {", typeParameterName, iMethod.getPrefix(), upperFirstCharacter(iMethod.getMethod().getName()), iMethod.getSuffix(), exceptionString);// Method Begin
-			codes.add(methodSignature);
+			codes.add(methodCode + "{");
 			for (String code : iMethod.getCodes()) {
 				codes.add(code);
 			}
@@ -100,32 +103,32 @@ public class CodeWriter {
 		for (String code : codes) {
 			String trimedCode = code.trim();
 			if (trimedCode.endsWith("{")) {
-				updateIndent(result);
+				writeIndent(result);
 				indentCount++;
 			} else if (trimedCode.endsWith("}")) {
 				indentCount--;
-				updateIndent(result);
+				writeIndent(result);
 			} else {
-				updateIndent(result);
+				writeIndent(result);
 			}
 			result.append(trimedCode).append("\n");
 		}
 		return result.toString();
 	}
 
-	public IClass getiClass() {
+	public IClass getIClass() {
 		return iClass;
 	}
 
-	public Map<Class<?>, IField> getiFields() {
+	public Map<Class<?>, IField> getIFields() {
 		return iFields;
 	}
 
-	public IHeader getiHeader() {
+	public IHeader getIHeader() {
 		return iHeader;
 	}
 
-	public Map<Method, IMethod> getiMethods() {
+	public Map<Method, IMethod> getIMethods() {
 		return iMethods;
 	}
 
@@ -141,32 +144,28 @@ public class CodeWriter {
 		}
 	}
 
-	public void merge(CodeWriter codeWriter) {
-		this.iHeader.getClassNames().addAll(codeWriter.getiHeader().getClassNames());
-		this.iMethods.putAll(codeWriter.getiMethods());
-		this.iFields.putAll(codeWriter.getiFields());
-	}
-
-	public void patchTypeParameterToMethod(Method method, String typeParameterName) {
+	public void patchTypeParameter(Method method, String typeParameterName) {
 		IMethod iMethod = iMethods.get(method);
+		if (iMethod == null) {
+			System.out.println(String.format("%s is not registered.", method));
+			return;
+		}
 		iMethod.setTypeParameterName(typeParameterName);
 	}
-
-
 	
-	public void setiClass(IClass iClass) {
+	public void setIClass(IClass iClass) {
 		this.iClass = iClass;
 	}
 	
-	public void setiFields(Map<Class<?>, IField> iFields) {
+	public void setIFields(Map<Class<?>, IField> iFields) {
 		this.iFields = iFields;
 	}
 	
-	public void setiHeader(IHeader iHeader) {
+	public void setIHeader(IHeader iHeader) {
 		this.iHeader = iHeader;
 	}
 	
-	public void setiMethods(Map<Method, IMethod> iMethods) {
+	public void setIMethods(Map<Method, IMethod> iMethods) {
 		this.iMethods = iMethods;
 	}
 	
@@ -174,11 +173,11 @@ public class CodeWriter {
 		this.indentCount = indentCount;
 	}
 	
-	public String simpleClassNameWithSurfix(Class<?> clazz, String suffix) {
+	public String simpleClassNameWithSuffix(Class<?> clazz, String suffix) {
 		return clazz.getSimpleName() + Lang.upperFirstCharacter(suffix);
 	}
 	
-	public void updateIndent(StringBuilder completeCodes) {
+	public void writeIndent(StringBuilder completeCodes) {
 		for (int i = 0; i < indentCount; i++) {
 			for (int j = 0; j < 4; j++) {
 				completeCodes.append(" ");
@@ -186,31 +185,36 @@ public class CodeWriter {
 		}
 	}
 	
-	public String upperFirstCharacter(String string) {
-		return string.substring(0, 1).toUpperCase() + string.substring(1);
-	}
-	
 	public void writeAnnotation(Method method, Class<?>... annotationTypes) {
 		IMethod iMethod = iMethods.get(method);
 		if (iMethod == null) {
-			System.out.println(String.format("%s should not be null", method));
-			iMethod = new IMethod();
+			System.out.println(String.format("%s is not registered.", method));
+			return;
 		}
 		iMethod.getAnnotationTypes().addAll(Arrays.asList(annotationTypes));
 	}
 	
-	public void writeClass(Class<?> clazz, String surfix, Class<?> extendedClass, List<Class<?>> implementedInterfaces, Class<?>... annotationTypes) {
+	public void writeClass(Class<?> clazz, String suffix, Class<?> extendedClass, List<Class<?>> implementedInterfaces, Class<?>... annotationTypes) {
+		if (iClass != null) {
+			System.out.println(String.format("%s is already defined.", clazz.getName()));
+			return;
+		}
 		iClass = new IClass();
 		iClass.setClazz(clazz);
-		iClass.setSurfix(surfix);
-		iClass.setExtendedClass(extendedClass);
-		writeImport(iClass.getExtendedClass());
-		iClass.setImplementedInterfaces(implementedInterfaces);
+		iClass.setSuffix(suffix);
+		// Extended Class
+		if (extendedClass != null) {
+			iClass.setExtendedClass(extendedClass);
+			writeImport(extendedClass);
+		}
+		// Implemented Interfaces
 		if (implementedInterfaces != null) {
+			iClass.setImplementedInterfaces(implementedInterfaces);
 			for (Class<?> implementedInterface : implementedInterfaces) {
 				writeImport(implementedInterface);
 			}
 		}
+		// Class Annotations
 		if (annotationTypes != null) {
 			iClass.setAnnotationTypes(Arrays.asList(annotationTypes));
 			importAnnotations(annotationTypes);
@@ -220,8 +224,8 @@ public class CodeWriter {
 	public void writeCode(Method method, String code) {
 		IMethod iMethod = iMethods.get(method);
 		if (iMethod == null) {
-			System.out.println(String.format("%s does not exist.", method.getName()));
-			iMethod = new IMethod();
+			System.out.println(String.format("%s is not registered.", method));
+			return;
 		}
 		iMethod.getCodes().add(code);
 	}
@@ -230,16 +234,18 @@ public class CodeWriter {
 		if (iFields.containsKey(fieldType)) {
 			return;
 		}
-		writeImport(fieldType);
 		IField iField = new IField();
 		iField.setFieldType(fieldType);
-		iField.setAnnotationTypes(Arrays.asList(annotationTypes));
-		importAnnotations(annotationTypes);
+		writeImport(fieldType);
+		if (annotationTypes != null) {
+			iField.setAnnotationTypes(Arrays.asList(annotationTypes));
+			importAnnotations(annotationTypes);
+		}
 		iFields.put(fieldType, iField);
 	}
 	
 	public void writeImport(Class<?> clazz) {
-		if (clazz != null && !classesIgnoringImport().contains(clazz)) {
+		if (!classesDontNeedToBeImported().contains(clazz)) {
 			String code = String.format("import %s;", clazz.getName());
 			List<String> classNames = iHeader.getClassNames();
 			if (!classNames.contains(code)) {
@@ -251,11 +257,13 @@ public class CodeWriter {
 	public void writeMethod(Method method, String prefix, String suffix, Class<?> exceptionType, Class<?>... annotationTypes) {
 		IMethod iMethod = new IMethod();
 		iMethod.setMethod(method);
-		iMethod.setAnnotationTypes(Arrays.asList(annotationTypes));
-		iMethod.setExceptionType(exceptionType);
 		iMethod.setPrefix(prefix);
 		iMethod.setSuffix(suffix);
-		importAnnotations(annotationTypes);
+		iMethod.setExceptionType(exceptionType);
+		if (annotationTypes != null) {
+			iMethod.setAnnotationTypes(Arrays.asList(annotationTypes));
+			importAnnotations(annotationTypes);
+		}
 		iMethods.put(method, iMethod);
 	}
 	
