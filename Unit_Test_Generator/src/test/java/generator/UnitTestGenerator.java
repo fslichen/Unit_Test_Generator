@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -48,8 +47,6 @@ import generator.pojo.SpecialParameterValue;
 import generator.pojo.VoidReturnValue;
 import generator.template.ReflectionAssert;
 import generator.template.TestCase;
-import generator.template.UnitTestClassWriter;
-import generator.template.UnitTestMethodWriter;
 
 public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
@@ -235,16 +232,17 @@ public class UnitTestGenerator {
 			codeWriter.writeImport(Test.class);
 			codeWriter.writeClass(clazz, "Test", BaseTestCase.class, null);
 			codeWriter.writeField(clazz, Autowired.class);
-			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
 			// Generate unit test method related codes.
+			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
 			int maxTestCaseCount = Lang.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
+				String concatenatedTypeSimpleNames = Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method);
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					// Method Header
-					codeWriter.writeMethod(method, "test", "WithTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method) + methodIndex, Exception.class, Test.class, Database4UcaseSetup.class, ExpectedDatabase4Ucase.class);
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(TestCase.class);
+					codeWriter.writeMethod(method, "test", "WithTypes" + concatenatedTypeSimpleNames + methodIndex, Exception.class, Test.class, Database4UcaseSetup.class, ExpectedDatabase4Ucase.class);
 					codeWriter.writeCode(method, "TestCase testCase = testCaseClient.getTestCase();");
 					codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");
 					codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
@@ -286,7 +284,7 @@ public class UnitTestGenerator {
 		if (requestMethod == RequestMethod.POST) {
 			String code = null;
 			if (method.getParameterCount() > 0) {
-				writeCodes4PreparingParameterValues(method, codeWriter, false);
+				writeCodes4PreparingParameterValues(method, codeWriter, true);
 				code = String.format("mockMvc.perform(post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			} else {
 				code = String.format("mockMvc.perform(post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
@@ -308,7 +306,7 @@ public class UnitTestGenerator {
 	
 	public void writeCodes4InvokingOrdinaryMethod(Class<?> clazz, Method method, CodeWriter codeWriter) {
 		Class<?> returnType = method.getReturnType();
-		String parametersInString = method.getParameterCount() > 0 ? writeCodes4PreparingParameterValues(method, codeWriter, true) : "";
+		String parametersInString = method.getParameterCount() > 0 ? writeCodes4PreparingParameterValues(method, codeWriter, false) : "";
 		if (returnType == void.class || returnType == Void.class) {
 			codeWriter.writeCode(method, String.format("%s.%s(%s);", Pointer.instanceName(clazz), method.getName(), parametersInString));
 		} else {
@@ -337,14 +335,14 @@ public class UnitTestGenerator {
 		Class<?> returnType = method.getReturnType();
 		if (returnType == void.class || returnType == Void.class) {
 			if (parameterCount > 0) {
-				codeWriter.writeCode(method, String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, true)));
+				codeWriter.writeCode(method, String.format("method.invoke(%s, %s);", Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, false)));
 			} else {
 				codeWriter.writeCode(method, String.format("method.invoke(%s);", Pointer.instanceName(clazz)));
 			}
 		} else {
 			String returnTypeSimpleName = returnType.getSimpleName();
 			if (parameterCount > 0) {
-				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, true)));
+				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, false)));
 			} else {
 				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
 			}
@@ -355,16 +353,16 @@ public class UnitTestGenerator {
 		codeWriter.writeCode(method, "} catch (Exception e){}");
 	}
 	
-	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter, boolean writeImports4Parameters) {
+	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter, boolean isController) {
 		StringBuilder parametersBuilder = new StringBuilder();
 		codeWriter.writeImport(List.class);
 		codeWriter.writeCode(method, "List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
-		int i = 0;
-		for (Class<?> parameterType : method.getParameterTypes()) {
-			if (writeImports4Parameters) {
+		if (!isController) {
+			int i = 0;
+			for (Class<?> parameterType : method.getParameterTypes()) {
 				codeWriter.writeImport(parameterType);
+				parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 			}
-			parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
 		}
 		return Lang.trimEndingComma(parametersBuilder);
 	}
