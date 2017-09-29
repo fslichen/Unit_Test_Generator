@@ -310,9 +310,9 @@ public class UnitTestGenerator {
 		if (returnType == void.class || returnType == Void.class) {
 			codeWriter.writeCode(method, String.format("%s.%s(%s);", Pointer.instanceName(clazz), method.getName(), parametersInString));
 		} else {
+			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode(method, String.format("%s actualResult = %s.%s(%s);", Pointer.simpleReturnTypeName(method, codeWriter), Pointer.instanceName(clazz), method.getName(), parametersInString));
 			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
-			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 	}
@@ -340,6 +340,7 @@ public class UnitTestGenerator {
 				codeWriter.writeCode(method, String.format("method.invoke(%s);", Pointer.instanceName(clazz)));
 			}
 		} else {
+			codeWriter.writeImport(ReflectionAssert.class);
 			String returnTypeSimpleName = returnType.getSimpleName();
 			if (parameterCount > 0) {
 				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s, %s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz), writeCodes4PreparingParameterValues(method, codeWriter, false)));
@@ -347,7 +348,6 @@ public class UnitTestGenerator {
 				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
 			}
 			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
-			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 		codeWriter.writeCode(method, "} catch (Exception e){}");
