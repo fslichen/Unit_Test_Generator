@@ -2,6 +2,7 @@ package generator.codeWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -269,13 +270,16 @@ public class CodeWriter {
 	
 	public void writeMockito4InvokingComponentMethod(Method currentMethod, Field field) {
 		writeStaticImport(Mockito.class);
-		StringBuilder parameterValuesInString = new StringBuilder();
 		writeField(field.getType(), MockBean.class);
 		for (Method method : field.getType().getDeclaredMethods()) {
+			StringBuilder parameterValuesInString = new StringBuilder();
 			for (int i = 0; i < method.getParameterCount(); i++) {
 				parameterValuesInString.append("null, ");
 			}
-			writeCode(currentMethod, String.format("when(%s.%s(%s)).thenReturn(%s)", Lang.lowerFirstCharacter(field.getType().getSimpleName()), method.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
+			Class<?> returnType = method.getReturnType();
+			if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(method.getModifiers())) {
+				writeCode(currentMethod, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(field.getType().getSimpleName()), method.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
+			}
 		}
 	}
 	

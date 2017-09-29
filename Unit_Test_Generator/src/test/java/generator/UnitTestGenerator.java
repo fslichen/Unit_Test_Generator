@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -246,10 +247,10 @@ public class UnitTestGenerator {
 					codeWriter.writeCode(method, "TestCase testCase = testCaseClient.getTestCase();");
 					codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");
 					codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
-//					// Dependencies
-//					for (Field field : Pointer.autowiredFields(clazz)) {
-//						codeWriter.writeMockito4InvokingComponentMethod(method, field);
-//					}
+					// Dependencies
+					for (Field field : Pointer.autowiredFields(clazz)) {
+						codeWriter.writeMockito4InvokingComponentMethod(method, field);
+					}
 					// Method Body
 					if (classAnnotationType == Controller.class) {
 						writeCodes4InvokingControllerMethod(clazz, method, codeWriter);

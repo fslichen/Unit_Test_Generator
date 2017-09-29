@@ -19,7 +19,7 @@ public class AnyService {
 		return Arrays.asList(anyPojo);
 	}
 	
-	private void anyMethod() {
-		
+	private AnyPojo anyMethod() {
+		return null;
 	}
 }
