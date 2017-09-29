@@ -28,7 +28,7 @@ public class AnyController {
 	
 	@RequestMapping("/test/post")
 	public void post(AnyPojo anyPojo) {
-		myService.anotherMethod(null);
+		myService.anotherMethod(null, 0);
 	}
 	
 	@RequestMapping("/another/test/post")

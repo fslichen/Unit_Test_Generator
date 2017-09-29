@@ -23,7 +23,7 @@ public class AnyServiceTestDemo extends BaseTestCase {
         String requestData = "{\"data\":[{\"name\":\"Abraham Lincoln\",\"age\":1295568196}],\"status\":\"Success\"}";
         String responseData = "{\"data\":[{\"name\":\"Bill Clinton\",\"age\":-202610213}],\"status\":\"Mocked\"}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
+        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), 0);
         List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }

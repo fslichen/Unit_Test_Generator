@@ -19,7 +19,7 @@ public class AnyService {
 		return anyPojo;
 	}
 	
-	public List<AnyPojo> anotherMethod(AnyPojo anyPojo) {
+	public List<AnyPojo> anotherMethod(AnyPojo anyPojo, int code) {
 		return Arrays.asList(anyPojo);
 	}
 	

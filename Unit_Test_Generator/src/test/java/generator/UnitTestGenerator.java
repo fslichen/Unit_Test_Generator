@@ -241,8 +241,12 @@ public class UnitTestGenerator {
 						codeWriter.writeStaticImport(Mockito.class);
 						codeWriter.writeField(dependencyField.getType(), MockBean.class);
 						StringBuilder parameterValuesInString = new StringBuilder();
-						for (int i = 0; i < dependencyMethod.getParameterCount(); i++) {
-							parameterValuesInString.append("null, ");
+						for (Class<?> parameterType : dependencyMethod.getParameterTypes()) {
+							if (parameterType.isPrimitive()) {
+								parameterValuesInString.append(Mocker.mockPrimitive(parameterType) + ", ");
+							} else {
+								parameterValuesInString.append("null, ");
+							}
 						}
 						Class<?> returnType = dependency.getMethod().getReturnType();
 						if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
