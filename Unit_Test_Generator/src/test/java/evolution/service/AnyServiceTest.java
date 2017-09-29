@@ -7,11 +7,11 @@ import generator.Json;
 import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
+import java.lang.reflect.Method;
 import java.util.List;
 import evolution.pojo.AnyPojo;
-import generator.template.ReflectionAssert;
 import evolution.pojo.AnotherPojo;
-import java.lang.reflect.Method;
+import generator.template.ReflectionAssert;
 public class AnyServiceTest extends BaseTestCase {
     @Autowired
     private AnyService anyService;
@@ -19,14 +19,15 @@ public class AnyServiceTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnotherMethodWithTypesAnyPojoList0() throws Exception {
+    public void testAnyMethodWithTypesPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
-        List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
-        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+        try {
+            Method method = AnyService.class.getDeclaredMethod("anyMethod");
+            method.setAccessible(true);
+            method.invoke(anyService);
+        } catch (Exception e){}
     }
     
     @Test
@@ -45,15 +46,14 @@ public class AnyServiceTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethodWithTypesPrimitiveVoid0() throws Exception {
+    public void testAnotherMethodWithTypesAnyPojoList0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        try {
-            Method method = AnyService.class.getDeclaredMethod("anyMethod");
-            method.setAccessible(true);
-            method.invoke(anyService);
-        } catch (Exception e){}
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
+        List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
     
 }
