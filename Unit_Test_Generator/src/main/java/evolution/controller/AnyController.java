@@ -24,11 +24,11 @@ import evolution.service.AnyService;
 @RequestMapping(value = "/project")
 public class AnyController {
 	@Autowired
-	private AnyService anyService;
+	private AnyService myService;
 	
 	@RequestMapping("/test/post")
 	public void post(AnyPojo anyPojo) {
-		
+		myService.anotherMethod(null);
 	}
 	
 	@RequestMapping("/another/test/post")
@@ -59,7 +59,7 @@ public class AnyController {
 		anyDto.setAge(27);
 		AnyPojo anyPojo = new AnyPojo();
 		AnotherPojo anotherPojo = new AnotherPojo();
-		anyService.anyMethod(anyPojo, anotherPojo);
+		myService.anyMethod(anyPojo, anotherPojo);
 		return anyDto;
 	}
 	

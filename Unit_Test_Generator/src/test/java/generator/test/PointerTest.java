@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import evolution.controller.AnyController;
 import evolution.pojo.AnyPojo;
-import generator.Pointer;
 import generator.codeWriter.CodeWriter;
+import generator.pointer.Pointer;
 
 public class PointerTest {
 	@Test

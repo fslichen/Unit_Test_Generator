@@ -19,12 +19,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -41,6 +44,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
 import generator.codeWriter.CodeWriter;
+import generator.pointer.Pointer;
+import generator.pointer.pojo.Dependency;
 import generator.pojo.ComponentDto;
 import generator.pojo.ControllerDto;
 import generator.pojo.ControllerMethodPojo;
@@ -227,8 +232,9 @@ public class UnitTestGenerator {
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
 			// Generate unit test class related codes.
-			Class<?> clazz = entry.getValue();
-			CodeWriter codeWriter = new CodeWriter();
+			Path path = entry.getKey();
+			final Class<?> clazz = entry.getValue();
+			final CodeWriter codeWriter = new CodeWriter();
 			codeWriter.writePackage(clazz);
 			codeWriter.writeImport(Test.class);
 			codeWriter.writeClass(clazz, "Test", BaseTestCase.class, null);
@@ -237,7 +243,7 @@ public class UnitTestGenerator {
 			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
 			int maxTestCaseCount = Lang.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
-			for (Method method : clazz.getDeclaredMethods()) {
+			for (final Method method : clazz.getDeclaredMethods()) {
 				String concatenatedTypeSimpleNames = Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method);
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					// Method Header
@@ -248,9 +254,29 @@ public class UnitTestGenerator {
 					codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");
 					codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
 					// Dependencies
-//					for (Field field : Pointer.autowiredFields(clazz)) {
-//						codeWriter.writeMockito4InvokingComponentMethod(method, field);
-//					}
+					final List<Dependency> dependencies = Pointer.dependencies(clazz);
+					Pointer.scanMethod(path.toFile(), method, new Function<String, Boolean>() {
+						@Override
+						public Boolean apply(String code) {
+							for (Dependency dependency : dependencies) {
+								Field dependencyField = dependency.getField();
+								Method dependencyMethod = dependency.getMethod();
+								if (code.contains(dependencyField.getName()) && code.contains(dependencyMethod.getName())) {// TODO Also consider method overloading.
+									codeWriter.writeStaticImport(Mockito.class);
+									codeWriter.writeField(dependencyField.getType(), MockBean.class);
+									StringBuilder parameterValuesInString = new StringBuilder();
+									for (int i = 0; i < dependencyMethod.getParameterCount(); i++) {
+										parameterValuesInString.append("null, ");
+									}
+									Class<?> returnType = dependency.getMethod().getReturnType();
+									if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
+										codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
+									}
+								}
+							}
+							return true;
+						}
+					});
 					// Method Body
 					if (classAnnotationType == Controller.class) {
 						writeCodes4InvokingControllerMethod(clazz, method, codeWriter);

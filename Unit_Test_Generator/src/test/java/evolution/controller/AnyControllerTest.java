@@ -10,13 +10,19 @@ import evolution.annotation.ExpectedDatabase4Ucase;
 import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.*;
+import evolution.service.AnyService;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import java.util.List;
 import java.lang.String;
 import java.lang.reflect.Method;
 import generator.template.ReflectionAssert;
-import java.util.List;
 public class AnyControllerTest extends BaseTestCase {
     @Autowired
     private AnyController anyController;
+    
+    @MockBean
+    private AnyService anyService;
     
     @Test
     @Database4UcaseSetup
@@ -46,6 +52,40 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         mockMvc.perform(get("/project/tree")).andExpect(status().isOk());
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testPostWithTypesAnyPojoPrimitiveVoid3() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        when(anyService.anotherMethod(null)).thenReturn(null);
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testPostWithTypesAnyDtoAnyDto3() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        when(anyService.anyMethod(null, null)).thenReturn(null);
+        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
+        mockMvc.perform(post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testPostAnotherWithTypesPrimitiveVoid0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        mockMvc.perform(post("/project/another/test/post").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
     
     @Test
@@ -88,33 +128,11 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testPostWithTypesAnyDtoAnyDto3() throws Exception {
+    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testPostWithTypesAnyPojoPrimitiveVoid3() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        mockMvc.perform(post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testPostAnotherWithTypesPrimitiveVoid0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        mockMvc.perform(post("/project/another/test/post").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
+        anyController.http();
     }
     
     @Test
@@ -125,16 +143,6 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         mockMvc.perform(get("/project/exception")).andExpect(status().isOk());
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        anyController.http();
     }
     
 }

@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import generator.pointer.Pointer;
+
 public class Mocker {
 	public static BigDecimal mockBigDecimal() {
 		return new BigDecimal(mockDouble());

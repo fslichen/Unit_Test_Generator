@@ -1,4 +1,4 @@
-package generator;
+package generator.pointer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,11 +22,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import generator.Lang;
 import generator.codeWriter.CodeWriter;
+import generator.pointer.pojo.Dependency;
 import generator.pojo.ControllerMethodPojo;
 
 @Controller
 public class Pointer {
+	public static List<Dependency> dependencies(Class<?> clazz) {
+		Field[] fields = clazz.getDeclaredFields();
+		List<Dependency> dependencies = new LinkedList<>();
+		for (Field field : fields) {
+			for (Method method : field.getType().getDeclaredMethods()) {
+				dependencies.add(new Dependency(field, method));
+			}
+		}
+		return dependencies;
+	}
+	
 	public static <T> List<T> scanMethod(File file, Method method, Function<String, T> function) throws IOException {
 		String code = null;
 		int lineIndex = -1;
