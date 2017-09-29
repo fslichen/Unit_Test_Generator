@@ -7,8 +7,8 @@ import generator.Json;
 import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
-import evolution.pojo.AnyPojoImpl;
 import generator.template.ReflectionAssert;
+import evolution.pojo.AnyPojoImpl;
 import evolution.pojo.AnyBasePojo;
 public class AnotherDaoImplTest extends BaseTestCase {
     @Autowired

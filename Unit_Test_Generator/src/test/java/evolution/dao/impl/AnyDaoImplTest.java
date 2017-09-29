@@ -7,8 +7,8 @@ import generator.Json;
 import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
-import java.util.LinkedList;
 import generator.template.ReflectionAssert;
+import java.util.LinkedList;
 import java.util.List;
 public class AnyDaoImplTest extends BaseTestCase {
     @Autowired
