@@ -248,9 +248,9 @@ public class UnitTestGenerator {
 					codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");
 					codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
 					// Dependencies
-					for (Field field : Pointer.autowiredFields(clazz)) {
-						codeWriter.writeMockito4InvokingComponentMethod(method, field);
-					}
+//					for (Field field : Pointer.autowiredFields(clazz)) {
+//						codeWriter.writeMockito4InvokingComponentMethod(method, field);
+//					}
 					// Method Body
 					if (classAnnotationType == Controller.class) {
 						writeCodes4InvokingControllerMethod(clazz, method, codeWriter);
