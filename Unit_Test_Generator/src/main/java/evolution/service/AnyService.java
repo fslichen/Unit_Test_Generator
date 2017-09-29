@@ -15,6 +15,10 @@ public class AnyService {
 		return anyPojo;
 	}
 	
+	public AnyPojo anyMethod(AnyPojo anyPojo) {
+		return anyPojo;
+	}
+	
 	public List<AnyPojo> anotherMethod(AnyPojo anyPojo) {
 		return Arrays.asList(anyPojo);
 	}

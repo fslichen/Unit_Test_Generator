@@ -229,12 +229,38 @@ public class UnitTestGenerator {
 		return Math.min(methodCaseCount, maxCaseCount);
 	}
 	
+	public void writeMockito4InvokingDependencyMethod(Path path, Class<?> clazz, final Method method, final CodeWriter codeWriter) throws IOException {
+		final List<Dependency> dependencies = Pointer.dependencies(clazz);
+		Pointer.scanMethod(path.toFile(), method, new Function<String, Boolean>() {
+			@Override
+			public Boolean apply(String code) {
+				for (Dependency dependency : dependencies) {
+					Field dependencyField = dependency.getField();
+					Method dependencyMethod = dependency.getMethod();
+					if (code.contains(dependencyField.getName()) && code.contains(dependencyMethod.getName())) {// TODO Also consider method overloading.
+						codeWriter.writeStaticImport(Mockito.class);
+						codeWriter.writeField(dependencyField.getType(), MockBean.class);
+						StringBuilder parameterValuesInString = new StringBuilder();
+						for (int i = 0; i < dependencyMethod.getParameterCount(); i++) {
+							parameterValuesInString.append("null, ");
+						}
+						Class<?> returnType = dependency.getMethod().getReturnType();
+						if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
+							codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
+						}
+					}
+				}
+				return true;
+			}
+		});
+	}
+	
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
 			// Generate unit test class related codes.
 			Path path = entry.getKey();
-			final Class<?> clazz = entry.getValue();
-			final CodeWriter codeWriter = new CodeWriter();
+			Class<?> clazz = entry.getValue();
+			CodeWriter codeWriter = new CodeWriter();
 			codeWriter.writePackage(clazz);
 			codeWriter.writeImport(Test.class);
 			codeWriter.writeClass(clazz, "Test", BaseTestCase.class, null);
@@ -243,7 +269,7 @@ public class UnitTestGenerator {
 			Class<?> classAnnotationType = Pointer.classAnnotationType(clazz);
 			int maxTestCaseCount = Lang.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
-			for (final Method method : clazz.getDeclaredMethods()) {
+			for (Method method : clazz.getDeclaredMethods()) {
 				String concatenatedTypeSimpleNames = Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method);
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					// Method Header
@@ -254,29 +280,7 @@ public class UnitTestGenerator {
 					codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");
 					codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
 					// Dependencies
-					final List<Dependency> dependencies = Pointer.dependencies(clazz);
-					Pointer.scanMethod(path.toFile(), method, new Function<String, Boolean>() {
-						@Override
-						public Boolean apply(String code) {
-							for (Dependency dependency : dependencies) {
-								Field dependencyField = dependency.getField();
-								Method dependencyMethod = dependency.getMethod();
-								if (code.contains(dependencyField.getName()) && code.contains(dependencyMethod.getName())) {// TODO Also consider method overloading.
-									codeWriter.writeStaticImport(Mockito.class);
-									codeWriter.writeField(dependencyField.getType(), MockBean.class);
-									StringBuilder parameterValuesInString = new StringBuilder();
-									for (int i = 0; i < dependencyMethod.getParameterCount(); i++) {
-										parameterValuesInString.append("null, ");
-									}
-									Class<?> returnType = dependency.getMethod().getReturnType();
-									if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
-										codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
-									}
-								}
-							}
-							return true;
-						}
-					});
+					writeMockito4InvokingDependencyMethod(path, clazz, method, codeWriter);
 					// Method Body
 					if (classAnnotationType == Controller.class) {
 						writeCodes4InvokingControllerMethod(clazz, method, codeWriter);

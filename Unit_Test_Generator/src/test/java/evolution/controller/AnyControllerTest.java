@@ -73,6 +73,7 @@ public class AnyControllerTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        when(anyService.anyMethod(null)).thenReturn(null);
         when(anyService.anyMethod(null, null)).thenReturn(null);
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         mockMvc.perform(post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
