@@ -184,6 +184,10 @@ public class Pointer {
 		return Lang.lowerFirstCharacter(clazz.getSimpleName());
 	}
 	
+	public static String instanceName(Field field) {
+		return Lang.lowerFirstCharacter(field.getType().getSimpleName());
+	}
+	
 	public static boolean isClass(String code) {
 		return code.contains(" class ");
 	}

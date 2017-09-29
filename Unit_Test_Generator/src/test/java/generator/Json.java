@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Json {
@@ -83,5 +84,28 @@ public class Json {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static String toJson(Object object) {
+		try {
+			return objectMapper.writeValueAsString(object);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T fromJson(String json, Class<T> clazz, Object... keys) throws Exception {
+		for (int i = 0; i < keys.length; i++) {
+			Map<String, Object> map = objectMapper.readValue(json, Map.class);
+			Object value = map.get(keys[i]);
+			if (value instanceof List) {
+				json = objectMapper.writeValueAsString(((List<?>) value).get((Integer) keys[++i]));
+			} else {
+				json = objectMapper.writeValueAsString(value);
+			}
+		}
+		return objectMapper.readValue(json, clazz);
 	}
 }

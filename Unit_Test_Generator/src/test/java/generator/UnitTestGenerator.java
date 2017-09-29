@@ -231,25 +231,36 @@ public class UnitTestGenerator {
 	
 	public void writeMockito4InvokingDependencyMethod(Path path, Class<?> clazz, final Method method, final CodeWriter codeWriter) throws IOException {
 		final List<Dependency> dependencies = Pointer.dependencies(clazz);
+		final Map<String, Object> requestData = new LinkedHashMap<>();
+		final Map<String, Object> responseData = new LinkedHashMap<>();
 		Pointer.scanMethod(path.toFile(), method, new Function<String, Boolean>() {
 			@Override
 			public Boolean apply(String code) {
 				for (Dependency dependency : dependencies) {
 					Field dependencyField = dependency.getField();
 					Method dependencyMethod = dependency.getMethod();
+					String instanceAndMethod = Pointer.instanceName(dependencyField) + "." + dependencyMethod.getName();
 					if (code.contains(dependencyField.getName()) && code.contains(dependencyMethod.getName())) {// TODO Also consider method overloading.
 						codeWriter.writeStaticImport(Mockito.class);
 						codeWriter.writeField(dependencyField.getType(), MockBean.class);
 						StringBuilder parameterValuesInString = new StringBuilder();
-						for (Class<?> parameterType : dependencyMethod.getParameterTypes()) {
-							if (parameterType.isPrimitive()) {
-								parameterValuesInString.append(Mocker.mockPrimitive(parameterType) + ", ");
-							} else {
+						if (dependencyMethod.getParameterCount() > 0) {
+							Object[] parameterValues = new Object[dependencyMethod.getParameterCount()];
+							for (int i = 0; i < dependencyMethod.getParameterCount(); i++) {
 								parameterValuesInString.append("null, ");
+								Mocker mocker = new Mocker();
+								try {
+									parameterValues[i] = mocker.mockObject(dependencyMethod.getGenericParameterTypes()[i].getTypeName());
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
 							}
+							requestData.put(instanceAndMethod, parameterValues);
 						}
-						Class<?> returnType = dependency.getMethod().getReturnType();
+						Class<?> returnType = dependencyMethod.getReturnType();
 						if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
+							Mocker mocker = new Mocker();
+							responseData.put(instanceAndMethod, mocker.mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
 							codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
 						}
 					}
@@ -257,6 +268,10 @@ public class UnitTestGenerator {
 				return true;
 			}
 		});
+		Map<String, Map<String, Object>> result = new LinkedHashMap<>();
+		result.put("requestData", requestData);
+		result.put("responseData", responseData);
+		codeWriter.writeCode(method, String.format("String mockedDataToBeUploaded = \"%s\";", Json.toJson(result).replace("\"", "'").replace("\\", "")));
 	}
 	
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter) throws Exception {
@@ -283,6 +298,7 @@ public class UnitTestGenerator {
 					codeWriter.writeCode(method, "TestCase testCase = testCaseClient.getTestCase();");
 					codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");
 					codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
+					codeWriter.writeCode(method, "String mockedData = testCase.getMockData();");
 					// Dependencies
 					writeMockito4InvokingDependencyMethod(path, clazz, method, codeWriter);
 					// Method Body

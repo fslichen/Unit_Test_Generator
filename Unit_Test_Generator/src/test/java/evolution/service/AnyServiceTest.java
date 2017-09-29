@@ -23,6 +23,8 @@ public class AnyServiceTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), int.class));
         List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
@@ -36,6 +38,8 @@ public class AnyServiceTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         try {
             Method method = AnyService.class.getDeclaredMethod("anyMethod");
             method.setAccessible(true);
@@ -52,6 +56,8 @@ public class AnyServiceTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
         AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
@@ -65,6 +71,8 @@ public class AnyServiceTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
         AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);

@@ -16,4 +16,14 @@ public class JsonTest {
 		System.out.println(Json.fromSubJson("{\"data\":{\"name\":\"Chen\",\"age\":27}}", "data", AnyDto.class));
 		System.out.println(Json.fromSubJsons("{\"data\":[{\"name\":\"Chen\",\"age\":27}]}", "data", AnyDto.class));
 	}
+	
+	@Test
+	public void testAdvancedFromJson() throws Exception {
+		String name = Json.fromJson("{'data':{'name':'Chen','age':27,'list':['Elsa','Anna']}}".replace("'", "\""), String.class, "data", "list", 1);
+		System.out.println(name);
+		int age = Json.fromJson("{'data':{'name':'Chen','age':27,'list':['Elsa','Anna']}}".replace("'", "\""), Integer.class, "data", "age");
+		System.out.println(age);
+		String str = Json.fromJson("{'requestData':{'anyService.anotherMethod':[{'name':'Abraham Lincoln','age':1669620757},984334412]},'responseData':{'anyService.anotherMethod':[{'name':'Richard Nixon','age':755938847},null]}}".replace("'", "\""), String.class, "requestData", "anyService.anotherMethod", 0, "name");
+		System.out.println(str);
+	}
 }

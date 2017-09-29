@@ -21,6 +21,8 @@ public class AnotherDaoImplTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AnyPojoImpl actualResult = anotherDaoImpl.anyMethod();
         AnyPojoImpl expectedResult = Json.fromSubJson(responseData, "data", AnyPojoImpl.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
@@ -33,6 +35,8 @@ public class AnotherDaoImplTest extends BaseTestCase {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AnyBasePojo actualResult = anotherDaoImpl.anyMethod();
         AnyBasePojo expectedResult = Json.fromSubJson(responseData, "data", AnyBasePojo.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);

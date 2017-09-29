@@ -68,31 +68,6 @@ public class Mocker {
 		return parameterValues;
 	}
 	
-	public static Object mockPrimitive(Class<?> clazz) {
-		if (clazz == boolean.class || clazz == Boolean.class) {
-			return mockBoolean();
-		} else if (clazz == byte.class || clazz == Byte.class) {
-			return mockByte();
-		} else if (clazz == short.class || clazz == Short.class) {
-			return mockShort();
-		} else if (clazz == int.class || clazz == Integer.class) {
-			return mockInteger();
-		} else if (clazz == long.class || clazz == Long.class) {
-			return mockLong();
-		} else if (clazz == float.class || clazz == Float.class) {
-			return mockFloat();
-		} else if (clazz == double.class || clazz == Double.class) {
-			return mockDouble();
-		} else if (clazz == char.class || clazz == Character.class) {
-			return mockCharacter();
-		} else if (clazz == BigDecimal.class) {
-			return mockBigDecimal();
-		} else if (clazz == String.class) {
-			return mockString();
-		} 
-		return null;
-	}
-	
 	public static Object mockReturnValue(Method method) throws Exception {
 		return new Mocker().mockObject(method.getGenericReturnType().getTypeName());
 	}
