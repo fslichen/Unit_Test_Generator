@@ -14,6 +14,8 @@ import static org.mockito.Mockito.*;
 import evolution.service.AnyService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.List;
+import evolution.pojo.AnyPojo;
+import evolution.pojo.AnotherPojo;
 import java.lang.String;
 import java.lang.reflect.Method;
 import generator.template.ReflectionAssert;
@@ -68,8 +70,8 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
-        when(anyService.anotherMethod(null, null)).thenReturn(null);
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'Abraham Lincoln','age':1669620757},984334412]},'responseData':{'anyService.anotherMethod':[{'name':'Richard Nixon','age':755938847},null]}}";
+        when(anyService.anotherMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anotherMethod", 0), Json.fromJson(mockedData, int.class, "requestData", "anyService.anotherMethod", 1))).thenReturn(Json.fromJson(mockedData, List.class, "anyService.anotherMethod"));
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'Bill Clinton','age':679996797},1683727415]},'responseData':{'anyService.anotherMethod':[{'name':'Bill Clinton','age':354959593}]}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         mockMvc.perform(post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
@@ -82,9 +84,9 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
-        when(anyService.anyMethod(null)).thenReturn(null);
-        when(anyService.anyMethod(null, null)).thenReturn(null);
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Donald Trump','age':1301002906},{'address':'Abraham Lincoln'}]},'responseData':{'anyService.anyMethod':{'name':'Abraham Lincoln','age':824816746}}}";
+        when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "anyService.anyMethod"));
+        when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "anyService.anyMethod"));
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Bill Clinton','age':25028799},{'address':'Richard Nixon'}]},'responseData':{'anyService.anyMethod':{'name':'Bill Clinton','age':-674528746}}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         mockMvc.perform(post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }

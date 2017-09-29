@@ -246,8 +246,10 @@ public class UnitTestGenerator {
 						StringBuilder parameterValuesInString = new StringBuilder();
 						if (dependencyMethod.getParameterCount() > 0) {
 							Object[] parameterValues = new Object[dependencyMethod.getParameterCount()];
+							Class<?>[] parameterTypes = dependencyMethod.getParameterTypes();
 							for (int i = 0; i < dependencyMethod.getParameterCount(); i++) {
-								parameterValuesInString.append("null, ");
+								codeWriter.writeImport(parameterTypes[i]);
+								parameterValuesInString.append(String.format("Json.fromJson(mockedData, %s.class, \"requestData\", \"%s\", %s), ", parameterTypes[i].getSimpleName(), instanceAndMethod, i));
 								Mocker mocker = new Mocker();
 								try {
 									parameterValues[i] = mocker.mockObject(dependencyMethod.getGenericParameterTypes()[i].getTypeName());
@@ -261,7 +263,8 @@ public class UnitTestGenerator {
 						if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
 							Mocker mocker = new Mocker();
 							responseData.put(instanceAndMethod, mocker.mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
-							codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", "null"));
+							codeWriter.writeImport(returnType);
+							codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", String.format("Json.fromJson(mockedData, %s.class, \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						}
 					}
 				}
