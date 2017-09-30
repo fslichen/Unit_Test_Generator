@@ -70,8 +70,8 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
-        when(anyService.anotherMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anotherMethod", 0), Json.fromJson(mockedData, int.class, "requestData", "anyService.anotherMethod", 1))).thenReturn(Json.fromJson(mockedData, List.class, "anyService.anotherMethod"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'Richard Nixon','age':439492436},812745634]},'responseData':{'anyService.anotherMethod':[{'name':'George Washington','age':1490800454},null]}}";
+        when(anyService.anotherMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anotherMethod", 0), Json.fromJson(mockedData, int.class, "requestData", "anyService.anotherMethod", 1))).thenReturn(Json.fromJson(mockedData, List.class, "responseData", "anyService.anotherMethod"));
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'Donald Trump','age':-1952702790},-636218055]},'responseData':{'anyService.anotherMethod':[{'name':'Richard Nixon','age':1957816351},null]}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         mockMvc.perform(post("/project/test/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
@@ -84,9 +84,9 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
-        when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "anyService.anyMethod"));
-        when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "anyService.anyMethod"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Bill Clinton','age':-1945980220},{'address':'Abraham Lincoln'}]},'responseData':{'anyService.anyMethod':{'name':'George Washington','age':-991173308}}}";
+        when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
+        when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Bill Clinton','age':631117110},{'address':'Abraham Lincoln'}]},'responseData':{'anyService.anyMethod':{'name':'Richard Nixon','age':-120602242}}}";
         List<String> parameterValues = Json.splitSubJsons(requestData, "data");
         mockMvc.perform(post("/project/post").content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.subJson(responseData, "data"), false));
     }
@@ -149,18 +149,6 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        String mockedData = testCase.getMockData();
-        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
-        anyController.http();
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testExceptionWithTypesAnyDtoAnyDto0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
@@ -168,6 +156,18 @@ public class AnyControllerTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         mockMvc.perform(get("/project/exception")).andExpect(status().isOk());
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testHttpWithTypesPrimitiveVoid0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
+        anyController.http();
     }
     
 }

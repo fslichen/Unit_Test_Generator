@@ -26,4 +26,10 @@ public class JsonTest {
 		String str = Json.fromJson("{'requestData':{'anyService.anotherMethod':[{'name':'Abraham Lincoln','age':1669620757},984334412]},'responseData':{'anyService.anotherMethod':[{'name':'Richard Nixon','age':755938847},null]}}".replace("'", "\""), String.class, "requestData", "anyService.anotherMethod", 0, "name");
 		System.out.println(str);
 	}
+	
+	@Test
+	public void testA() throws Exception {
+		Integer integer = Json.fromJson("{'name':'Chen','data':[{'age':27},{'age':28}]}".replace("'", "\""), Integer.class, "data", 0, "age");
+		System.out.println(integer);
+	}
 }

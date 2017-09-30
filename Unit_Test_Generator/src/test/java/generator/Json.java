@@ -96,16 +96,22 @@ public class Json {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T fromJson(String json, Class<T> clazz, Object... keys) throws Exception {
-		for (int i = 0; i < keys.length; i++) {
-			Map<String, Object> map = objectMapper.readValue(json, Map.class);
-			Object value = map.get(keys[i]);
-			if (value instanceof List) {
-				json = objectMapper.writeValueAsString(((List<?>) value).get((Integer) keys[++i]));
-			} else {
-				json = objectMapper.writeValueAsString(value);
+	public static <T> T fromJson(String json, Class<T> clazz, Object... keys) {
+		Object object = null;
+		try {
+			object = objectMapper.readValue(json, Object.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		for (Object key : keys) {
+			if (object instanceof List) {
+				List<?> list = (List<?>) object;
+				object = list.get((Integer) key);
+			} else if (object instanceof Map) {
+				Map<?, ?> map = (Map<?, ?>) object;
+				object = map.get(key);
 			}
 		}
-		return objectMapper.readValue(json, clazz);
+		return (T) object;
 	}
 }
