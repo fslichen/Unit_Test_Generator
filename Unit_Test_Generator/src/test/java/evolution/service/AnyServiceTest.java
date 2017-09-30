@@ -7,9 +7,9 @@ import generator.Json;
 import generator.template.TestCase;
 import evolution.annotation.Database4UcaseSetup;
 import evolution.annotation.ExpectedDatabase4Ucase;
-import java.util.List;
 import evolution.pojo.AnyPojo;
 import generator.template.ReflectionAssert;
+import java.util.List;
 import java.lang.reflect.Method;
 import evolution.pojo.AnotherPojo;
 public class AnyServiceTest extends BaseTestCase {
@@ -25,8 +25,7 @@ public class AnyServiceTest extends BaseTestCase {
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), int.class));
+        List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0), Json.fromJson(requestData, int.class, "data", 1));
         List<AnyPojo> expectedResult = Json.fromSubJson(responseData, "data", List.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
@@ -58,8 +57,7 @@ public class AnyServiceTest extends BaseTestCase {
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class));
+        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0));
         AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
@@ -73,8 +71,7 @@ public class AnyServiceTest extends BaseTestCase {
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
-        List<String> parameterValues = Json.splitSubJsons(requestData, "data");
-        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(parameterValues.get(0), AnyPojo.class), Json.fromJson(parameterValues.get(1), AnotherPojo.class));
+        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0), Json.fromJson(requestData, AnotherPojo.class, "data", 1));
         AnyPojo expectedResult = Json.fromSubJson(responseData, "data", AnyPojo.class);
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }

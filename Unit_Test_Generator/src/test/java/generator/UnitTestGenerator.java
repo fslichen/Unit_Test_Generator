@@ -338,13 +338,12 @@ public class UnitTestGenerator {
 		if (requestMethod == RequestMethod.POST) {
 			String code = null;
 			if (method.getParameterCount() > 0) {
-				writeCodes4PreparingParameterValues(method, codeWriter, true);
-				code = String.format("mockMvc.perform(post(%s).content(parameterValues.get(0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
+				code = String.format("mockMvc.perform(post(%s).content(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"", writeCodes4PreparingParameterValues(method, codeWriter, true));
 			} else {
 				code = String.format("mockMvc.perform(post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			}
 			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
-				code += ".andExpect(content().json(Json.subJson(responseData, \"data\"), false))";
+				code += String.format(".andExpect(content().json(Json.toJson(responseData, \"data\"), false))");
 			}
 			codeWriter.writeCode(method, code + ";");
 		} else if (requestMethod == RequestMethod.GET) {
@@ -409,13 +408,15 @@ public class UnitTestGenerator {
 	
 	public String writeCodes4PreparingParameterValues(Method method, CodeWriter codeWriter, boolean isController) {
 		StringBuilder parametersBuilder = new StringBuilder();
-		codeWriter.writeImport(List.class);
-		codeWriter.writeCode(method, "List<String> parameterValues = Json.splitSubJsons(requestData, \"data\");");
 		if (!isController) {
 			int i = 0;
 			for (Class<?> parameterType : method.getParameterTypes()) {
 				codeWriter.writeImport(parameterType);
-				parametersBuilder.append(String.format("Json.fromJson(parameterValues.get(%s), %s.class), ", i++, parameterType.getSimpleName()));
+				parametersBuilder.append(String.format("Json.fromJson(requestData, %s.class, \"data\", %s), ", parameterType.getSimpleName(), i++));
+			}
+		} else {
+			for (int i = 0; i < method.getParameterCount(); i++) {
+				parametersBuilder.append(String.format("Json.toJson(requestData, \"data\", %s), ", i));
 			}
 		}
 		return Lang.trimEndingComma(parametersBuilder);

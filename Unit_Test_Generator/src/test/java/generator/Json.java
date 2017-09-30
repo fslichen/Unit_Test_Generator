@@ -114,4 +114,8 @@ public class Json {
 		}
 		return (T) object;
 	}
+	
+	public static String toJson(String json, Object... keys) {
+		return toJson(fromJson(json, Object.class, keys));
+	}
 }
