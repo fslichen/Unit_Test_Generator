@@ -365,7 +365,7 @@ public class UnitTestGenerator {
 		} else {
 			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode(method, String.format("%s actualResult = %s.%s(%s);", Pointer.simpleReturnTypeName(method, codeWriter), Pointer.instanceName(clazz), method.getName(), parametersInString));
-			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
+			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromJson(responseData, %s.class, \"data\");", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 	}
@@ -400,7 +400,7 @@ public class UnitTestGenerator {
 			} else {
 				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
 			}
-			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromSubJson(responseData, \"data\", %s.class);", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
+			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromJson(responseData, %s.class, \"data\");", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 		codeWriter.writeCode(method, "} catch (Exception e){}");
