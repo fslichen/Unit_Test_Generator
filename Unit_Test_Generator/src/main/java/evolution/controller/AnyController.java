@@ -72,6 +72,7 @@ public class AnyController {
 	}
 	
 	private String hide(String info) {
+		myService.anyMethod(null);
 		return null;
 	}
 	
