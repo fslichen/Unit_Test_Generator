@@ -36,7 +36,15 @@ public class CodeWriter {
 				float.class, Float.class, 
 				double.class, Double.class, 
 				char.class, Character.class, 
-				boolean.class, Boolean.class));
+				boolean.class, Boolean.class, Object.class,
+				byte[].class, Byte[].class, 
+				short[].class, Short[].class,
+				int[].class, Integer[].class, 
+				long[].class, Long[].class, 
+				float[].class, Float[].class, 
+				double[].class, Double[].class, 
+				char[].class, Character[].class, 
+				boolean[].class, Boolean[].class, Object[].class));
 		return classes;
 	}
 
