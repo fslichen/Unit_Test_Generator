@@ -1,6 +1,5 @@
 package evolution.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +13,8 @@ import evolution.service.AnyService;
 @RestController
 @RequestMapping("/another")
 public class AnotherController {
-	@Autowired
 	private AnyService myService;
 	
-	@Autowired
 	private RestTemplate restTemplate;
 	
 	@PostMapping("/post/abstract")

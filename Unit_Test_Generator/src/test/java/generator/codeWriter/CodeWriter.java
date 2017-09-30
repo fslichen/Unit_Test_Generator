@@ -36,15 +36,7 @@ public class CodeWriter {
 				float.class, Float.class, 
 				double.class, Double.class, 
 				char.class, Character.class, 
-				boolean.class, Boolean.class, Object.class,
-				byte[].class, Byte[].class, 
-				short[].class, Short[].class,
-				int[].class, Integer[].class, 
-				long[].class, Long[].class, 
-				float[].class, Float[].class, 
-				double[].class, Double[].class, 
-				char[].class, Character[].class, 
-				boolean[].class, Boolean[].class, Object[].class));
+				boolean.class, Boolean.class, Object.class));
 		return classes;
 	}
 
@@ -241,7 +233,7 @@ public class CodeWriter {
 	}
 	
 	public void writeImport(Class<?> clazz) {
-		if (!classesDontNeedToBeImported().contains(clazz)) {
+		if (!clazz.isArray() && !classesDontNeedToBeImported().contains(clazz)) {
 			String code = String.format("import %s;", clazz.getName());
 			List<String> classNames = iHeader.getClassNames();
 			if (!classNames.contains(code)) {
