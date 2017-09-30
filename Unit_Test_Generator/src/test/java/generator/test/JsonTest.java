@@ -28,8 +28,14 @@ public class JsonTest {
 	}
 	
 	@Test
-	public void testA() throws Exception {
+	public void testFromJson() throws Exception {
 		Integer integer = Json.fromJson("{'name':'Chen','data':[{'age':27},{'age':28}]}".replace("'", "\""), Integer.class, "data", 0, "age");
 		System.out.println(integer);
+	}
+	
+	@Test
+	public void testToJson() {
+		String age = Json.toJson("{'name':'Chen','data':[{'age':27},{'age':28}]}".replace("'", "\""), "data", 0, "age");
+		System.out.println(age);
 	}
 }
