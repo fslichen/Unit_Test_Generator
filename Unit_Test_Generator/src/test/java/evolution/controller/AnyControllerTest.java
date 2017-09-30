@@ -69,7 +69,7 @@ public class AnyControllerTest extends BaseTestCase {
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'George Washington','age':-1074560625},-1432288697]},'responseData':{}}";
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'George Washington','age':-1486345742},-1638501421]},'responseData':{}}";
         mockMvc.perform(post("/project/test/post").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.toJson(responseData, "data"), false));
     }
     
@@ -83,7 +83,7 @@ public class AnyControllerTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Richard Nixon','age':-827394763},{'address':'Richard Nixon'}]},'responseData':{'anyService.anyMethod':{'name':'Bill Clinton','age':-89053003}}}";
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Donald Trump','age':-668467946},{'address':'George Washington'}]},'responseData':{'anyService.anyMethod':{'name':'George Washington','age':-505856954}}}";
         mockMvc.perform(post("/project/post").content(Json.toJson(requestData, "data", 0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.toJson(responseData, "data"), false));
     }
     
@@ -109,7 +109,7 @@ public class AnyControllerTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Donald Trump','age':1640939635},{'address':'Bill Clinton'}]},'responseData':{'anyService.anyMethod':{'name':'Barack Obama','age':996431999}}}";
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Donald Trump','age':-361200262},{'address':'George Washington'}]},'responseData':{'anyService.anyMethod':{'name':'Donald Trump','age':-999783667}}}";
         try {
             Method method = AnyController.class.getDeclaredMethod("hide", String.class);
             method.setAccessible(true);

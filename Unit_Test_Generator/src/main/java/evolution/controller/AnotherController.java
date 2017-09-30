@@ -30,9 +30,8 @@ public class AnotherController {
 		restTemplate.postForObject(null, null, null, new Object());
 	}
 	
-	// TODO Remove the [] symbols from the method name.
-//	@PostMapping("/post/objects") 
-//	public Object[] postObjects() {
-//		return null;
-//	}
+	@PostMapping("/post/objects") 
+	public Object[] postObjects(int[] ints) {
+		return null;
+	}
 }

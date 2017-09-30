@@ -131,7 +131,7 @@ public class Pointer {
 		for (Class<?> parameterType : method.getParameterTypes()) {
 			result.append(parameterType.getSimpleName());
 		}
-		return result.toString();
+		return result.toString().replace("[]", "Array");
 	}
 	
 	public static ControllerMethodPojo controllerMethodPojo(Class<?> clazz, Method method) {
@@ -214,7 +214,7 @@ public class Pointer {
 		if (returnType.isPrimitive()) {
 			return "Primitive" + Lang.upperFirstCharacter(returnType.getSimpleName());
 		}
-		return returnType.getSimpleName();
+		return returnType.getSimpleName().replace("[]", "Array");
 	}
 	
 	public static <T> List<Method> setters(Class<T> clazz) throws Exception {
