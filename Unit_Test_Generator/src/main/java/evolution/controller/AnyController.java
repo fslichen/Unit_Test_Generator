@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import evolution.controller.dto.AnyAbstractDto;
 import evolution.controller.dto.AnyDto;
+import evolution.pojo.AbstractAlphaPojo;
+import evolution.pojo.AlphaPojo;
 import evolution.pojo.AnotherPojo;
 import evolution.pojo.AnyPojo;
 import evolution.pojo.Tree;

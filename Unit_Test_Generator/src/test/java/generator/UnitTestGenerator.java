@@ -262,11 +262,11 @@ public class UnitTestGenerator {
 							requestData.put(instanceAndMethod, parameterValues);
 						}
 						Class<?> returnType = dependencyMethod.getReturnType();
-						if (returnType != void.class && returnType != Void.class && !Modifier.isPrivate(dependencyMethod.getModifiers())) {
+						if (!Modifier.isAbstract(returnType.getModifiers()) && !Modifier.isPrivate(dependencyMethod.getModifiers()) && returnType != void.class && returnType != Void.class) {
 							Mocker mocker = new Mocker();
 							responseData.put(instanceAndMethod, mocker.mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
 							codeWriter.writeImport(returnType);
-							codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), parameterValuesInString.length() > 2 ? parameterValuesInString.substring(0, parameterValuesInString.length() - 2) : "", String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
+							codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						}
 					}
 				}

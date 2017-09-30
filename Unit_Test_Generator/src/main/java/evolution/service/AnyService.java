@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import evolution.pojo.AlphaPojo;
 import evolution.pojo.AnotherPojo;
 import evolution.pojo.AnyPojo;
 
@@ -24,6 +25,10 @@ public class AnyService {
 	}
 	
 	private AnyPojo anyMethod() {
+		return null;
+	}
+	
+	public AlphaPojo anyAbstract(AlphaPojo pojo) {
 		return null;
 	}
 }
