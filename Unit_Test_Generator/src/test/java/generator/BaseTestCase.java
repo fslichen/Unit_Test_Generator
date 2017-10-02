@@ -14,6 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import evolution.Application;
 import generator.template.TestCaseClient;
+import generator.template.impl.TestCaseClientImpl;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = Application.class) 
@@ -31,5 +32,6 @@ public class BaseTestCase {
 	@PostConstruct
 	public void postConstruct() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+		testCaseClient = new TestCaseClientImpl();
 	}
 }

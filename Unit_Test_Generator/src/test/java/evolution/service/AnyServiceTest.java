@@ -48,20 +48,6 @@ public class AnyServiceTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testAnyMethodWithTypesAnyPojoAnyPojo0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        String mockedData = testCase.getMockData();
-        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
-        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0));
-        AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class, "data");
-        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
     public void testAnyMethodWithTypesAnyPojo0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
@@ -87,6 +73,20 @@ public class AnyServiceTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0), Json.fromJson(requestData, AnotherPojo.class, "data", 1));
+        AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class, "data");
+        ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testAnyMethodWithTypesAnyPojoAnyPojo0() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
+        AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0));
         AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }

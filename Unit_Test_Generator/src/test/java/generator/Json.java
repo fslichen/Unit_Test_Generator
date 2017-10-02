@@ -112,7 +112,7 @@ public class Json {
 				object = map.get(key);
 			}
 		}
-		return (T) object;
+		return (T) fromJson(toJson(object), clazz);
 	}
 	
 	public static String toJson(String json, Object... keys) {
