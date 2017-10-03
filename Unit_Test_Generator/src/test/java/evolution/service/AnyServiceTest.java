@@ -27,6 +27,7 @@ public class AnyServiceTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AlphaPojo actualResult = anyService.anyAbstract(Json.fromJson(requestData, AlphaPojo.class, "data", 0));
+        System.out.println(Json.toJson(actualResult));
         AlphaPojo expectedResult = Json.fromJson(responseData, AlphaPojo.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
@@ -41,6 +42,7 @@ public class AnyServiceTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         List<AnyPojo> actualResult = anyService.anotherMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0), Json.fromJson(requestData, int.class, "data", 1));
+        System.out.println(Json.toJson(actualResult));
         List<AnyPojo> expectedResult = Json.fromJson(responseData, List.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
@@ -58,6 +60,7 @@ public class AnyServiceTest extends BaseTestCase {
             Method method = AnyService.class.getDeclaredMethod("anyMethod");
             method.setAccessible(true);
             AnyPojo actualResult = (AnyPojo) method.invoke(anyService);
+            System.out.println(Json.toJson(actualResult));
             AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class, "data");
             ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
         } catch (Exception e){}
@@ -73,6 +76,7 @@ public class AnyServiceTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0), Json.fromJson(requestData, AnotherPojo.class, "data", 1));
+        System.out.println(Json.toJson(actualResult));
         AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
@@ -87,6 +91,7 @@ public class AnyServiceTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AnyPojo actualResult = anyService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0));
+        System.out.println(Json.toJson(actualResult));
         AnyPojo expectedResult = Json.fromJson(responseData, AnyPojo.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }

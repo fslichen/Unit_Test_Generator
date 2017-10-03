@@ -209,6 +209,10 @@ public class CodeWriter {
 		}
 	}
 	
+	public void writeOutput(Method method, String code) {
+		writeCode(method, String.format("System.out.println(%s);", code));
+	}
+	
 	public void writeCode(Method method, String code) {
 		IMethod iMethod = iMethods.get(method);
 		if (iMethod == null) {

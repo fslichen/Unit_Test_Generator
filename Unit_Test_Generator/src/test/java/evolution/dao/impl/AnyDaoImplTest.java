@@ -24,6 +24,7 @@ public class AnyDaoImplTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         LinkedList<T> actualResult = anyDaoImpl.anyMethod();
+        System.out.println(Json.toJson(actualResult));
         LinkedList<T> expectedResult = Json.fromJson(responseData, LinkedList.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }
@@ -38,6 +39,7 @@ public class AnyDaoImplTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         List actualResult = anyDaoImpl.anyMethod();
+        System.out.println(Json.toJson(actualResult));
         List expectedResult = Json.fromJson(responseData, List.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }

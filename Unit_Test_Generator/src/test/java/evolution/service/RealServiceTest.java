@@ -24,6 +24,7 @@ public class RealServiceTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         AnotherPojo actualResult = realService.anyMethod(Json.fromJson(requestData, AnyPojo.class, "data", 0));
+        System.out.println(Json.toJson(actualResult));
         AnotherPojo expectedResult = Json.fromJson(responseData, AnotherPojo.class, "data");
         ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);
     }

@@ -357,6 +357,7 @@ public class UnitTestGenerator {
 				code = String.format("mockMvc.perform(post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			}
 			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
+				codeWriter.writeOutput(method, code + ".andReturn().getResponse().getContentAsString()");
 				code += String.format(".andExpect(content().json(Json.toJson(responseData, \"data\"), false))");
 			}
 			codeWriter.writeCode(method, code + ";");
@@ -379,6 +380,7 @@ public class UnitTestGenerator {
 		} else {
 			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode(method, String.format("%s actualResult = %s.%s(%s);", Pointer.simpleReturnTypeName(method, codeWriter), Pointer.instanceName(clazz), method.getName(), parametersInString));
+			codeWriter.writeOutput(method, "Json.toJson(actualResult)");
 			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromJson(responseData, %s.class, \"data\");", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
@@ -414,6 +416,7 @@ public class UnitTestGenerator {
 			} else {
 				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
 			}
+			codeWriter.writeOutput(method, "Json.toJson(actualResult)");
 			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromJson(responseData, %s.class, \"data\");", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
