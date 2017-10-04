@@ -213,6 +213,10 @@ public class CodeWriter {
 		writeCode(method, String.format("System.out.println(%s);", code));
 	}
 	
+	public void writeOutput(Method method, String prefix, String code, String suffix) {
+		writeCode(method, String.format("System.out.println(%s + %s + %s);", "\"" + prefix.replace("'", "\\\"") + "\"", code, "\"" + suffix.replace("'", "\\\"") + "\""));
+	}
+	
 	public void writeCode(Method method, String code) {
 		IMethod iMethod = iMethods.get(method);
 		if (iMethod == null) {
