@@ -52,14 +52,13 @@ public class AnyControllerTest extends BaseTestCase {
     @Test
     @Database4UcaseSetup
     @ExpectedDatabase4Ucase
-    public void testPostWithTypesAnyPojoPrimitiveVoid3() throws Exception {
+    public void testAbstractPojoWithTypesAnyAbstractDtoPrimitiveVoid0() throws Exception {
         TestCase testCase = testCaseClient.getTestCase();
         String requestData = testCase.getRequestData();
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'George Washington','age':1885083976},45093458]},'responseData':{}}";
-        System.out.println("{\"data\":" + mockMvc.perform(post("/project/test/post").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString() + ",\"status\":\"Success\"}");
-        mockMvc.perform(post("/project/test/post").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.toJson(responseData, "data"), false));
+        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
+        mockMvc.perform(get("/project/abstract")).andExpect(status().isOk());
     }
     
     @Test
@@ -72,9 +71,22 @@ public class AnyControllerTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'George Washington','age':-1672984826},{'address':'Richard Nixon'}]},'responseData':{'anyService.anyMethod':{'name':'Donald Trump','age':777207622}}}";
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Barack Obama','age':947694306},{'address':'Abraham Lincoln'}]},'responseData':{'anyService.anyMethod':{'name':'Richard Nixon','age':-1877653962}}}";
         System.out.println("{\"data\":" + mockMvc.perform(post("/project/post").content(Json.toJson(requestData, "data", 0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString() + ",\"status\":\"Success\"}");
         mockMvc.perform(post("/project/post").content(Json.toJson(requestData, "data", 0)).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.toJson(responseData, "data"), false));
+    }
+    
+    @Test
+    @Database4UcaseSetup
+    @ExpectedDatabase4Ucase
+    public void testPostWithTypesAnyPojoPrimitiveVoid3() throws Exception {
+        TestCase testCase = testCaseClient.getTestCase();
+        String requestData = testCase.getRequestData();
+        String responseData = testCase.getResponseData();
+        String mockedData = testCase.getMockData();
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anotherMethod':[{'name':'Richard Nixon','age':998799605},35430902]},'responseData':{}}";
+        System.out.println("{\"data\":" + mockMvc.perform(post("/project/test/post").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString() + ",\"status\":\"Success\"}");
+        mockMvc.perform(post("/project/test/post").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.toJson(responseData, "data"), false));
     }
     
     @Test
@@ -100,7 +112,7 @@ public class AnyControllerTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
         when(anyService.anyMethod(Json.fromJson(mockedData, AnyPojo.class, "requestData", "anyService.anyMethod", 0), Json.fromJson(mockedData, AnotherPojo.class, "requestData", "anyService.anyMethod", 1))).thenReturn(Json.fromJson(mockedData, AnyPojo.class, "responseData", "anyService.anyMethod"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Donald Trump','age':1825224833},{'address':'Richard Nixon'}]},'responseData':{'anyService.anyMethod':{'name':'Bill Clinton','age':-1639394666}}}";
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyMethod':[{'name':'Richard Nixon','age':169101033},{'address':'Donald Trump'}]},'responseData':{'anyService.anyMethod':{'name':'Bill Clinton','age':1476699652}}}";
         try {
             Method method = AnyController.class.getDeclaredMethod("hide", String.class);
             method.setAccessible(true);
@@ -121,18 +133,6 @@ public class AnyControllerTest extends BaseTestCase {
         String mockedData = testCase.getMockData();
         String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
         mockMvc.perform(get("/project/servlet/get")).andExpect(status().isOk());
-    }
-    
-    @Test
-    @Database4UcaseSetup
-    @ExpectedDatabase4Ucase
-    public void testAbstractPojoWithTypesAnyAbstractDtoPrimitiveVoid0() throws Exception {
-        TestCase testCase = testCaseClient.getTestCase();
-        String requestData = testCase.getRequestData();
-        String responseData = testCase.getResponseData();
-        String mockedData = testCase.getMockData();
-        String mockedDataToBeUploaded = "{'requestData':{},'responseData':{}}";
-        mockMvc.perform(get("/project/abstract")).andExpect(status().isOk());
     }
     
     @Test
