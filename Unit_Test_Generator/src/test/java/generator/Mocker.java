@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -94,6 +95,10 @@ public class Mocker {
 		return collection;
 	}
 	
+	public Date mockDate() {
+		return new Date();
+	}
+	
 	public Object mockObject(String genericTypeName) {
 		if (genericTypeName.equals(boolean.class.getName()) || genericTypeName.equals(Boolean.class.getName())) {
 			return mockBoolean();
@@ -115,6 +120,8 @@ public class Mocker {
 			return mockBigDecimal();
 		} else if (genericTypeName.equals(String.class.getName())) {// TODO Add more primitive types.
 			return mockString();
+		} else if (genericTypeName.equals(Date.class.getName())) {
+			return mockDate();
 		} else if (genericTypeName.startsWith(List.class.getName())) {
 			return mockCollection(genericTypeName, new LinkedList<>());
 		} else if (genericTypeName.startsWith(Set.class.getName())) {
