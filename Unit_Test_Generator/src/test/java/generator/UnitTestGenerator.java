@@ -138,24 +138,26 @@ public class UnitTestGenerator {
 	
 	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, WebApplicationContext webApplicationContext) throws Exception {
 		for (Entry<Path, Class<?>> entry : classesUnderBasePackageOfSrcMainJava(basePackage, classFilter).entrySet()) {
+			Path path = entry.getKey();
 			Class<?> clazz = entry.getValue();
-			String jsonDirectoryPath = Lang.pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "");
+			// Determine JSON directory path.
+			String jsonDirectoryPath = Lang.pathInString(path).replace("src/main/java", "src/test/java").replace(".java", "");
 			int index = jsonDirectoryPath.lastIndexOf("/");
 			jsonDirectoryPath = jsonDirectoryPath.substring(0, index + 1) + Lang.lowerFirstCharacter(jsonDirectoryPath.substring(index + 1));
+			// Determine use case count.
 			int maxUseCaseCount = Lang.property("max-use-case-count", Integer.class);
-			Map<String, Integer> useCaseCountsByMethod = caseCountsByMethod(entry.getKey().toFile());
-			boolean isController = clazz.getAnnotation(Controller.class) != null || clazz.getAnnotation(RestController.class) != null;
+			Map<String, Integer> useCaseCountsByMethod = caseCountsByMethod(path.toFile());
+			// Scan methods and generate use cases.
+			boolean isController = clazz.isAnnotationPresent(Controller.class) || clazz.isAnnotationPresent(RestController.class);
 			for (Method method : clazz.getDeclaredMethods()) {
 				for (int useCaseIndex = 0; useCaseIndex < safeCaseCount(method, useCaseCountsByMethod, maxUseCaseCount); useCaseIndex++) {
 					// Request Data
 					int i = 0;
-					Object[] parameterValues = Mocker.mockParameterValues(method);
+					Object[] parameterValues = Mocker.mockParameterValues(method);// Separate parameter values and parameter values for invoking method because invoking the method may pollute the original parameter values.
 					Object[] parameterValues4InvokingMethod = new Object[parameterValues.length];
 					for (Object parameterValue : parameterValues) {
-						if (parameterValue == null) {
-							parameterValue = new SpecialParameterValue(method.getParameterTypes()[i]);
-						}
-						parameterValues4InvokingMethod[i++] = Json.copyObject(parameterValue);
+						parameterValues4InvokingMethod[i] = Json.copyObject(parameterValue == null ? new SpecialParameterValue(method.getParameterTypes()[i]) : parameterValue);
+						i++;
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
@@ -174,7 +176,7 @@ public class UnitTestGenerator {
 					Class<?> returnType = method.getReturnType();
 					String responseStatus = "Success";
 					if (returnType == void.class || returnType == Void.class) {
-						returnValue = new VoidReturnValue("OK", "void");
+						returnValue = new VoidReturnValue("Void Return Value", "void");
 					} else {
 						try {
 							method.setAccessible(true);
