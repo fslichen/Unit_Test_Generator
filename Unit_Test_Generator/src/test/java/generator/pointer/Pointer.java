@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,17 @@ import generator.pojo.ControllerMethodPojo;
 
 @Controller
 public class Pointer {
+	public static Integer parameterIndex(Method method, Predicate<Parameter> predicate) {
+		int i = 0;
+		for (Parameter parameter : method.getParameters()) { 
+			if (predicate.test(parameter)) {
+				return i;
+			}
+			i++;
+		}
+		return null;
+	}
+	
 	public static List<Field> autowiredFields(Class<?> clazz) {
 		List<Field> autowiredFields = new LinkedList<>();
 		for (Field field : clazz.getDeclaredFields()) {

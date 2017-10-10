@@ -275,20 +275,9 @@ public class UnitTestGenerator {
 		codeWriter.writeStaticImport(MockMvcRequestBuilders.class);
 		if (requestMethod == RequestMethod.POST) {
 			String code = null;
-			if (method.getParameterCount() > 0) {
-				StringBuilder parametersBuilder = new StringBuilder();
-				int i = 0;
-				for (Parameter parameter : method.getParameters()) {
-					if (parameter.getAnnotation(RequestBody.class) != null) {
-						parametersBuilder.append(String.format("Json.toJson(requestData, \"data\", %s)", i++));
-						break;
-					}
-				}
-				if (parametersBuilder.length() == 0) {
-					System.out.println(String.format("%s is missing request body.", method));
-					parametersBuilder.append("\"The request body is missing.\"");
-				}
-				code = String.format("mockMvc.perform(post(%s).content(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"", parametersBuilder.toString());
+			Integer requestBodyParameterIndex = Pointer.parameterIndex(method, x -> x.isAnnotationPresent(RequestBody.class));
+			if (requestBodyParameterIndex != null) {
+				code = String.format("mockMvc.perform(post(%s).content(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"", String.format("Json.toJson(requestData, \"data\", %s)", requestBodyParameterIndex));
 			} else {
 				code = String.format("mockMvc.perform(post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			}
