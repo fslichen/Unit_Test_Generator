@@ -96,6 +96,17 @@ public class Pointer {
 		return ts;
 	}
 	
+	public static String methodName(String code) {
+		int leftBracketIndex = code.indexOf("(");
+		for (int i = leftBracketIndex - 1; i >= 0; i--) {
+			if (code.charAt(i) == ' ') {
+				return code.substring(i + 1, leftBracketIndex);
+			}
+		}
+		System.out.println(String.format("%s does not contain a method name.", code));
+		return null;
+	}
+	
 	public static List<Field> autowiredFields(Class<?> clazz) {
 		List<Field> autowiredFields = new LinkedList<>();
 		for (Field field : clazz.getDeclaredFields()) {

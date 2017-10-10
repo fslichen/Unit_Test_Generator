@@ -40,7 +40,7 @@ public class AnotherControllerTest extends BaseTestCase {
         when(restTemplate.postForObject(Json.fromJson(mockedData, String.class, "requestData", "restTemplate.postForObject", 0), Json.fromJson(mockedData, Object.class, "requestData", "restTemplate.postForObject", 1), Json.fromJson(mockedData, Class.class, "requestData", "restTemplate.postForObject", 2), Json.fromJson(mockedData, Map.class, "requestData", "restTemplate.postForObject", 3))).thenReturn(Json.fromJson(mockedData, Object.class, "responseData", "restTemplate.postForObject"));
         when(restTemplate.postForObject(Json.fromJson(mockedData, URI.class, "requestData", "restTemplate.postForObject", 0), Json.fromJson(mockedData, Object.class, "requestData", "restTemplate.postForObject", 1), Json.fromJson(mockedData, Class.class, "requestData", "restTemplate.postForObject", 2))).thenReturn(Json.fromJson(mockedData, Object.class, "responseData", "restTemplate.postForObject"));
         when(restTemplate.postForObject(Json.fromJson(mockedData, String.class, "requestData", "restTemplate.postForObject", 0), Json.fromJson(mockedData, Object.class, "requestData", "restTemplate.postForObject", 1), Json.fromJson(mockedData, Class.class, "requestData", "restTemplate.postForObject", 2), Json.fromJson(mockedData, Object[].class, "requestData", "restTemplate.postForObject", 3))).thenReturn(Json.fromJson(mockedData, Object.class, "responseData", "restTemplate.postForObject"));
-        String mockedDataToBeUploaded = "{'requestData':{'restTemplate.postForObject':['Donald Trump','Donald Trump',null,null]},'responseData':{'restTemplate.postForObject':null}}";
+        String mockedDataToBeUploaded = "{'requestData':{'restTemplate.postForObject':['Richard Nixon','George Washington',null,null]},'responseData':{'restTemplate.postForObject':null}}";
         mockMvc.perform(get("/another/rest/template")).andExpect(status().isOk());
     }
     
@@ -53,7 +53,7 @@ public class AnotherControllerTest extends BaseTestCase {
         String responseData = testCase.getResponseData();
         String mockedData = testCase.getMockData();
         when(anyService.anyAbstract(Json.fromJson(mockedData, AlphaPojo.class, "requestData", "anyService.anyAbstract", 0))).thenReturn(Json.fromJson(mockedData, AlphaPojo.class, "responseData", "anyService.anyAbstract"));
-        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyAbstract':[{'name':'Bill Clinton'}]},'responseData':{'anyService.anyAbstract':{'name':'Barack Obama'}}}";
+        String mockedDataToBeUploaded = "{'requestData':{'anyService.anyAbstract':[{'name':'Bill Clinton'}]},'responseData':{'anyService.anyAbstract':{'name':'Abraham Lincoln'}}}";
         System.out.println("{\"data\":" + mockMvc.perform(post("/another/post/abstract").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString() + ",\"status\":\"Success\"}");
         mockMvc.perform(post("/another/post/abstract").content("The request body is missing.").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(content().json(Json.toJson(responseData, "data"), false));
     }
