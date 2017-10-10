@@ -15,7 +15,6 @@ public class TestCaseImpl implements TestCase {
 
 	@Override
 	public String getMockData() {
-		// TODO Auto-generated method stub
-		return null;
+		return "{'requestData':{'realService.anyMethod':[{'name':'George Washington','age':1598897994,'date':1507632626273}]},'responseData':{'realService.anyMethod':{'address':'Barack Obama'}}}".replace("'", "\"");
 	}
 }
