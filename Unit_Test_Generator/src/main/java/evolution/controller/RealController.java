@@ -16,6 +16,6 @@ public class RealController {
 	
 	@PostMapping("/real/post")
 	public AnotherPojo anyMethod(@RequestBody AnyPojo anyPojo) {
-		return realService.anyMethod(anyPojo);
+		return realService.anyMethod(anyPojo);// Mockito returns null when anyPojo and the parameter inside when statement are different. Please don't forget to override the equals() method within the DTO.
 	}
 }
