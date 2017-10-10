@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -63,7 +64,7 @@ public class UnitTestGenerator {
 	public Map<String, Integer> caseCountsByMethod(File file) throws IOException {
 		int caseCount = 0;
 		String methodName = null;
-		Map<String, Integer> caseCountByMethod = new LinkedHashMap<>();
+		Map<String, Integer> caseCountsByMethod = new LinkedHashMap<>();
 		Set<String> conditionStatements = new HashSet<>(Arrays.asList("if (", "if(", "else if (", "else if(", "else {", "else{"));
 		for (String code : FileUtils.readLines(file, "UTF-8")) {
 			code = code.trim();
@@ -78,10 +79,10 @@ public class UnitTestGenerator {
 					}
 				}
 			} else if (code.endsWith("}")) {
-				caseCountByMethod.put(methodName, caseCount);
+				caseCountsByMethod.put(methodName, caseCount);
 			}
 		}
-		return caseCountByMethod;
+		return caseCountsByMethod;
 	}
 	
 	public Map<Path, Class<?>> classesUnderBasePackageOfSrcMainJava(final String basePackage, final Predicate<Class<?>> classFilter) throws Exception {
@@ -91,10 +92,7 @@ public class UnitTestGenerator {
 				@Override
 				public boolean test(Path path) {
 					String pathInString = Lang.pathInString(path);
-					if (!pathInString.contains(SRC_MAIN_JAVA) || (basePackage != null && !pathInString.contains(basePackage.replace(".", "/"))) || !Lang.withExtension(pathInString, "java")) {
-						return false;
-					}
-					return true;
+					return pathInString.contains(SRC_MAIN_JAVA) && (basePackage == null || pathInString.contains(basePackage.replace(".", "/"))) && Lang.withExtension(pathInString, "java");
 				}}).forEach(new Consumer<Path>() {
 				@Override
 				public void accept(Path path) {
@@ -106,7 +104,7 @@ public class UnitTestGenerator {
 							classes.put(path, clazz);
 						}
 					} catch (ClassNotFoundException e) {
-						System.out.println("Unable to determine the class " + className + ".");
+						System.out.println(String.format("Unable to determine the class %s.", className));
 					}
 				}
 			});
@@ -128,8 +126,7 @@ public class UnitTestGenerator {
 			controllerDto.setRequestMethod("POST");
 			controllerDto.setRequestPath(postMapping.value()[0]);
 		} else if (requestMapping != null) {
-			RequestMethod[] requestMethods = requestMapping.method();
-			if (requestMethods.length > 0) {
+			if (requestMapping.method().length > 0) {
 				controllerDto.setRequestMethod(requestMapping.method()[0].toString());
 			} else {
 				controllerDto.setRequestMethod("ANY");
@@ -137,14 +134,6 @@ public class UnitTestGenerator {
 			controllerDto.setRequestPath(requestMapping.value()[0]);
 		}
 		return controllerDto;
-	}
-	
-	public File createDirectoriesAndFile(String filePath) {
-		File fileDirectory = new File(filePath.substring(0, filePath.lastIndexOf("/")));
-		if (!fileDirectory.exists()) {
-			fileDirectory.mkdirs();
-		}
-		return new File(filePath);
 	}
 	
 	public void invokeMethodsUnderBasePackageOfSrcMainJavaAndGenerateUseCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter, WebApplicationContext webApplicationContext) throws Exception {
@@ -170,7 +159,7 @@ public class UnitTestGenerator {
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
-					File requestJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
+					File requestJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
 					if (!requestJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
@@ -195,7 +184,7 @@ public class UnitTestGenerator {
 							returnValue = Mocker.mockReturnValue(method);
 						}
 					}
-					File responseJsonFile = createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
+					File responseJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
 					if (!responseJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
 						objectMapper.writeValue(responseJsonFile, new ComponentDto(returnValue, responseStatus));
 					} else {
@@ -218,11 +207,7 @@ public class UnitTestGenerator {
 	}
 		
 	public int safeCaseCount(Method method, Map<String, Integer> caseCountsByMethod, int maxCaseCount) {
-		Integer methodCaseCount = caseCountsByMethod.get(method.getName());
-		if (methodCaseCount == null) {
-			return 1;
-		} 
-		return Math.min(methodCaseCount, maxCaseCount);
+		return Math.min(Optional.ofNullable(caseCountsByMethod).map(x -> x.get(method.getName())).orElse(1), maxCaseCount);
 	}
 	
 	public void scanClassesUnderBasePackageOfSrcMainJavaAndGenerateTestCasesUnderSrcTestJava(String basePackage, Predicate<Class<?>> classFilter) throws Exception {
@@ -263,7 +248,7 @@ public class UnitTestGenerator {
 				}
 			}
 			// Write unit test file.
-			File unitTestFile = createDirectoriesAndFile(Lang.pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java"));
+			File unitTestFile = Lang.createDirectoriesAndFile(Lang.pathInString(entry.getKey()).replace("src/main/java", "src/test/java").replace(".java", "Test.java"));
 			if (!unitTestFile.exists() || Lang.property("overwrite-test-case", Boolean.class)) {
 				try (PrintWriter printWriter = new PrintWriter(unitTestFile)) {
 					printWriter.write(codeWriter.generateCodes().toString());

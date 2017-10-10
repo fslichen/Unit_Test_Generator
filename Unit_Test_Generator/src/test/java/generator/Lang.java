@@ -1,5 +1,6 @@
 package generator;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -7,6 +8,18 @@ import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 
 public class Lang {
+	public static File createDirectoriesAndFile(String filePath) {
+		File fileDirectory = fileDirectory(filePath);
+		if (!fileDirectory.exists()) {
+			fileDirectory.mkdirs();
+		}
+		return new File(filePath);
+	}
+	
+	public static File fileDirectory(String filePath) {
+		return new File(filePath.substring(0, filePath.lastIndexOf("/")));
+	}
+	
 	public static boolean isUpperCase(char character) {
 		return 'A' <= character && character <= 'Z';
 	}
