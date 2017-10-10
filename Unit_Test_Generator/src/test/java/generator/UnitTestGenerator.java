@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -282,7 +281,7 @@ public class UnitTestGenerator {
 				code = String.format("mockMvc.perform(post(%s).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())", "\"" + pojo.getRequestPath() + "\"");
 			}
 			if (pojo.getReturnType() != void.class && pojo.getReturnType() != Void.class) {
-				codeWriter.writeOutput(method, "{'data':", code + ".andReturn().getResponse().getContentAsString()", ",'status':'Success'}");
+				codeWriter.writeOutput(method, "Response Data to be Uploaded : {'data':", code + ".andReturn().getResponse().getContentAsString()", ",'status':'Success'}");
 				code += String.format(".andExpect(content().json(Json.toJson(responseData, \"data\"), false))");
 			}
 			codeWriter.writeCode(method, code + ";");
@@ -305,8 +304,8 @@ public class UnitTestGenerator {
 		} else {
 			codeWriter.writeImport(ReflectionAssert.class);
 			codeWriter.writeCode(method, String.format("%s actualResult = %s.%s(%s);", Pointer.simpleReturnTypeName(method, codeWriter), Pointer.instanceName(clazz), method.getName(), parametersInString));
-			codeWriter.writeOutput(method, "{'data':", "Json.toJson(actualResult)", ",'status':'Success'}");
 			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromJson(responseData, %s.class, \"data\");", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
+			codeWriter.writeOutput(method, "Response Data to be Uploaded : {'data':", "Json.toJson(actualResult)", ",'status':'Success'}");
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 	}
@@ -341,8 +340,8 @@ public class UnitTestGenerator {
 			} else {
 				codeWriter.writeCode(method, String.format("%s actualResult = (%s) method.invoke(%s);", Pointer.simpleReturnTypeName(method, codeWriter), returnTypeSimpleName, Pointer.instanceName(clazz)));
 			}
-			codeWriter.writeOutput(method, "{'data':", "Json.toJson(actualResult)", ",'status':'Success'}");
 			codeWriter.writeCode(method, String.format("%s expectedResult = Json.fromJson(responseData, %s.class, \"data\");", Pointer.simpleReturnTypeName(method, codeWriter), returnType.getSimpleName()));
+			codeWriter.writeOutput(method, "Response Data to be Uploaded : {'data':", "Json.toJson(actualResult)", ",'status':'Success'}");
 			codeWriter.writeCode(method, "ReflectionAssert.assertReflectionEquals(actualResult, expectedResult);");
 		}
 		codeWriter.writeCode(method, "} catch (Exception e){}");
