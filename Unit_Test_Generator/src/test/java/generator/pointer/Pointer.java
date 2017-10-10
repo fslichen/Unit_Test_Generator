@@ -29,84 +29,6 @@ import generator.pojo.ControllerMethodPojo;
 
 @Controller
 public class Pointer {
-	public static List<Dependency> dependencies(Class<?> clazz) {
-		Field[] fields = clazz.getDeclaredFields();
-		List<Dependency> dependencies = new LinkedList<>();
-		for (Field field : fields) {
-			for (Method method : field.getType().getDeclaredMethods()) {
-				dependencies.add(new Dependency(field, method));
-			}
-		}
-		return dependencies;
-	}
-	
-	public static <T> List<T> scanMethod(File file, Method method, Function<String, T> function) throws IOException {
-		String code = null;
-		int lineIndex = -1;
-		int methodStartLineIndex = -1;
-		int methodEndLineIndex = -1;
-		int curlyBraceLevel = 1;
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		final List<T> ts = new LinkedList<>();
-		while ((code = reader.readLine()) != null) {
-			lineIndex++;
-			if (methodStartLineIndex == -1) {// The method body has not been scanned yet.
-				if (!code.contains("(") || !code.contains(")") 
-						|| !code.contains("{") || !code.contains(method.getName()) 
-						|| !code.contains(method.getReturnType().getSimpleName()))  {
-					continue;
-				}
-				for (Class<?> parameterType : method.getParameterTypes()) {
-					if (!code.contains(parameterType.getSimpleName())) {
-						continue;
-					}
-				}
-				methodStartLineIndex = lineIndex;
-			} else {
-				for (int i = 0; i < code.length(); i++) {
-					char character = code.charAt(i);
-					if (character == '{' || character == '}') {
-						boolean isEffectiveCurlyBracket = true;
-						char previousCharacter = i > 0 ? code.charAt(i - 1) : 0;
-						if (previousCharacter  == '"' || previousCharacter == '\'') {
-							isEffectiveCurlyBracket = false;
-						}
-						char nextCharacter = i < code.length() - 1 ? code.charAt(i + 1) : 0;
-						if (nextCharacter == '"' || nextCharacter == '\'') {
-							isEffectiveCurlyBracket = false;
-						}
-						if (isEffectiveCurlyBracket) {
-							if (character == '{') {
-								curlyBraceLevel++;
-							} else if (character == '}') {
-								curlyBraceLevel--;
-							}
-						}
-					}
-				}
-				if (curlyBraceLevel == 0) {
-					methodEndLineIndex = lineIndex;
-					System.out.println(String.format("The start line is %d, and the end line is %d.", methodStartLineIndex, methodEndLineIndex));
-					break;
-				}
-				ts.add(function.apply(code));
-			}
-		}
-		reader.close();
-		return ts;
-	}
-	
-	public static String methodName(String code) {
-		int leftBracketIndex = code.indexOf("(");
-		for (int i = leftBracketIndex - 1; i >= 0; i--) {
-			if (code.charAt(i) == ' ') {
-				return code.substring(i + 1, leftBracketIndex);
-			}
-		}
-		System.out.println(String.format("%s does not contain a method name.", code));
-		return null;
-	}
-	
 	public static List<Field> autowiredFields(Class<?> clazz) {
 		List<Field> autowiredFields = new LinkedList<>();
 		for (Field field : clazz.getDeclaredFields()) {
@@ -177,6 +99,17 @@ public class Pointer {
 		return pojo;
 	}
 	
+	public static List<Dependency> dependencies(Class<?> clazz) {
+		Field[] fields = clazz.getDeclaredFields();
+		List<Dependency> dependencies = new LinkedList<>();
+		for (Field field : fields) {
+			for (Method method : field.getType().getDeclaredMethods()) {
+				dependencies.add(new Dependency(field, method));
+			}
+		}
+		return dependencies;
+	}
+	
 	public static String fieldName(Method method) {// Getter or Setter
 		String methodName = method.getName();
 		if ((methodName.startsWith("set") || methodName.startsWith("get"))) {
@@ -220,12 +153,79 @@ public class Pointer {
 		return level;
 	}
 	
+	public static String methodName(String code) {
+		int leftBracketIndex = code.indexOf("(");
+		for (int i = leftBracketIndex - 1; i >= 0; i--) {
+			if (code.charAt(i) == ' ') {
+				return code.substring(i + 1, leftBracketIndex);
+			}
+		}
+		System.out.println(String.format("%s does not contain a method name.", code));
+		return null;
+	}
+	
 	public static String returnTypeSimpleName(Method method) {
 		Class<?> returnType = method.getReturnType();
 		if (returnType.isPrimitive()) {
 			return "Primitive" + Lang.upperFirstCharacter(returnType.getSimpleName());
 		}
 		return returnType.getSimpleName().replace("[]", "Array");
+	}
+	
+	public static <T> List<T> scanMethod(File file, Method method, Function<String, T> function) throws IOException {
+		String code = null;
+		int lineIndex = -1;
+		int methodStartLineIndex = -1;
+		int methodEndLineIndex = -1;
+		int curlyBraceLevel = 1;
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		final List<T> ts = new LinkedList<>();
+		while ((code = reader.readLine()) != null) {
+			lineIndex++;
+			if (methodStartLineIndex == -1) {// The method body has not been scanned yet.
+				if (!code.contains("(") || !code.contains(")") 
+						|| !code.contains("{") || !code.contains(method.getName()) 
+						|| !code.contains(method.getReturnType().getSimpleName()))  {
+					continue;
+				}
+				for (Class<?> parameterType : method.getParameterTypes()) {
+					if (!code.contains(parameterType.getSimpleName())) {
+						continue;
+					}
+				}
+				methodStartLineIndex = lineIndex;
+			} else {
+				for (int i = 0; i < code.length(); i++) {
+					char character = code.charAt(i);
+					if (character == '{' || character == '}') {
+						boolean isEffectiveCurlyBracket = true;
+						char previousCharacter = i > 0 ? code.charAt(i - 1) : 0;
+						if (previousCharacter  == '"' || previousCharacter == '\'') {
+							isEffectiveCurlyBracket = false;
+						}
+						char nextCharacter = i < code.length() - 1 ? code.charAt(i + 1) : 0;
+						if (nextCharacter == '"' || nextCharacter == '\'') {
+							isEffectiveCurlyBracket = false;
+						}
+						if (isEffectiveCurlyBracket) {
+							if (character == '{') {
+								curlyBraceLevel++;
+							} else if (character == '}') {
+								curlyBraceLevel--;
+							}
+						}
+					}
+				}
+				if (curlyBraceLevel == 0) {
+					methodEndLineIndex = lineIndex;
+					System.out.println(String.format("The start line is %d, and the end line is %d.", methodStartLineIndex, methodEndLineIndex));
+					break;
+				}
+				ts.add(function.apply(code));
+			}
+		}
+		reader.close();
+		return ts;
 	}
 	
 	public static <T> List<Method> setters(Class<T> clazz) throws Exception {
