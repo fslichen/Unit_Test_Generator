@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -240,7 +240,6 @@ public class UnitTestGenerator {
 					if (method.getReturnType() != void.class || method.getReturnType() != Void.class) {
 						codeWriter.writeCode(method, "String responseData = testCase.getResponseData();");
 					}
-					codeWriter.writeCode(method, "String mockedData = testCase.getMockData();");
 					// Dependencies
 					writeMockito4InvokingDependencyMethod(path, clazz, method, codeWriter);
 					// Method Body
@@ -374,6 +373,7 @@ public class UnitTestGenerator {
 		final List<Dependency> dependencies = Pointer.dependencies(clazz);
 		final Map<String, Object> requestData = new LinkedHashMap<>();
 		final Map<String, Object> responseData = new LinkedHashMap<>();
+		final Set<Dependency> effectiveDependencies = new LinkedHashSet<>();
 		Pointer.scanMethod(path.toFile(), method, code -> {
 			for (Dependency dependency : dependencies) {
 				Field dependencyField = dependency.getField();
@@ -395,6 +395,10 @@ public class UnitTestGenerator {
 					}
 					Class<?> returnType = dependencyMethod.getReturnType();
 					if (!Modifier.isAbstract(returnType.getModifiers()) && !Modifier.isPrivate(dependencyMethod.getModifiers()) && returnType != void.class && returnType != Void.class) {
+						if (effectiveDependencies.isEmpty()) {
+							codeWriter.writeCode(method, "String mockedData = testCase.getMockData();");
+						}
+						effectiveDependencies.add(dependency);
 						codeWriter.writeImport(returnType);
 						codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						responseData.put(instanceAndMethod, new Mocker().mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
@@ -406,6 +410,8 @@ public class UnitTestGenerator {
 		Map<String, Map<String, Object>> result = new LinkedHashMap<>();
 		result.put("requestData", requestData);
 		result.put("responseData", responseData);
-		codeWriter.writeCode(method, String.format("String mockedDataToBeUploaded = \"%s\";", Json.toJson(result).replace("\"", "'").replace("\\", "")));
+		if (!effectiveDependencies.isEmpty()) {
+			codeWriter.writeCode(method, String.format("String mockedDataToBeUploaded = \"%s\";", Json.toJson(result).replace("\"", "'").replace("\\", "")));
+		}
 	}
 }
