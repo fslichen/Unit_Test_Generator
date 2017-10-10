@@ -111,7 +111,9 @@ public class UnitTestGenerator {
 		return classes;
 	}
 	
-	public ControllerDto controllerDto(Method method, Object data) {
+	public ControllerDto controllerDto(Class<?> controllerClass, Method method, Object data) {
+		RequestMapping baseRequestMapping = controllerClass.getAnnotation(RequestMapping.class);
+		String basePath = baseRequestMapping != null ? baseRequestMapping.value()[0] : "";
 		ControllerDto controllerDto = new ControllerDto();
 		controllerDto.setSession(UUID.randomUUID().toString());
 		controllerDto.setData(data);
@@ -120,17 +122,17 @@ public class UnitTestGenerator {
 		RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
 		if (getMapping != null) {
 			controllerDto.setRequestMethod("GET");
-			controllerDto.setRequestPath(getMapping.value()[0]);
+			controllerDto.setRequestPath(basePath + getMapping.value()[0]);
 		} else if (postMapping != null) {
 			controllerDto.setRequestMethod("POST");
-			controllerDto.setRequestPath(postMapping.value()[0]);
+			controllerDto.setRequestPath(basePath + postMapping.value()[0]);
 		} else if (requestMapping != null) {
 			if (requestMapping.method().length > 0) {
 				controllerDto.setRequestMethod(requestMapping.method()[0].toString());
 			} else {
 				controllerDto.setRequestMethod("ANY");
 			}
-			controllerDto.setRequestPath(requestMapping.value()[0]);
+			controllerDto.setRequestPath(basePath + requestMapping.value()[0]);
 		}
 		return controllerDto;
 	}
@@ -163,7 +165,7 @@ public class UnitTestGenerator {
 					File requestJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
 					if (!requestJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
 						if (isController) {
-							objectMapper.writeValue(requestJsonFile, controllerDto(method, parameterValues));
+							objectMapper.writeValue(requestJsonFile, controllerDto(clazz, method, parameterValues));
 						} else {
 							objectMapper.writeValue(requestJsonFile, new ComponentDto(parameterValues, "Success"));
 						}
