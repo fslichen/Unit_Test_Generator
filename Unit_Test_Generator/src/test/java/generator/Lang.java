@@ -1,7 +1,6 @@
 package generator;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
 
@@ -42,10 +41,13 @@ public class Lang {
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T property(String key, Class<T> clazz) {
-		Properties properties = new Properties();
 		try {
+			Properties properties = new Properties();
 			properties.load(UnitTestGenerator.class.getResourceAsStream("/unit-test.properties"));
-			String value = properties.get(key).toString();
+			String value = properties.getProperty(key);
+			if (value == null) {
+				return null;
+			}
 			if (clazz == int.class || clazz == Integer.class) {
 				return (T) new Integer(value);
 			} else if (clazz == double.class || clazz == Double.class) {
@@ -54,7 +56,7 @@ public class Lang {
 				return (T) new Boolean(value);
 			}
 			return (T) value;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println("Please create unit-test.properties under src/test/resources");
 			return null;
 		}

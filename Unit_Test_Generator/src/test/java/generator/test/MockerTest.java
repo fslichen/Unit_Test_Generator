@@ -32,6 +32,10 @@ public class MockerTest {
 		
 	}
 	
+	public void anyMethod(AnyPojo anyPojo) {
+		
+	}
+	
 	@Test
 	public void test() throws NoSuchMethodException, SecurityException {
 		Mocker mocker = new Mocker();
@@ -45,5 +49,8 @@ public class MockerTest {
 		System.out.println(mocker.mockObject(method2.getGenericParameterTypes()[0].getTypeName()));
 		Method method3 = MockerTest.class.getDeclaredMethod("gammaMethod", AnyPojo4Test.class);
 		System.out.println(mocker.mockObject(method3.getGenericParameterTypes()[0].getTypeName()));
+		Method method4 = MockerTest.class.getDeclaredMethod("anyMethod", AnyPojo.class);
+		Object obj = mocker.mockObject(method4.getGenericParameterTypes()[0].getTypeName());
+		System.out.println(obj);
 	}
 }

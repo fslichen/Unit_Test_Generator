@@ -146,15 +146,20 @@ public class Mocker {
 						List<Method> setters = Pointer.setters(clazz);
 						if (setters.size() > 0) {
 							for (Method setter : setters) {
-								setter.invoke(instance, mockObject(Pointer.genericParameterTypeName(setter, 0)));
+								setter.invoke(instance, mockGeneralOrSpecificObject(setter));
 							}
 						} else {
 							instance = "The object does not have any setters.";
 						}
 					} catch (Exception e) {
 						Map<Object, Object> mapInstance = new LinkedHashMap<>();
-						for (Method setter : Pointer.setters(clazz)) {
-							mapInstance.put(Pointer.fieldName(setter), mockObject(Pointer.genericParameterTypeName(setter, 0)));
+						List<Method> setters = Pointer.setters(clazz);
+						if (setters.size() > 0) {
+							for (Method setter : setters) {
+								mapInstance.put(Pointer.fieldName(setter), mockGeneralOrSpecificObject(setter));
+							}
+						} else {
+							System.out.println(String.format("%s does not have any setters.", clazz));
 						}
 						instance = mapInstance;
 					}
@@ -165,5 +170,14 @@ public class Mocker {
 			}
 		}
 		return null;
+	}
+	
+	public Object mockSpecificObject(Method setter) {
+		return Lang.property("mock." + Pointer.fieldName(setter), setter.getParameterTypes()[0]);
+	}
+	
+	public Object mockGeneralOrSpecificObject(Method setter) {
+		Object specificMockedObject = mockSpecificObject(setter);
+		return specificMockedObject == null ? mockObject(Pointer.genericParameterTypeName(setter, 0)) : specificMockedObject;
 	}
 }
