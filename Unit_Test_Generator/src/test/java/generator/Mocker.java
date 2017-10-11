@@ -173,7 +173,7 @@ public class Mocker {
 	}
 	
 	public Object mockSpecificObject(Method setter) {
-		return Lang.property("mock." + Pointer.fieldName(setter), setter.getParameterTypes()[0]);
+		return Lang.randomProperty("mock." + Pointer.fieldName(setter), setter.getParameterTypes()[0]);
 	}
 	
 	public Object mockGeneralOrSpecificObject(Method setter) {
