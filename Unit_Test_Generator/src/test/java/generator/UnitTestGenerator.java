@@ -28,7 +28,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -371,7 +370,6 @@ public class UnitTestGenerator {
 				String instanceAndMethod = Pointer.instanceName(dependencyField) + "." + dependencyMethod.getName();
 				if (code.contains(instanceAndMethod)) {// Example : anyService.anyMethod(); TODO Also consider method overloading.
 					codeWriter.writeStaticImport(Mockito.class);
-					codeWriter.writeField(dependencyField.getType(), MockBean.class);
 					StringBuilder parameterValuesInString = new StringBuilder();
 					if (dependencyMethod.getParameterCount() > 0) {
 						Object[] parameterValues = new Object[dependencyMethod.getParameterCount()];
@@ -390,7 +388,9 @@ public class UnitTestGenerator {
 						}
 						effectiveDependencies.add(dependency);
 						codeWriter.writeImport(returnType);
-						codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", Lang.lowerFirstCharacter(dependencyField.getType().getSimpleName()), dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
+						codeWriter.writeImport(Mockito.class);
+						codeWriter.writeImport(dependencyField.getType());
+						codeWriter.writeCode(method, String.format("when(Mockito.mock(%s.class).%s(%s)).thenReturn(%s);", dependencyField.getType().getSimpleName(), dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						responseData.put(instanceAndMethod, new Mocker().mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
 					}
 				}

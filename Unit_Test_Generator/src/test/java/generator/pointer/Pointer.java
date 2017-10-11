@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -139,6 +140,10 @@ public class Pointer {
 	
 	public static String instanceName(Class<?> clazz) {
 		return Lang.lowerFirstCharacter(clazz.getSimpleName());
+	}
+	
+	public static String randomInstanceName(Class<?> clazz, int bound) {
+		return instanceName(clazz) + new Random().nextInt(bound);
 	}
 	
 	public static String instanceName(Field field) {
