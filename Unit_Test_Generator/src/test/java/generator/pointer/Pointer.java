@@ -154,9 +154,13 @@ public class Pointer {
 		return code.contains(" class ");
 	}
 	
+	public static boolean isInterface(String code) {
+		return code.contains(" interface ");
+	}
+	
 	public static boolean isMethod(String code) {
 		code = code.trim();
-		if (!isClass(code)) {
+		if (!(isClass(code) || isInterface(code))) {
 			return code.endsWith("{") && (code.startsWith("public") || code.startsWith("private") || code.startsWith("protected"));
 		}
 		return false;
