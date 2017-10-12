@@ -166,7 +166,7 @@ public class UnitTestGenerator {
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
 					String jsonFileBasePath = jsonDirectoryPath + "/" + "test" + Lang.upperFirstCharacter(method.getName()) + Pointer.overloadingProveMethodSuffix(method, useCaseIndex);
-					File requestJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
+					File requestJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Request.json");
 					if (!requestJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
 						if (isController) {
 							objectMapper.writeValue(requestJsonFile, controllerDto(clazz, method, parameterValues));
@@ -191,7 +191,7 @@ public class UnitTestGenerator {
 							returnValue = Mocker.mockReturnValue(method);
 						}
 					}
-					File responseJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Response" + useCaseIndex + ".json");
+					File responseJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Response.json");
 					if (!responseJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
 						objectMapper.writeValue(responseJsonFile, new ComponentDto(returnValue, responseStatus));
 					} else {
