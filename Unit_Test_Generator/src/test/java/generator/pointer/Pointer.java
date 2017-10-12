@@ -198,7 +198,6 @@ public class Pointer {
 		String code = null;
 		int lineIndex = -1;
 		int methodStartLineIndex = -1;
-		int methodEndLineIndex = -1;
 		int curlyBraceLevel = 1;
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		final List<T> ts = new LinkedList<>();
@@ -239,7 +238,6 @@ public class Pointer {
 					}
 				}
 				if (curlyBraceLevel == 0) {
-					methodEndLineIndex = lineIndex;
 					break;
 				}
 				ts.add(function.apply(code));
