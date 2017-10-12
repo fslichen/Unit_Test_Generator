@@ -240,7 +240,6 @@ public class Pointer {
 				}
 				if (curlyBraceLevel == 0) {
 					methodEndLineIndex = lineIndex;
-					System.out.println(String.format("The start line is %d, and the end line is %d.", methodStartLineIndex, methodEndLineIndex));
 					break;
 				}
 				ts.add(function.apply(code));
