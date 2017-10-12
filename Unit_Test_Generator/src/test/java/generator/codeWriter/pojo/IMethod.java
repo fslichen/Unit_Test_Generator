@@ -4,16 +4,19 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import generator.util.map.MultiHashMap;
+import generator.util.map.MultiMap;
+
 public class IMethod {
 	private String typeParameterName;
 	private String prefix;
 	private Method method;
 	private String suffix;
 	private Class<?> exceptionType;
-	private List<Class<?>> annotationTypes;
+	private MultiMap<Class<?>, AnnotationArgument> annotationTypeAndArgumentsMap;
 	private List<String> codes;
 	public IMethod() {
-		annotationTypes = new LinkedList<>();
+		annotationTypeAndArgumentsMap = new MultiHashMap<>();
 		codes = new LinkedList<>();
 	}
 	public String getTypeParameterName() {
@@ -46,11 +49,11 @@ public class IMethod {
 	public void setExceptionType(Class<?> exceptionType) {
 		this.exceptionType = exceptionType;
 	}
-	public List<Class<?>> getAnnotationTypes() {
-		return annotationTypes;
+	public MultiMap<Class<?>, AnnotationArgument> getAnnotationTypeAndArgumentsMap() {
+		return annotationTypeAndArgumentsMap;
 	}
-	public void setAnnotationTypes(List<Class<?>> annotationTypes) {
-		this.annotationTypes = annotationTypes;
+	public void setAnnotationTypeAndArgumentsMap(MultiMap<Class<?>, AnnotationArgument> annotationTypeAndArgumentsMap) {
+		this.annotationTypeAndArgumentsMap = annotationTypeAndArgumentsMap;
 	}
 	public List<String> getCodes() {
 		return codes;

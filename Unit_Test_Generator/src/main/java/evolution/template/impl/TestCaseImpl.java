@@ -1,6 +1,6 @@
-package generator.template.impl;
+package evolution.template.impl;
 
-import generator.template.TestCase;
+import evolution.template.TestCase;
 
 public class TestCaseImpl implements TestCase {
 	@Override

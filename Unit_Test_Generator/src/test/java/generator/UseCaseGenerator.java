@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
+import evolution.template.BaseTestCase;
+
 public class UseCaseGenerator extends BaseTestCase {
 	@Test
 	public void run() throws Exception {

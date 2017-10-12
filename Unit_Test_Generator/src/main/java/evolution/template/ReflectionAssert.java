@@ -1,4 +1,4 @@
-package generator.template;
+package evolution.template;
 
 public class ReflectionAssert {
 	public static boolean assertReflectionEquals(Object object0, Object object1) {

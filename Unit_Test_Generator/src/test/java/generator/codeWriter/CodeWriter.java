@@ -2,16 +2,20 @@ package generator.codeWriter;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import generator.Lang;
+import generator.codeWriter.pojo.AnnotationArgument;
 import generator.codeWriter.pojo.IClass;
 import generator.codeWriter.pojo.IField;
 import generator.codeWriter.pojo.IHeader;
 import generator.codeWriter.pojo.IMethod;
+import generator.util.map.MultiMap;
 
 public class CodeWriter {
 	private Integer indentCount;
@@ -74,9 +78,13 @@ public class CodeWriter {
 		}
 		// Method
 		for (IMethod iMethod : iMethods.values()) {
-			for (Class<?> annotationType : iMethod.getAnnotationTypes()) {// Method Annotations
-				codes.add("@" + annotationType.getSimpleName());
-			}
+			iMethod.getAnnotationTypeAndArgumentsMap().forEach((annotationType, annotationArguments) -> {
+				StringBuilder annotationValuesBuilder = new StringBuilder();
+				Optional.ofNullable(annotationArguments).ifPresent(x -> x.forEach(annotationArgument -> {
+					annotationValuesBuilder.append(annotationArgument.getCode() + ", ");
+				}));
+				codes.add("@" + annotationType.getSimpleName() + Optional.of(annotationValuesBuilder).map(x -> Lang.trimEndingComma(x)).filter(x -> !x.isEmpty()).map(x -> "(" + x + ")").orElse(""));
+			});
 			String methodCode = "public ";
 			String typeParameterName = iMethod.getTypeParameterName();// Type Parameter
 			if (typeParameterName != null) {
@@ -132,12 +140,16 @@ public class CodeWriter {
 		return indentCount;
 	}
 
-	public void importAnnotations(Class<?>... annotationTypes) {
+	public void importAnnotations(Class<?>... annotationTypes) {// TODO Change the method name
 		if (annotationTypes != null) {
 			for (Class<?> annotationType : annotationTypes) {
 				writeImport(annotationType);
 			}
 		}
+	}
+	
+	public void importClasses(Collection<Class<?>> classes) {// TODO Determine whether ifPresent is needed.
+		Optional.ofNullable(classes).ifPresent(x -> x.forEach(y -> writeImport(y)));
 	}
 
 	public void patchTypeParameter(Method method, String typeParameterName) {
@@ -171,15 +183,6 @@ public class CodeWriter {
 	
 	public String simpleClassNameWithSuffix(Class<?> clazz, String suffix) {
 		return clazz.getSimpleName() + Lang.upperFirstCharacter(suffix);
-	}
-	
-	public void writeAnnotation(Method method, Class<?>... annotationTypes) {
-		IMethod iMethod = iMethods.get(method);
-		if (iMethod == null) {
-			System.out.println(String.format("%s is not registered.", method));
-			return;
-		}
-		iMethod.getAnnotationTypes().addAll(Arrays.asList(annotationTypes));
 	}
 	
 	public void writeClass(Class<?> clazz, String suffix, Class<?> extendedClass, List<Class<?>> implementedInterfaces, Class<?>... annotationTypes) {
@@ -258,15 +261,16 @@ public class CodeWriter {
 		}
 	}
 	
-	public void writeMethod(Method method, String prefix, String suffix, Class<?> exceptionType, Class<?>... annotationTypes) {
+	public void writeMethod(Method method, String prefix, String suffix, Class<?> exceptionType, MultiMap<Class<?>, AnnotationArgument> annotationTypeAndArgumentsMap) {
 		IMethod iMethod = new IMethod();
 		iMethod.setMethod(method);
 		iMethod.setPrefix(prefix);
 		iMethod.setSuffix(suffix);
 		iMethod.setExceptionType(exceptionType);
-		if (annotationTypes != null) {
-			iMethod.setAnnotationTypes(Arrays.asList(annotationTypes));
-			importAnnotations(annotationTypes);
+		if (annotationTypeAndArgumentsMap != null) {
+			importClasses(annotationTypeAndArgumentsMap.keySet());			
+			annotationTypeAndArgumentsMap.values().stream().filter(x -> x != null).flatMap(x -> x.stream()).filter(x -> x != null).map(x -> x.getClazz()).filter(x -> x != null).forEach(x -> writeImport(x));
+			iMethod.setAnnotationTypeAndArgumentsMap(annotationTypeAndArgumentsMap);
 		}
 		iMethods.put(method, iMethod);
 	}

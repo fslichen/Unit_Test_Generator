@@ -2,7 +2,7 @@ package generator.util.map;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +11,7 @@ public class MultiHashMap<T, V> implements MultiMap<T, V> {
 	private Map<T, List<V>> map;
 	
 	public MultiHashMap() {
-		map = new HashMap<>();
+		map = new LinkedHashMap<>();
 	}
 	
 	@Override

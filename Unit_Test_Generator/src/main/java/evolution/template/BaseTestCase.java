@@ -1,4 +1,4 @@
-package generator;
+package evolution.template;
 
 import javax.annotation.PostConstruct;
 
@@ -13,8 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import evolution.Application;
-import generator.template.TestCaseClient;
-import generator.template.impl.TestCaseClientImpl;
+import evolution.template.impl.TestCaseClientImpl;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = Application.class) 

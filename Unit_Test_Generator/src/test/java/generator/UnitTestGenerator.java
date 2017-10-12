@@ -42,9 +42,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import evolution.annotation.Database4UcaseSetup;
-import evolution.annotation.ExpectedDatabase4Ucase;
+import evolution.template.BaseTestCase;
+import evolution.template.Database4UcaseSetup;
+import evolution.template.DatabaseAssertionMode;
+import evolution.template.ExpectedDatabase4Ucase;
+import evolution.template.ReflectionAssert;
+import evolution.template.TestCase;
 import generator.codeWriter.CodeWriter;
+import generator.codeWriter.pojo.AnnotationArgument;
 import generator.pointer.Pointer;
 import generator.pointer.pojo.Dependency;
 import generator.pojo.ComponentDto;
@@ -52,8 +57,8 @@ import generator.pojo.ControllerDto;
 import generator.pojo.ControllerMethodPojo;
 import generator.pojo.SpecialParameterValue;
 import generator.pojo.VoidReturnValue;
-import generator.template.ReflectionAssert;
-import generator.template.TestCase;
+import generator.util.map.MultiHashMap;
+import generator.util.map.MultiMap;
 
 public class UnitTestGenerator {
 	public static final String SRC_MAIN_JAVA = "src/main/java";
@@ -232,7 +237,14 @@ public class UnitTestGenerator {
 					// Method Header
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(TestCase.class);
-					codeWriter.writeMethod(method, "test", "WithTypes" + concatenatedTypeSimpleNames + methodIndex, Exception.class, Test.class, Database4UcaseSetup.class, ExpectedDatabase4Ucase.class);
+					MultiMap<Class<?>, AnnotationArgument> annotationTypeAndArguments = new MultiHashMap<>();
+					annotationTypeAndArguments.put(Test.class, null);
+					annotationTypeAndArguments.put(Database4UcaseSetup.class, null);
+					AnnotationArgument annotationArgument4ExpectedDatabase4Ucase = new AnnotationArgument();
+					annotationArgument4ExpectedDatabase4Ucase.setClazz(DatabaseAssertionMode.class);
+					annotationArgument4ExpectedDatabase4Ucase.setCode("assertionMode = DatabaseAssertionMode.NON_STRICT");
+					annotationTypeAndArguments.push(ExpectedDatabase4Ucase.class, annotationArgument4ExpectedDatabase4Ucase);
+					codeWriter.writeMethod(method, "test", "WithTypes" + concatenatedTypeSimpleNames + methodIndex, Exception.class, annotationTypeAndArguments);
 					codeWriter.writeCode(method, "TestCase testCase = testCaseClient.getTestCase();");
 					if (method.getParameterCount() > 0) {
 						codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");

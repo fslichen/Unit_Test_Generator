@@ -1,4 +1,4 @@
-package generator.template;
+package evolution.template;
 
 public interface TestCase {
 	public String getRequestData();
