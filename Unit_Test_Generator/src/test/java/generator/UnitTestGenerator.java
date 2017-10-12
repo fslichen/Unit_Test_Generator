@@ -165,7 +165,7 @@ public class UnitTestGenerator {
 						i++;
 					}
 					ObjectMapper objectMapper = new ObjectMapper();
-					String jsonFileBasePath = jsonDirectoryPath + "/" + method.getName();
+					String jsonFileBasePath = jsonDirectoryPath + "/" + "test" + Lang.upperFirstCharacter(method.getName()) + Pointer.overloadingProveMethodSuffix(method, useCaseIndex);
 					File requestJsonFile = Lang.createDirectoriesAndFile(jsonFileBasePath + "Request" + useCaseIndex + ".json");
 					if (!requestJsonFile.exists() || Lang.property("overwrite-use-case", Boolean.class)) {
 						if (isController) {
@@ -232,19 +232,18 @@ public class UnitTestGenerator {
 			int maxTestCaseCount = Lang.property("max-test-case-count", Integer.class);
 			Map<String, Integer> testCaseCountsByMethod = caseCountsByMethod(path.toFile());
 			for (Method method : clazz.getDeclaredMethods()) {
-				String concatenatedTypeSimpleNames = Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method);
 				for (int methodIndex = 0; methodIndex < safeCaseCount(method, testCaseCountsByMethod, maxTestCaseCount); methodIndex++) {
 					// Method Header
 					codeWriter.writeImport(Json.class);
 					codeWriter.writeImport(TestCase.class);
-					MultiMap<Class<?>, AnnotationArgument> annotationTypeAndArguments = new MultiHashMap<>();
-					annotationTypeAndArguments.put(Test.class, null);
-					annotationTypeAndArguments.put(Database4UcaseSetup.class, null);
+					MultiMap<Class<?>, AnnotationArgument> annotationTypeAndArgumentsMap = new MultiHashMap<>();
+					annotationTypeAndArgumentsMap.put(Test.class, null);
+					annotationTypeAndArgumentsMap.put(Database4UcaseSetup.class, null);
 					AnnotationArgument annotationArgument4ExpectedDatabase4Ucase = new AnnotationArgument();
 					annotationArgument4ExpectedDatabase4Ucase.setClazz(DatabaseAssertionMode.class);
 					annotationArgument4ExpectedDatabase4Ucase.setCode("assertionMode = DatabaseAssertionMode.NON_STRICT");
-					annotationTypeAndArguments.push(ExpectedDatabase4Ucase.class, annotationArgument4ExpectedDatabase4Ucase);
-					codeWriter.writeMethod(method, "test", "WithTypes" + concatenatedTypeSimpleNames + methodIndex, Exception.class, annotationTypeAndArguments);
+					annotationTypeAndArgumentsMap.push(ExpectedDatabase4Ucase.class, annotationArgument4ExpectedDatabase4Ucase);
+					codeWriter.writeMethod(method, "test", Pointer.overloadingProveMethodSuffix(method, methodIndex), Exception.class, annotationTypeAndArgumentsMap);
 					codeWriter.writeCode(method, "TestCase testCase = testCaseClient.getTestCase();");
 					if (method.getParameterCount() > 0) {
 						codeWriter.writeCode(method, "String requestData = testCase.getRequestData();");

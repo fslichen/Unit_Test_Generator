@@ -313,4 +313,8 @@ public class Pointer {
 		}
 		return typeArgumentNames;
 	}
+	
+	public static String overloadingProveMethodSuffix(Method method, int methodIndex) {
+		return "WithTypes" + Pointer.concatenateParameterTypeSimpleNames(method) + Pointer.returnTypeSimpleName(method) + methodIndex;
+	}
 }
