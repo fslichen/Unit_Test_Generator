@@ -12,13 +12,18 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 public class FileStudio {
-	public static void modify(Path basePath, Predicate<Path> fileFilter, Map<String, String> map) throws IOException {
+	public static void copyAndModify(Path sourceBasePath, Path targetBasePath, Predicate<Path> fileFilter, Map<String, String> codeConvertionMap) throws IOException {
+		copy(sourceBasePath, targetBasePath);
+		modify(targetBasePath, fileFilter, codeConvertionMap);
+	}
+	
+	public static void modify(Path basePath, Predicate<Path> fileFilter, Map<String, String> codeConvertionMap) throws IOException {
 		Files.walk(basePath).filter(path -> path.toFile().isFile() && fileFilter.test(path)).forEach(path -> { 
 			try {
 				List<String> updatedLines = new LinkedList<>();
 				Files.lines(path).forEach(line -> {
 					String updatedLine = line;
-					for (Entry<String, String> entry : map.entrySet()) {
+					for (Entry<String, String> entry : codeConvertionMap.entrySet()) {
 						if (line.equals(entry.getKey())) {
 							updatedLine = entry.getValue();
 							break;

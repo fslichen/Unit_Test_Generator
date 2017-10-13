@@ -15,6 +15,10 @@ public class FileStudioTest {
 //		FileStudio.copy(Paths.get("/Users/chenli/Desktop/Buffer"), Paths.get("/Users/chenli/Desktop/New_Buffer"));
 		Map<String, String> map = new LinkedHashMap<>();
 		map.put("import java.util.Map", "import java.util.HashMap");
-		FileStudio.modify(Paths.get("/Users/chenli/Desktop/Program_Buffer"), x -> x.toFile().toString().endsWith(".java"), map);
+//		FileStudio.modify(Paths.get("/Users/chenli/Desktop/Program_Buffer"), x -> x.toFile().toString().endsWith(".java"), map);
+		FileStudio.copyAndModify(Paths.get("/Users/chenli/Desktop/Program_Buffer"), 
+				Paths.get("/Users/chenli/Desktop/New_Program_Buffer"), 
+				x -> x.toFile().toString().endsWith(".java"), 
+				map);
 	}
 }
