@@ -2,6 +2,7 @@ package generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,10 +11,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
+
+import generator.test.classScanner.AnyClass;
 
 public class ClassScanner {
 	private static int previousIndex(String string, int index, Predicate<Character> predicate) {
@@ -25,7 +29,7 @@ public class ClassScanner {
 		return -1;
 	}
 	
-	public static void scanProject(Path sourcePath) throws IOException {
+	public static Map<Class<?>, Map<Method, List<String>>> classAndMethodsMap(Path sourcePath) throws IOException {
 		Map<Class<?>, Map<Method, List<String>>> result = new LinkedHashMap<>();
 		Files.walk(sourcePath).forEach(path -> {
 			File file = path.toFile();
@@ -75,11 +79,39 @@ public class ClassScanner {
 				} catch (Exception e) {}
 			}
 		});
-		System.out.println(result);
+		return result;
+	}
+	
+	public static List<String> mockDependencies(Class<?> clazz, Method method, Map<Class<?>, Map<Method, List<String>>> classAndMethodsMap) {
+		List<String> mockingInfo = new LinkedList<>();
+		for (String code : classAndMethodsMap.get(clazz).get(method)) {
+			for (Field field : clazz.getDeclaredFields()) {// TODO Also consider the annotation of field like @Autowired.
+				if (code.contains(field.getName())) {
+					Class<?> fieldType = field.getType();
+					String dependencyName = field.getName();
+					String methodName = code.substring(code.indexOf(".") + 1, code.indexOf("("));
+					int parameterCount = code.split(",").length - 1;
+					for (Entry<Method, List<String>> entry : classAndMethodsMap.get(fieldType).entrySet()) {
+						Method methodCandidate = entry.getKey();
+						if (methodName.equals(methodCandidate.getName()) && methodCandidate.getParameterCount() == parameterCount) {
+							mockingInfo.addAll(mockDependencies(fieldType, methodCandidate, classAndMethodsMap));
+							break;
+						}
+					}
+					mockingInfo.add(String.format("Mock %s & %s & %s by Mockito.", dependencyName, methodName, parameterCount));
+					break;
+				}
+			}
+		}
+		return mockingInfo;
 	}
 	
 	@Test
-	public void test() throws IOException {
-		scanProject(Paths.get("/home/chen/Desktop/Playground/Git/Unit_Test_Generator"));
+	public void test() throws IOException, NoSuchMethodException, SecurityException {
+		Class<?> clazz = AnyClass.class;
+		Method method = AnyClass.class.getMethod("anyMethod");
+		Map<Class<?>, Map<Method, List<String>>> classAndMethodsMap = classAndMethodsMap(Paths.get("/home/chen/Desktop/Playground/Git/Unit_Test_Generator/Unit_Test_Generator/Unit_Test_Generator/src/test/java/generator/test/classScanner"));
+		List<String> mockingInfo = mockDependencies(clazz, method, classAndMethodsMap);
+		System.out.println(mockingInfo);
 	}
 }
