@@ -94,11 +94,11 @@ public class ClassScanner {
 					for (Entry<Method, List<String>> entry : classAndMethodsMap.get(fieldType).entrySet()) {
 						Method methodCandidate = entry.getKey();
 						if (methodName.equals(methodCandidate.getName()) && methodCandidate.getParameterCount() == parameterCount) {
+							mockingInfo.add(String.format("Mock %s.", methodCandidate));
 							mockingInfo.addAll(mockDependencies(fieldType, methodCandidate, classAndMethodsMap));
 							break;
 						}
 					}
-					mockingInfo.add(String.format("Mock %s & %s & %s by Mockito.", dependencyName, methodName, parameterCount));
 					break;
 				}
 			}
