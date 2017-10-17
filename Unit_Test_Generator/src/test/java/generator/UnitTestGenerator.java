@@ -378,7 +378,7 @@ public class UnitTestGenerator {
 			for (Dependency dependency : dependencies) {
 				Field dependencyField = dependency.getField();
 				Method dependencyMethod = dependency.getMethod();
-				String instanceAndMethod = Pointer.instanceName(dependencyField) + "." + dependencyMethod.getName();
+				String instanceAndMethod = dependencyField.getName() + "." + dependencyMethod.getName();
 				if (code.contains(instanceAndMethod)) {// Example : anyService.anyMethod(); TODO Also consider method overloading.
 					codeWriter.writeStaticImport(Mockito.class);
 					StringBuilder parameterValuesInString = new StringBuilder();
