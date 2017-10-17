@@ -401,7 +401,11 @@ public class UnitTestGenerator {
 						codeWriter.writeImport(returnType);
 						codeWriter.writeImport(Mockito.class);
 						codeWriter.writeImport(dependencyField.getType());
-						codeWriter.writeCode(method, String.format("when(Mockito.mock(%s.class).%s(%s)).thenReturn(%s);", dependencyField.getType().getSimpleName(), dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
+						String randomInstanceName = Pointer.randomInstanceName(dependencyField.getType(), 1000);
+						codeWriter.writeCode(method, String.format("%s %s = Mockito.mock(%s.class);", dependencyField.getType().getSimpleName(), randomInstanceName, dependencyField.getType().getSimpleName()));
+						codeWriter.writeImport(Reflection.class);
+						codeWriter.writeCode(method, String.format("Reflection.set(%s, \"%s\", %s);", Pointer.instanceName(clazz), dependencyField.getName(), randomInstanceName));
+						codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", randomInstanceName, dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						responseData.put(instanceAndMethod, new Mocker().mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
 					}
 				}
