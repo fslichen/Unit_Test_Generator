@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import generator.Lang;
 import generator.codeWriter.CodeWriter;
-import generator.pointer.pojo.Dependency;
+import generator.pointer.pojo.FieldAndMethod;
 import generator.pojo.ControllerMethodPojo;
 
 @Controller
@@ -113,12 +113,12 @@ public class Pointer {
 		return pojo;
 	}
 	
-	public static List<Dependency> dependencies(Class<?> clazz) {
+	public static List<FieldAndMethod> fieldAndMethodList(Class<?> clazz) {
 		Field[] fields = clazz.getDeclaredFields();
-		List<Dependency> dependencies = new LinkedList<>();
+		List<FieldAndMethod> dependencies = new LinkedList<>();
 		for (Field field : fields) {
 			for (Method method : field.getType().getDeclaredMethods()) {
-				dependencies.add(new Dependency(field, method));
+				dependencies.add(new FieldAndMethod(field, method));
 			}
 		}
 		return dependencies;

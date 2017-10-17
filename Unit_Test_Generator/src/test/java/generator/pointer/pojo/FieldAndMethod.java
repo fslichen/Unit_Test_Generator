@@ -3,13 +3,13 @@ package generator.pointer.pojo;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class Dependency {
+public class FieldAndMethod {
 	private Field field;
 	private Method method;
-	public Dependency() {
+	public FieldAndMethod() {
 
 	}
-	public Dependency(Field field, Method method) {
+	public FieldAndMethod(Field field, Method method) {
 		this.field = field;
 		this.method = method;
 	}

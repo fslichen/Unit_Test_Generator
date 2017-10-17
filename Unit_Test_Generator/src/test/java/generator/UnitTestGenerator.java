@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,7 +50,7 @@ import evolution.template.TestCase;
 import generator.codeWriter.CodeWriter;
 import generator.codeWriter.pojo.AnnotationArgument;
 import generator.pointer.Pointer;
-import generator.pointer.pojo.Dependency;
+import generator.pointer.pojo.FieldAndMethod;
 import generator.pojo.ComponentDto;
 import generator.pojo.ControllerDto;
 import generator.pojo.ControllerMethodPojo;
@@ -370,16 +369,16 @@ public class UnitTestGenerator {
 	}
 	
 	public void writeMockito4InvokingDependencyMethod(Path path, Class<?> clazz, final Method method, final CodeWriter codeWriter) throws IOException {
-		final List<Dependency> dependencies = Pointer.dependencies(clazz);
+		final List<FieldAndMethod> fieldAndMethodList = Pointer.fieldAndMethodList(clazz);
 		final Map<String, Object> requestData = new LinkedHashMap<>();
 		final Map<String, Object> responseData = new LinkedHashMap<>();
-		final Set<Dependency> effectiveDependencies = new LinkedHashSet<>();
+		final Set<Boolean> mockingExists = new HashSet<>();
 		Pointer.scanMethod(path.toFile(), method, code -> {
-			for (Dependency dependency : dependencies) {
-				Field dependencyField = dependency.getField();
-				Method dependencyMethod = dependency.getMethod();
+			for (FieldAndMethod fieldAndMethod : fieldAndMethodList) {// TODO Consider method overloading. 
+				Field dependencyField = fieldAndMethod.getField();
+				Method dependencyMethod = fieldAndMethod.getMethod();
 				String instanceAndMethod = dependencyField.getName() + "." + dependencyMethod.getName();
-				if (code.contains(instanceAndMethod)) {// Example : anyService.anyMethod(); TODO Also consider method overloading.
+				if (code.contains(instanceAndMethod)) {// Example : The code may contain the string anyService.anyMethod; TODO Consider method overloading.
 					codeWriter.writeStaticImport(Mockito.class);
 					StringBuilder parameterValuesInString = new StringBuilder();
 					if (dependencyMethod.getParameterCount() > 0) {
@@ -394,19 +393,21 @@ public class UnitTestGenerator {
 					}
 					Class<?> returnType = dependencyMethod.getReturnType();
 					if (!Modifier.isAbstract(returnType.getModifiers()) && !Modifier.isPrivate(dependencyMethod.getModifiers()) && returnType != void.class && returnType != Void.class) {
-						if (effectiveDependencies.isEmpty()) {
+						if (mockingExists.isEmpty()) {
 							codeWriter.writeCode(method, "String mockedData = testCase.getMockData();");
 						}
-						effectiveDependencies.add(dependency);
+						mockingExists.add(true);
 						codeWriter.writeImport(returnType);
 						codeWriter.writeImport(Mockito.class);
 						codeWriter.writeImport(dependencyField.getType());
-						String randomInstanceName = Pointer.randomInstanceName(dependencyField.getType(), 1000);
-						codeWriter.writeCode(method, String.format("%s %s = Mockito.mock(%s.class);", dependencyField.getType().getSimpleName(), randomInstanceName, dependencyField.getType().getSimpleName()));
 						codeWriter.writeImport(Reflection.class);
-						codeWriter.writeCode(method, String.format("Reflection.set(%s, \"%s\", %s);", Pointer.instanceName(clazz), dependencyField.getName(), randomInstanceName));
-						codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", randomInstanceName, dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
+						String randomDependencyInstanceName = Pointer.randomInstanceName(dependencyField.getType(), 1000);
+						String dependencyFieldTypeSimpleName = dependencyField.getType().getSimpleName();
+						codeWriter.writeCode(method, String.format("%s %s = Mockito.mock(%s.class);", dependencyFieldTypeSimpleName, randomDependencyInstanceName, dependencyFieldTypeSimpleName));
+						codeWriter.writeCode(method, String.format("Reflection.set(%s, \"%s\", %s);", Pointer.instanceName(clazz), dependencyField.getName(), randomDependencyInstanceName));
+						codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", randomDependencyInstanceName, dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						responseData.put(instanceAndMethod, new Mocker().mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
+						break;// TODO When overloading exists, determining the exact method being invoked is tricky. Therefore, if one of the overloading methods is encountered, other overloading methods are ignored.
 					}
 				}
 			}
@@ -415,7 +416,7 @@ public class UnitTestGenerator {
 		Map<String, Map<String, Object>> result = new LinkedHashMap<>();
 		result.put("requestData", requestData);
 		result.put("responseData", responseData);
-		if (!effectiveDependencies.isEmpty()) {
+		if (!mockingExists.isEmpty()) {
 			codeWriter.writeCode(method, String.format("String mockedDataToBeUploaded = \"%s\";", Json.toJson(result).replace("\"", "'").replace("\\", "")));
 		}
 	}

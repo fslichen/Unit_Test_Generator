@@ -24,6 +24,7 @@ public class AnotherController {
 	
 	@GetMapping("/rest/template")
 	public void restTemplate() {
+		myService.anyAbstract(null);
 		restTemplate.postForObject(null, null, null, new Object());
 	}
 	
