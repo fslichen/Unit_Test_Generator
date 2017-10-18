@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -400,11 +401,11 @@ public class UnitTestGenerator {
 						codeWriter.writeImport(returnType);
 						codeWriter.writeImport(Mockito.class);
 						codeWriter.writeImport(dependencyField.getType());
-						codeWriter.writeImport(Reflection.class);
+						codeWriter.writeImport(ReflectionTestUtils.class);
 						String randomDependencyInstanceName = Pointer.randomInstanceName(dependencyField.getType(), 1000);
 						String dependencyFieldTypeSimpleName = dependencyField.getType().getSimpleName();
 						codeWriter.writeCode(method, String.format("%s %s = Mockito.mock(%s.class);", dependencyFieldTypeSimpleName, randomDependencyInstanceName, dependencyFieldTypeSimpleName));
-						codeWriter.writeCode(method, String.format("Reflection.set(%s, \"%s\", %s);", Pointer.instanceName(clazz), dependencyField.getName(), randomDependencyInstanceName));
+						codeWriter.writeCode(method, String.format("ReflectionTestUtils.setField(%s, \"%s\", %s);", Pointer.instanceName(clazz), dependencyField.getName(), randomDependencyInstanceName));
 						codeWriter.writeCode(method, String.format("when(%s.%s(%s)).thenReturn(%s);", randomDependencyInstanceName, dependencyMethod.getName(), Lang.trimEndingComma(parameterValuesInString), String.format("Json.fromJson(mockedData, %s.class, \"responseData\", \"%s\")", returnType.getSimpleName(), instanceAndMethod)));
 						responseData.put(instanceAndMethod, new Mocker().mockObject(dependencyMethod.getGenericReturnType().getTypeName()));
 						break;// TODO When overloading exists, determining the exact method being invoked is tricky. Therefore, if one of the overloading methods is encountered, other overloading methods are ignored.
